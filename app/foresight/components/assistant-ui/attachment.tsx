@@ -214,7 +214,7 @@ export const ComposerAddAttachment: FC = () => {
         side="bottom"
         variant="ghost"
         size="icon"
-        className="aui-composer-add-attachment size-8 rounded-full p-1 font-semibold text-xs hover:bg-muted-foreground/15 dark:border-muted-foreground/15 dark:hover:bg-muted-foreground/30"
+        className="aui-composer-add-attachment size-8 rounded-full p-1 font-semibold text-xs hover:bg-transparent dark:border-transparent dark:hover:bg-transparent"
         aria-label="Add Attachment"
       >
         <FolderPlusIcon size={20} className="aui-attachment-add-icon flex items-center" />

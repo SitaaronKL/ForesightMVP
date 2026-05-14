@@ -15,8 +15,8 @@
   --color-brand-600: #2b5780;
   --color-brand-700: #234566;
   --color-brand-800: #1a3550;
-  --color-brand-900: #0b3b5c;
-  --color-brand-950: #061f31;
+  --color-brand-900: #283B9E;
+  --color-brand-950: #1c2b76;
 
   --color-teal-300: #80e5d8;
   --color-teal-500: #2fc1ad;
@@ -44,17 +44,17 @@
 /* ---- shadcn/ui tokens mapped to brand palette ---- */
 :root {
   --background: #f8fbfd;
-  --foreground: #061f31;
+  --foreground: #1c2b76;
 
   --card: rgba(255, 255, 255, 0.9);
-  --card-foreground: #061f31;
+  --card-foreground: #1c2b76;
   --popover: #ffffff;
-  --popover-foreground: #061f31;
+  --popover-foreground: #1c2b76;
 
-  --primary: #0b3b5c;
+  --primary: #283B9E;
   --primary-foreground: #ffffff;
   --secondary: #e3edf5;
-  --secondary-foreground: #0b3b5c;
+  --secondary-foreground: #283B9E;
 
   --muted: #f3f8fc;
   --muted-foreground: #2b5780;
@@ -72,24 +72,24 @@
   --radius: 0.625rem;
 
   --sidebar: #ffffff;
-  --sidebar-foreground: #061f31;
-  --sidebar-primary: #0b3b5c;
+  --sidebar-foreground: #1c2b76;
+  --sidebar-primary: #283B9E;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f3f8fc;
-  --sidebar-accent-foreground: #0b3b5c;
+  --sidebar-accent-foreground: #283B9E;
   --sidebar-border: #e3edf5;
   --sidebar-ring: #5e8eb7;
 }
 
 .dark {
-  --background: #061f31;
+  --background: #1c2b76;
   --foreground: #f3f8fc;
   --card: rgba(11, 59, 92, 0.6);
   --card-foreground: #f3f8fc;
-  --popover: #0b3b5c;
+  --popover: #283B9E;
   --popover-foreground: #f3f8fc;
   --primary: #94b6d2;
-  --primary-foreground: #061f31;
+  --primary-foreground: #1c2b76;
   --secondary: #1a3550;
   --secondary-foreground: #f3f8fc;
   --muted: #1a3550;
@@ -175,7 +175,7 @@ body {
 }
 
 .gradient-mesh {
-  background: linear-gradient(135deg, #0b3b5c 0%, #234566 40%, #2fc1ad 100%);
+  background: linear-gradient(135deg, #283B9E 0%, #234566 40%, #2fc1ad 100%);
 }
 
 .shadow-glow {
