@@ -133,14 +133,17 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
               <button
                 onMouseEnter={() => phoneRef.current?.startAnimation()}
                 onMouseLeave={() => phoneRef.current?.stopAnimation()}
-                className="inline-flex items-center gap-2 rounded-[100px] bg-foresight text-white px-5 py-2 text-sm font-medium hover:bg-foresight-dark transition shadow-sm flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-foresight/40"
+                aria-label="Call"
+                className="inline-flex items-center gap-2 rounded-[100px] bg-foresight text-white py-2 text-sm font-medium hover:bg-foresight-dark transition shadow-sm flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-foresight/40 px-3 @[800px]:px-5"
               >
                 <PhoneCallIcon
                   ref={phoneRef}
                   size={16}
                   className="flex items-center"
                 />
-                Call
+                <span className="hidden @[800px]:inline whitespace-nowrap">
+                  Call
+                </span>
               </button>
             </DropdownMenuTrigger>
           </GlassTooltip>
@@ -196,14 +199,17 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
       {recording && (
         <button
           onClick={stopAndProcess}
-          className="inline-flex items-center gap-2 rounded-[100px] bg-red-warning text-white px-5 py-2 text-sm font-medium hover:bg-red-700 transition shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-2 rounded-[100px] bg-red-warning text-white py-2 text-sm font-medium hover:bg-red-700 transition shadow-sm flex-shrink-0 px-3 @[800px]:px-5"
         >
-          <Square className="w-3 h-3 fill-current" /> Stop ({elapsed}s)
+          <Square className="w-3 h-3 fill-current" />
+          <span className="hidden @[800px]:inline whitespace-nowrap">
+            Stop ({elapsed}s)
+          </span>
         </button>
       )}
 
       {processing && (
-        <div className="inline-flex items-center rounded-[100px] bg-brand-100 text-brand-700 px-5 py-2 text-sm flex-shrink-0">
+        <div className="inline-flex items-center rounded-[100px] bg-brand-100 text-brand-700 py-2 text-sm flex-shrink-0 px-3 @[800px]:px-5">
           <Spinner size={14} label="Transcribing…" />
         </div>
       )}
