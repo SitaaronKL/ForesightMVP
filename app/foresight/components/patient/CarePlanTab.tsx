@@ -3,7 +3,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { HistoryIcon, type HistoryIconHandle } from "../HistoryIcon";
 
 const SECTIONS = [
   ["problemList", "Problem list"],
@@ -20,6 +21,7 @@ export function CarePlanTab({ patientId }: { patientId: Id<"patients"> }) {
   const data = useQuery(api.queries.carePlans.current, { patientId });
   const versions = useQuery(api.queries.carePlans.versions, { patientId });
   const [showHistory, setShowHistory] = useState(false);
+  const historyRef = useRef<HistoryIconHandle>(null);
 
   if (!data) return <div className="glass p-6 text-brand-500">Loading…</div>;
   if (!data.currentVersion) {
@@ -46,8 +48,13 @@ export function CarePlanTab({ patientId }: { patientId: Id<"patients"> }) {
           </div>
           <button
             onClick={() => setShowHistory(true)}
-            className="text-xs px-3 py-1.5 rounded-md bg-brand-50 hover:bg-brand-100 text-brand-700"
+            onMouseEnter={() => historyRef.current?.startAnimation()}
+            onMouseLeave={() => historyRef.current?.stopAnimation()}
+            className="flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 bg-foresight hover:bg-foresight-dark text-white transition shadow-sm"
+            aria-label="View care plan history"
+            title="View history"
           >
+            <HistoryIcon ref={historyRef} size={14} className="flex items-center" />
             History ({versions?.length ?? 0})
           </button>
         </div>
