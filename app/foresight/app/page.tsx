@@ -37,8 +37,13 @@ function RoleRouter() {
     if (!me) return;
     const role = (me as any).role;
     if (role === "admin") router.replace("/admin");
+    else if (role === "nurse") router.replace("/dashboard");
     else if (role === "patient") router.replace("/portal");
-    else router.replace("/dashboard");
+    else {
+      // No role overlay yet (just signed up, no seed has been run). Send them
+      // to /admin so they can seed and acquire a role via the email bridge.
+      router.replace("/admin");
+    }
   }, [me, router]);
   return <Splash text="Loading workspace…" />;
 }
