@@ -43,7 +43,7 @@ export function AgentRail({
 
   return (
     <>
-      <aside className="w-[380px] xl:w-[420px] flex-shrink-0 sticky top-0 self-start h-screen hidden lg:flex relative">
+      <aside className="fixed right-0 top-0 w-[380px] xl:w-[420px] h-screen hidden lg:flex z-20">
         {/* Collapse tab nub: glued to the OUTSIDE of the sidebar's left edge,
             so it visibly attaches to the sidebar instead of overlapping the
             translucent surface and bleeding into dashboard content behind. */}

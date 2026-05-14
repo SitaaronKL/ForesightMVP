@@ -33,9 +33,13 @@ function Workspace({ children }: { children: ReactNode }) {
   const needsSeed = me !== undefined && role !== "nurse" && role !== "admin";
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen">
       <Sidebar user={me} />
-      <main className="flex-1 min-w-0 w-full px-6 py-6">
+      <main
+        className={`min-h-screen pl-[13.5rem] pr-6 py-6 ${
+          needsSeed ? "" : "lg:pr-[380px] xl:pr-[420px]"
+        }`}
+      >
         <div className="max-w-[960px] mx-auto">
           {needsSeed ? <SeedFirstNotice /> : children}
         </div>

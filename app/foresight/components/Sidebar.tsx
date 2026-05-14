@@ -24,7 +24,7 @@ export function Sidebar({ user }: { user: any }) {
   const panelActive = pathname?.startsWith("/panel") ?? false;
 
   return (
-    <aside className="self-start sticky top-0 h-screen w-44 shrink-0 flex flex-col backdrop-blur-md bg-white/70 border-r border-brand-100 z-30">
+    <aside className="fixed left-3 top-3 bottom-3 w-44 flex flex-col backdrop-blur-md bg-white/70 border border-brand-100 rounded-[100px] shadow-[0_8px_32px_rgba(11,59,92,0.08)] py-4 z-30">
       <div className="px-5 pt-5 pb-4">
         <Link
           href="/dashboard"

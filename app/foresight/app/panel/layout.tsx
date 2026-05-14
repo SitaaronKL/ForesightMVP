@@ -28,9 +28,9 @@ export default function PanelLayout({ children }: { children: ReactNode }) {
 function Workspace({ children }: { children: ReactNode }) {
   const me = useMe();
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen">
       <Sidebar user={me} />
-      <main className="flex-1 min-w-0 w-full px-6 py-6">
+      <main className="min-h-screen pl-[12rem] pr-6 py-6 lg:pr-[380px] xl:pr-[420px]">
         <div className="max-w-[960px] mx-auto">{children}</div>
       </main>
       <AgentRail user={me} />

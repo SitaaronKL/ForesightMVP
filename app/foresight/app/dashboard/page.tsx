@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { LiquidGlass } from "../../components/LiquidGlass";
 import { PatientPill } from "../../components/PatientPill";
 
 export default function DashboardPage() {
@@ -12,44 +11,77 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* KPI bento (WebGL liquid glass) */}
-      <div className="w-[280px]">
-        <LiquidGlass borderRadius={20} tintOpacity={0.08}>
-          <div className="flex flex-col gap-2 p-5 w-[280px] h-[280px] justify-center">
-            <KpiRow label="Panel size" value={kpis?.panelSize ?? "—"} />
-            <KpiRow label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
-            <KpiRow
-              label="Reach rate"
-              value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
-              tone={kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"}
-            />
-            <KpiRow
-              label="Avg doc / patient"
-              value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
-            />
-            <KpiRow
-              label="APCM coverage"
-              value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
-              tone={
-                kpis
-                  ? kpis.serviceElementCoverage >= 0.7
-                    ? "ok"
-                    : kpis.serviceElementCoverage >= 0.5
-                      ? "warn"
-                      : "bad"
-                  : "neutral"
-              }
-            />
-          </div>
-        </LiquidGlass>
-      </div>
+      {/* Page title */}
+      <header>
+        <h1 className="text-4xl font-semibold tracking-tight text-brand-900">
+          Today&apos;s Queue
+        </h1>
+        <p className="mt-1 text-sm text-brand-600">
+          {queue ? `${queue.length} patients flagged for today.` : "Loading panel…"}
+        </p>
+      </header>
 
-      {/* Briefing */}
+      {/* Combined stats + queue panel */}
+      <section className="glass overflow-hidden">
+        {/* Stats strip */}
+        <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-5 gap-4 border-b border-brand-100/70">
+          <Kpi label="Panel size" value={kpis?.panelSize ?? "—"} />
+          <Kpi label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
+          <Kpi
+            label="Reach rate"
+            value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
+            tone={
+              kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"
+            }
+          />
+          <Kpi
+            label="Avg doc / patient"
+            value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
+          />
+          <Kpi
+            label="APCM coverage"
+            value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
+            tone={
+              kpis
+                ? kpis.serviceElementCoverage >= 0.7
+                  ? "ok"
+                  : kpis.serviceElementCoverage >= 0.5
+                    ? "warn"
+                    : "bad"
+                : "neutral"
+            }
+          />
+        </div>
+
+        {/* Queue */}
+        <div className="px-5 py-4">
+          <div className="flex items-center justify-between mb-3 gap-3">
+            <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
+              Priority queue
+            </h2>
+            <span className="text-xs text-brand-500 flex-shrink-0">
+              {queue?.length ?? 0} patients flagged
+            </span>
+          </div>
+          <div className="grid gap-2">
+            {queue?.map((p) => (
+              <PatientPill key={p._id} patient={p} />
+            ))}
+            {queue?.length === 0 && (
+              <div className="text-xs text-brand-500 py-4 text-center">
+                No urgent patients today. Nice work.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Briefing (kept separate) */}
       {briefing?.content && (
         <section className="glass p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
-              Today's briefing
+              Today&apos;s briefing
             </h2>
             <span className="text-xs text-brand-500">{briefing.date}</span>
           </div>
@@ -65,33 +97,11 @@ export default function DashboardPage() {
           )}
         </section>
       )}
-
-      {/* Today's queue */}
-      <section className="glass p-5 overflow-hidden">
-        <div className="flex items-center justify-between mb-3 gap-3">
-          <h2 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
-            Today's queue
-          </h2>
-          <span className="text-xs text-brand-500 flex-shrink-0">
-            {queue?.length ?? 0} patients flagged
-          </span>
-        </div>
-        <div className="grid gap-2">
-          {queue?.map((p) => (
-            <PatientPill key={p._id} patient={p} />
-          ))}
-          {queue?.length === 0 && (
-            <div className="text-xs text-brand-500 py-4 text-center">
-              No urgent patients today. Nice work.
-            </div>
-          )}
-        </div>
-      </section>
     </div>
   );
 }
 
-function KpiRow({
+function Kpi({
   label,
   value,
   tone = "neutral",
@@ -107,9 +117,11 @@ function KpiRow({
     bad: "text-red-warning",
   }[tone];
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <span className="text-xs text-brand-600">{label}</span>
-      <span className={`text-sm font-semibold ${toneClass}`}>{value}</span>
+    <div className="flex flex-col">
+      <span className="text-[10px] text-brand-500 uppercase tracking-wider">
+        {label}
+      </span>
+      <span className={`mt-0.5 text-xl font-semibold ${toneClass}`}>{value}</span>
     </div>
   );
 }

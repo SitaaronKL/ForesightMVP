@@ -54,9 +54,10 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen">
       <Sidebar user={me} />
-      <main className="flex-1 min-w-0 w-full p-6 space-y-5 max-w-5xl mx-auto">
+      <main className="min-h-screen pl-[13.5rem] pr-6 py-6 space-y-5">
+        <div className="max-w-5xl mx-auto space-y-5">
         <h1 className="text-2xl font-semibold text-brand-900">Admin console</h1>
 
         <section className="glass p-5">
@@ -155,6 +156,7 @@ function Admin() {
             </tbody>
           </table>
         </section>
+        </div>
       </main>
     </div>
   );
