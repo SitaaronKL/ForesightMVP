@@ -131,9 +131,6 @@ export function AgentRail({
 
           <div className="border-t border-white/10 p-3 space-y-2">
             <div className="flex flex-wrap gap-1.5">
-              {contextPatientId
-                ? ["Summarize this patient", "Draft a SOAP note", "Suggest care plan changes"]
-                : ["Today's queue", "Overdue Level 3", "Reach rate"].map((s) => s)}
               {(contextPatientId
                 ? ["Summarize this patient", "Draft a SOAP note", "Suggest care plan changes"]
                 : ["Today's queue", "Overdue Level 3", "Reach rate"]
@@ -187,6 +184,15 @@ export function AgentRail({
   );
 }
 
+function truncateJson(obj: any): string {
+  try {
+    const s = JSON.stringify(obj);
+    return s.length > 80 ? s.slice(0, 77) + "..." : s;
+  } catch {
+    return String(obj).slice(0, 80);
+  }
+}
+
 function MessageBubble({
   message,
   onOpenSoapReview,
@@ -205,15 +211,20 @@ function MessageBubble({
   }
   if (message.role === "tool") {
     return (
-      <div className="text-[11px] text-white/60 font-mono">
-        🔧 {message.toolName ?? "tool"}
+      <div className="text-[11px] text-white/55 font-mono pl-1">
+        <span className="text-teal-300">▸</span>{" "}
+        <span className="text-white/80">{message.toolName ?? "tool"}</span>
         {message.toolArgs && (
           <span className="text-white/40 ml-1">
-            ({JSON.stringify(message.toolArgs).slice(0, 80)})
+            ({truncateJson(message.toolArgs)})
           </span>
         )}
       </div>
     );
+  }
+  // Empty assistant bubbles (e.g. internal __rawItem envelopes that decoded to JSON) — skip render
+  if (message.role === "assistant" && (!message.content || message.content.startsWith("{\"__rawItem"))) {
+    return null;
   }
   if (message.role === "system") {
     return (

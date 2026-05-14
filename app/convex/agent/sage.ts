@@ -1,7 +1,14 @@
 "use node";
-import { Agent } from "@openai/agents";
+import { Agent, setDefaultOpenAIKey } from "@openai/agents";
 import { allTools, readOnlyTools, AgentContext } from "./tools";
 import { noDirectPatientContact } from "./guardrails";
+
+// Convex injects env vars at runtime, but the Agents SDK resolves the API key
+// lazily through its default client and sometimes misses process.env reads in
+// the V8/Node sandbox. Explicit set guarantees the model client has credentials.
+if (process.env.OPENAI_API_KEY) {
+  setDefaultOpenAIKey(process.env.OPENAI_API_KEY);
+}
 
 export const sage = new Agent<AgentContext>({
   name: "Sage",

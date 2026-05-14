@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { use, useState } from "react";
+import Link from "next/link";
 import { RiskBadge, TierBadge, BillingBadge } from "../../../components/RiskBadge";
 import { OverviewTab } from "../../../components/patient/OverviewTab";
 import { CarePlanTab } from "../../../components/patient/CarePlanTab";
@@ -46,6 +47,16 @@ export default function PatientPage({
 
   return (
     <div className="space-y-5">
+      {/* Back to dashboard */}
+      <div>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1 text-xs text-brand-600 hover:text-brand-900 transition"
+        >
+          <span aria-hidden>←</span> Back to panel
+        </Link>
+      </div>
+
       {/* Patient header */}
       <div className="glass p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
