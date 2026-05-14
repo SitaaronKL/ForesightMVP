@@ -8,6 +8,7 @@ import { HelpHint } from "../../components/HelpHint";
 export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
   const queue = useQuery(api.queries.panels.todaysQueue, { limit: 8 });
+  const reached = useQuery(api.queries.panels.reachedToday, { limit: 12 });
   const briefing = useQuery(api.queries.agent.todaysBriefing, { type: "morning" });
 
   return (
@@ -65,7 +66,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Queue */}
+        {/* Priority queue */}
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-3 gap-3">
             <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
@@ -77,7 +78,7 @@ export default function DashboardPage() {
           </div>
           <div className="grid gap-2">
             {queue?.map((p) => (
-              <PatientPill key={p._id} patient={p} />
+              <PatientPill key={p._id} patient={p} billingIconOnly />
             ))}
             {queue?.length === 0 && (
               <div className="text-xs text-brand-500 py-4 text-center">
@@ -86,6 +87,26 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* Reached today — only shown when there's at least one. */}
+        {(reached?.length ?? 0) > 0 && (
+          <div className="px-5 py-4 border-t border-brand-100/70">
+            <div className="flex items-center justify-between mb-3 gap-3">
+              <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
+                Reached today
+              </h2>
+              <span className="text-xs text-brand-500 flex-shrink-0">
+                {reached?.length ?? 0}{" "}
+                {(reached?.length ?? 0) === 1 ? "patient" : "patients"}
+              </span>
+            </div>
+            <div className="grid gap-2">
+              {reached?.map((p) => (
+                <PatientPill key={p._id} patient={p} billingIconOnly />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Briefing (kept separate) */}

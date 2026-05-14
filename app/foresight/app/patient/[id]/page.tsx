@@ -5,7 +5,8 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { use, useState } from "react";
 import { Mars, Venus, CircleUser } from "lucide-react";
-import { RiskBadge, TierBadge, BillingBadge } from "../../../components/RiskBadge";
+import { BillingBadge } from "../../../components/RiskBadge";
+import { RiskTierBadge } from "../../../components/RiskTierBadge";
 import { Spinner } from "../../../components/Spinner";
 import { BackToPanelButton } from "../../../components/BackToPanelButton";
 import { OverviewTab } from "../../../components/patient/OverviewTab";
@@ -61,8 +62,7 @@ export default function PatientPage({
               <span>·</span>
               <span>{patient.city}, {patient.state}</span>
               <span>·</span>
-              <RiskBadge score={patient.riskScore} />
-              <TierBadge tier={patient.tier} />
+              <RiskTierBadge score={patient.riskScore} tier={patient.tier} />
               <BillingBadge program={patient.billingProgram} />
               {patient.dualEligible && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">

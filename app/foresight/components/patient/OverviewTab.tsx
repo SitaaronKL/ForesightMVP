@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
+import { TopicChipList } from "../TopicChip";
 
 export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
   const overview = useQuery(api.queries.patients.overview, { patientId });
@@ -55,9 +56,7 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
                     {e.type.replace("_", " ")} · {Math.round(e.durationSeconds / 60)} min · {e.status}
                   </div>
                 </div>
-                <span className="text-xs text-brand-600">
-                  {(e.topicTags ?? []).join(", ")}
-                </span>
+                <TopicChipList topics={e.topicTags} />
               </li>
             ))}
           </ul>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { RiskBadge, TierBadge } from "./RiskBadge";
+import { RiskTierBadge } from "./RiskTierBadge";
+import { BillingBadge } from "./RiskBadge";
 import { HelpHint } from "./HelpHint";
 
 const TIER_LABEL: Record<string, string> = {
@@ -14,7 +15,15 @@ const PROGRAM_LABEL: Record<string, string> = {
   APCM: "Advanced Primary Care Management",
 };
 
-export function PatientPill({ patient: p }: { patient: any }) {
+export function PatientPill({
+  patient: p,
+  billingIconOnly = false,
+}: {
+  patient: any;
+  /** When true, the billing program is rendered as an icon-only chip
+   * (used on the dashboard's Today's Queue to keep rows compact). */
+  billingIconOnly?: boolean;
+}) {
   const conditions: string[] = Array.isArray(p.chronicConditions)
     ? p.chronicConditions
     : [];
@@ -28,8 +37,8 @@ export function PatientPill({ patient: p }: { patient: any }) {
       className="flex items-center justify-between gap-3 pl-2 pr-4 py-2 rounded-full bg-white/60 hover:bg-white/90 transition border border-brand-100 min-w-0"
     >
       <div className="flex items-center gap-2 min-w-0">
-        <RiskBadge score={p.riskScore} />
-        <TierBadge tier={p.tier} />
+        <RiskTierBadge score={p.riskScore} tier={p.tier} />
+        <BillingBadge program={p.billingProgram} iconOnly={billingIconOnly} />
         <span className="font-medium text-brand-950 truncate">
           {p.firstName} {p.lastName}
         </span>

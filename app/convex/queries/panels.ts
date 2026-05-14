@@ -18,6 +18,7 @@ export const list = query({
   args: {
     paginationOpts: paginationOptsValidator,
     tierFilter: v.optional(v.string()),
+    programFilter: v.optional(v.string()),
     statusFilter: v.optional(v.string()),
     overdueOnly: v.optional(v.boolean()),
     search: v.optional(v.string()),
@@ -27,6 +28,7 @@ export const list = query({
 
     const hasFilter =
       !!args.tierFilter ||
+      !!args.programFilter ||
       args.overdueOnly === true ||
       (args.search && args.search.trim().length > 0);
 
@@ -41,8 +43,11 @@ export const list = query({
         )
         .collect();
       const searchLower = (args.search ?? "").toLowerCase().trim();
+      const programLower = (args.programFilter ?? "").toLowerCase();
       const filtered = all.filter((p) => {
         if (args.tierFilter && p.tier !== args.tierFilter) return false;
+        if (programLower && p.billingProgram?.toLowerCase() !== programLower)
+          return false;
         if (args.overdueOnly && !isOverdue(p)) return false;
         if (
           searchLower &&
@@ -91,6 +96,70 @@ export const list = query({
     return { ...result, page: decorated };
   },
 });
+
+/**
+ * Patients the calling nurse has had an encounter with so far today.
+ * Used by the dashboard "Reached today" section so that completing a call
+ * (which drops the patient out of `todaysQueue`) still surfaces the work.
+ */
+export const reachedToday = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const nurse = await requireNurse(ctx);
+
+    // Day window in the nurse's local server time (UTC here is fine for the demo).
+    const now = new Date();
+    const startOfDay = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+    );
+    const endOfDay = startOfDay + 24 * 60 * 60 * 1000;
+
+    const todays = await ctx.db
+      .query("encounters")
+      .withIndex("by_nurse_and_date", (q) =>
+        q.eq("nurseId", nurse._id).gte("startedAt", startOfDay),
+      )
+      .collect();
+
+    // De-dupe by patientId, keep the most recent encounter per patient.
+    const latestPerPatient = new Map<string, any>();
+    for (const e of todays) {
+      if (e.startedAt >= endOfDay) continue;
+      const prev = latestPerPatient.get(e.patientId as unknown as string);
+      if (!prev || e.startedAt > prev.startedAt) {
+        latestPerPatient.set(e.patientId as unknown as string, e);
+      }
+    }
+
+    const rows: any[] = [];
+    for (const enc of latestPerPatient.values()) {
+      const p: any = await ctx.db.get(enc.patientId);
+      if (!p) continue;
+      rows.push({
+        ...p,
+        urgencyScore: urgencyScore(p),
+        urgencyReason: `Reached ${formatRelativeTime(enc.startedAt)} · ${enc.type.replace(
+          "_",
+          " ",
+        )}`,
+        reachedAt: enc.startedAt,
+      });
+    }
+
+    rows.sort((a, b) => b.reachedAt - a.reachedAt);
+    return rows.slice(0, args.limit ?? 12);
+  },
+});
+
+function formatRelativeTime(ts: number): string {
+  const diffMin = Math.round((Date.now() - ts) / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.round(diffMin / 60);
+  return `${diffHr}h ago`;
+}
 
 /**
  * Today's priority queue: top N most urgent patients across the panel.
