@@ -18,6 +18,37 @@ export const createThread = mutation({
   },
 });
 
+export const renameThreadIfDefault = mutation({
+  args: { threadId: v.id("agentThreads"), title: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const thread = await ctx.db.get(args.threadId);
+    if (!thread || thread.userId !== userId) throw new Error("Forbidden");
+    const defaultTitles = ["New thread", "Today", "Patient session"];
+    if (defaultTitles.includes(thread.title)) {
+      const trimmed = args.title.replace(/\s+/g, " ").trim().slice(0, 60);
+      if (trimmed.length > 0) {
+        await ctx.db.patch(args.threadId, { title: trimmed });
+      }
+    }
+  },
+});
+
+export const deleteThread = mutation({
+  args: { threadId: v.id("agentThreads") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const thread = await ctx.db.get(args.threadId);
+    if (!thread || thread.userId !== userId) throw new Error("Forbidden");
+    const messages = await ctx.db
+      .query("agentMessages")
+      .withIndex("by_thread", (q) => q.eq("threadId", args.threadId))
+      .collect();
+    for (const m of messages) await ctx.db.delete(m._id);
+    await ctx.db.delete(args.threadId);
+  },
+});
+
 export const appendUserMessage = mutation({
   args: {
     threadId: v.id("agentThreads"),

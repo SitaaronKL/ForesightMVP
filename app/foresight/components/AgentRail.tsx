@@ -7,6 +7,8 @@ import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
 import ReactMarkdown from "react-markdown";
 
+type View = "list" | "thread";
+
 export function AgentRail({
   user,
   contextPatientId,
@@ -15,6 +17,7 @@ export function AgentRail({
   contextPatientId?: Id<"patients">;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [view, setView] = useState<View>("list");
   const [threadId, setThreadId] = useState<Id<"agentThreads"> | null>(null);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
@@ -22,46 +25,77 @@ export function AgentRail({
   const [reviewPatientId, setReviewPatientId] = useState<Id<"patients"> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const threads = useQuery(api.queries.agent.myThreads, { limit: 1 });
+  const threads = useQuery(api.queries.agent.myThreads, { limit: 50 });
   const messages = useQuery(
     api.queries.agent.messages,
-    threadId ? { threadId } : ("skip" as any),
+    threadId && view === "thread" ? { threadId } : ("skip" as any),
   );
 
   const createThread = useMutation(api.mutations.agent.createThread);
+  const renameThreadIfDefault = useMutation(
+    api.mutations.agent.renameThreadIfDefault,
+  );
+  const deleteThread = useMutation(api.mutations.agent.deleteThread);
   const runAgentTurn = useAction(api.agent.runAgentTurn.runAgentTurn);
 
-  // Ensure a thread exists
   useEffect(() => {
-    if (threadId) return;
-    if (!threads) return;
-    (async () => {
-      if (threads.length > 0) {
-        setThreadId(threads[0]._id);
-      } else {
-        const id = await createThread({
-          title: contextPatientId ? "Patient session" : "Today",
-          contextPatientId,
-        });
-        setThreadId(id);
-      }
-    })();
-  }, [threads, threadId, createThread, contextPatientId]);
-
-  useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && view === "thread") {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages?.length]);
+  }, [messages?.length, view]);
+
+  async function startNewThread() {
+    const id = await createThread({
+      title: contextPatientId ? "Patient session" : "New thread",
+      contextPatientId,
+    });
+    setThreadId(id);
+    setView("thread");
+  }
+
+  function openThread(id: Id<"agentThreads">) {
+    setThreadId(id);
+    setView("thread");
+  }
+
+  function backToList() {
+    setView("list");
+    setThreadId(null);
+  }
 
   async function handleSend() {
-    if (!input.trim() || !threadId) return;
+    if (!input.trim()) return;
+
+    // Make sure we have a thread
+    let activeId = threadId;
+    let isFirst = false;
+    if (!activeId) {
+      activeId = await createThread({
+        title: contextPatientId ? "Patient session" : "New thread",
+        contextPatientId,
+      });
+      setThreadId(activeId);
+      setView("thread");
+      isFirst = true;
+    } else {
+      isFirst = (messages?.length ?? 0) === 0;
+    }
+
     const userMessage = input;
     setInput("");
     setPending(true);
+
+    // If this is the first message, rename the thread from "New thread" → first user msg
+    if (isFirst) {
+      void renameThreadIfDefault({
+        threadId: activeId,
+        title: userMessage,
+      });
+    }
+
     try {
       await runAgentTurn({
-        threadId,
+        threadId: activeId,
         userInput: userMessage,
         contextPatientId,
       });
@@ -70,6 +104,12 @@ export function AgentRail({
     } finally {
       setPending(false);
     }
+  }
+
+  async function handleDelete(id: Id<"agentThreads">) {
+    if (!confirm("Delete this thread? This cannot be undone.")) return;
+    if (threadId === id) backToList();
+    await deleteThread({ threadId: id });
   }
 
   function openSoapReview(soapNoteId: Id<"soapNotes">, patientId: Id<"patients">) {
@@ -93,81 +133,58 @@ export function AgentRail({
     <>
       <aside className="w-[380px] flex-shrink-0 sticky top-[60px] self-start h-[calc(100vh-60px)] p-4 hidden lg:flex">
         <div className="glass-dark flex flex-col w-full h-full overflow-hidden">
-          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-2 h-2 rounded-full ${pending ? "bg-teal-300 pulse-dot" : "bg-green-ok"}`}
-              />
-              <span className="font-semibold text-sm tracking-wide">Sage</span>
-              <span className="text-[10px] text-white/60">
-                {contextPatientId ? "patient context" : "panel context"}
-              </span>
-            </div>
-            <button
-              onClick={() => setCollapsed(true)}
-              className="text-white/60 hover:text-white text-lg leading-none"
-              aria-label="Collapse Sage"
-            >
-              ›
-            </button>
-          </div>
+          <Header
+            view={view}
+            threadTitle={
+              view === "thread"
+                ? threads?.find((t) => t._id === threadId)?.title ?? "Thread"
+                : null
+            }
+            pending={pending}
+            contextPatientId={contextPatientId}
+            onBackToList={backToList}
+            onNewThread={startNewThread}
+            onCollapse={() => setCollapsed(true)}
+          />
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-            {(messages ?? []).length === 0 && (
-              <div className="text-xs text-white/60 italic mt-8 text-center px-4">
-                Sage is ready. Try: "show me overdue Level 3 patients" or "draft a SOAP for Maria's last call"
+          {view === "list" && (
+            <ThreadList
+              threads={threads ?? []}
+              onOpen={openThread}
+              onDelete={handleDelete}
+              onNewThread={startNewThread}
+            />
+          )}
+
+          {view === "thread" && (
+            <>
+              <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                {(messages ?? []).length === 0 && (
+                  <div className="text-xs text-white/60 italic mt-8 text-center px-4">
+                    Sage is ready. Try: "show me overdue Level 3 patients" or "draft a SOAP for Maria's last call"
+                  </div>
+                )}
+                {messages?.map((m) => (
+                  <MessageBubble
+                    key={m._id}
+                    message={m}
+                    onOpenSoapReview={openSoapReview}
+                  />
+                ))}
+                {pending && (
+                  <div className="text-xs text-white/60 italic">Sage is thinking…</div>
+                )}
               </div>
-            )}
-            {messages?.map((m) => (
-              <MessageBubble
-                key={m._id}
-                message={m}
-                onOpenSoapReview={openSoapReview}
-              />
-            ))}
-            {pending && (
-              <div className="text-xs text-white/60 italic">Sage is thinking…</div>
-            )}
-          </div>
 
-          <div className="border-t border-white/10 p-3 space-y-2">
-            <div className="flex flex-wrap gap-1.5">
-              {(contextPatientId
-                ? ["Summarize this patient", "Draft a SOAP note", "Suggest care plan changes"]
-                : ["Today's queue", "Overdue Level 3", "Reach rate"]
-              ).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setInput(s)}
-                  className="text-[10px] px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                placeholder="Ask Sage…"
-                rows={2}
-                className="flex-1 px-3 py-2 rounded-lg bg-white/10 text-white placeholder:text-white/40 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-teal-300"
+              <Composer
+                input={input}
+                setInput={setInput}
+                onSend={handleSend}
+                pending={pending}
+                contextPatientId={contextPatientId}
               />
-              <button
-                onClick={handleSend}
-                disabled={pending || !input.trim()}
-                className="px-3 rounded-lg bg-teal-500 hover:bg-teal-700 text-white text-sm disabled:opacity-30"
-              >
-                ↑
-              </button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </aside>
 
@@ -185,6 +202,182 @@ export function AgentRail({
   );
 }
 
+function Header({
+  view,
+  threadTitle,
+  pending,
+  contextPatientId,
+  onBackToList,
+  onNewThread,
+  onCollapse,
+}: {
+  view: View;
+  threadTitle: string | null;
+  pending: boolean;
+  contextPatientId?: Id<"patients">;
+  onBackToList: () => void;
+  onNewThread: () => void;
+  onCollapse: () => void;
+}) {
+  return (
+    <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className={`w-2 h-2 rounded-full flex-shrink-0 ${pending ? "bg-teal-300 pulse-dot" : "bg-green-ok"}`}
+        />
+        {view === "list" ? (
+          <>
+            <span className="font-semibold text-sm tracking-wide">Sage</span>
+            <span className="text-[10px] text-white/60">
+              {contextPatientId ? "patient context" : "panel context"}
+            </span>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onBackToList}
+              className="text-white/60 hover:text-white text-xs leading-none flex-shrink-0"
+              aria-label="Back to threads"
+              title="Back to threads"
+            >
+              ‹
+            </button>
+            <span className="font-medium text-xs text-white/90 truncate">
+              {threadTitle}
+            </span>
+          </>
+        )}
+      </div>
+      <div className="flex items-center gap-1 flex-shrink-0">
+        <button
+          onClick={onNewThread}
+          className="text-[10px] px-2 py-1 rounded bg-teal-500 hover:bg-teal-700 text-white"
+          title="New chat"
+        >
+          + New
+        </button>
+        <button
+          onClick={onCollapse}
+          className="text-white/60 hover:text-white text-lg leading-none ml-1"
+          aria-label="Collapse Sage"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ThreadList({
+  threads,
+  onOpen,
+  onDelete,
+  onNewThread,
+}: {
+  threads: any[];
+  onOpen: (id: Id<"agentThreads">) => void;
+  onDelete: (id: Id<"agentThreads">) => void;
+  onNewThread: () => void;
+}) {
+  return (
+    <div className="flex-1 overflow-y-auto">
+      {threads.length === 0 ? (
+        <div className="p-6 text-center">
+          <p className="text-xs text-white/60 italic mb-4">No conversations yet.</p>
+          <button
+            onClick={onNewThread}
+            className="text-xs px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-700 text-white"
+          >
+            Start a chat
+          </button>
+        </div>
+      ) : (
+        <ul className="py-2">
+          {threads.map((t) => (
+            <li key={t._id} className="group">
+              <div className="flex items-stretch hover:bg-white/5">
+                <button
+                  onClick={() => onOpen(t._id)}
+                  className="flex-1 text-left px-4 py-2.5 min-w-0"
+                >
+                  <div className="text-sm text-white/90 truncate">{t.title}</div>
+                  <div className="text-[10px] text-white/50 mt-0.5">
+                    {formatRelative(t.lastMessageAt)}
+                    {t.contextPatientId ? " · patient" : ""}
+                  </div>
+                </button>
+                <button
+                  onClick={() => onDelete(t._id)}
+                  className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-red-warning px-3 transition"
+                  aria-label="Delete thread"
+                  title="Delete"
+                >
+                  ✕
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Composer({
+  input,
+  setInput,
+  onSend,
+  pending,
+  contextPatientId,
+}: {
+  input: string;
+  setInput: (s: string) => void;
+  onSend: () => void;
+  pending: boolean;
+  contextPatientId?: Id<"patients">;
+}) {
+  const suggestions = contextPatientId
+    ? ["Summarize this patient", "Draft a SOAP note", "Suggest care plan changes"]
+    : ["Today's queue", "Overdue Level 3", "Reach rate"];
+  return (
+    <div className="border-t border-white/10 p-3 space-y-2">
+      <div className="flex flex-wrap gap-1.5">
+        {suggestions.map((s) => (
+          <button
+            key={s}
+            onClick={() => setInput(s)}
+            className="text-[10px] px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSend();
+            }
+          }}
+          placeholder="Ask Sage…"
+          rows={2}
+          className="flex-1 px-3 py-2 rounded-lg bg-white/10 text-white placeholder:text-white/40 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-teal-300"
+        />
+        <button
+          onClick={onSend}
+          disabled={pending || !input.trim()}
+          className="px-3 rounded-lg bg-teal-500 hover:bg-teal-700 text-white text-sm disabled:opacity-30"
+        >
+          ↑
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function truncateJson(obj: any): string {
   try {
     const s = JSON.stringify(obj);
@@ -192,6 +385,18 @@ function truncateJson(obj: any): string {
   } catch {
     return String(obj).slice(0, 80);
   }
+}
+
+function formatRelative(ms: number): string {
+  const diff = Date.now() - ms;
+  const min = Math.floor(diff / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  return new Date(ms).toLocaleDateString();
 }
 
 function MessageBubble({
@@ -223,16 +428,17 @@ function MessageBubble({
       </div>
     );
   }
-  // Empty assistant bubbles (e.g. internal __rawItem envelopes that decoded to JSON) — skip render
-  if (message.role === "assistant" && (!message.content || message.content.startsWith("{\"__rawItem"))) {
-    return null;
-  }
   if (message.role === "system") {
     return (
-      <div className="text-[11px] text-amber-warning italic">
-        {message.content}
-      </div>
+      <div className="text-[11px] text-amber-warning italic">{message.content}</div>
     );
+  }
+  // Skip empty assistant bubbles or raw __rawItem JSON envelopes
+  if (
+    message.role === "assistant" &&
+    (!message.content || message.content.startsWith('{"__rawItem'))
+  ) {
+    return null;
   }
   return (
     <div className="flex flex-col gap-2">
@@ -240,17 +446,32 @@ function MessageBubble({
         <div className="max-w-[90%] rounded-2xl bg-white/10 px-3 py-2 text-sm leading-relaxed">
           <ReactMarkdown
             components={{
-              p: ({ children }) => <p className="my-1 first:mt-0 last:mb-0">{children}</p>,
-              ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 my-1">{children}</ol>,
-              ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1">{children}</ul>,
+              p: ({ children }) => (
+                <p className="my-1 first:mt-0 last:mb-0">{children}</p>
+              ),
+              ol: ({ children }) => (
+                <ol className="list-decimal list-inside space-y-0.5 my-1">{children}</ol>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc list-inside space-y-0.5 my-1">{children}</ul>
+              ),
               li: ({ children }) => <li className="leading-snug">{children}</li>,
-              strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+              strong: ({ children }) => (
+                <strong className="font-semibold text-white">{children}</strong>
+              ),
               em: ({ children }) => <em className="italic text-white/90">{children}</em>,
               code: ({ children }) => (
-                <code className="font-mono text-[11px] bg-black/30 px-1 py-0.5 rounded">{children}</code>
+                <code className="font-mono text-[11px] bg-black/30 px-1 py-0.5 rounded">
+                  {children}
+                </code>
               ),
               a: ({ href, children }) => (
-                <a href={href} className="text-teal-300 underline" target="_blank" rel="noreferrer">
+                <a
+                  href={href}
+                  className="text-teal-300 underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {children}
                 </a>
               ),
@@ -290,12 +511,13 @@ function ActionCard({
   const dismiss = useMutation(api.mutations.agent.dismissActionCard);
   const [pending, setPending] = useState(false);
 
-  const label = {
-    soap_draft: "SOAP draft",
-    care_plan_revision: "Care plan revision",
-    patient_message: "Portal message",
-    outreach: "Outreach scheduled",
-  }[card.kind as string] ?? "Action";
+  const label =
+    {
+      soap_draft: "SOAP draft",
+      care_plan_revision: "Care plan revision",
+      patient_message: "Portal message",
+      outreach: "Outreach scheduled",
+    }[card.kind as string] ?? "Action";
 
   async function handleApply() {
     setPending(true);
@@ -321,7 +543,6 @@ function ActionCard({
           content: card.summary,
         });
       } else {
-        // Outreach: already scheduled. Mark applied for UI.
         await dismiss({ messageId, cardIndex });
       }
     } catch (err: any) {
@@ -338,9 +559,7 @@ function ActionCard({
           <div className="text-[10px] uppercase tracking-wider text-teal-300 font-semibold">
             {label}
           </div>
-          <div className="text-xs text-white/90 mt-0.5 truncate">
-            {card.summary}
-          </div>
+          <div className="text-xs text-white/90 mt-0.5 truncate">{card.summary}</div>
         </div>
         {card.status === "applied" ? (
           <span className="text-[10px] uppercase text-green-ok bg-green-500/15 px-2 py-1 rounded">
