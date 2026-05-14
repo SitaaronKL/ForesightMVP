@@ -93,11 +93,12 @@ export function SoapReviewModal({
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="!max-w-5xl w-[min(96vw,72rem)] max-h-[90vh] overflow-y-auto p-0 border-0 bg-white shadow-2xl rounded-2xl"
+        className="!max-w-5xl w-[min(96vw,72rem)] max-h-[90vh] p-0 border-0 bg-white shadow-2xl rounded-2xl overflow-hidden"
       >
+        <div className="max-h-[90vh] overflow-y-auto">
         {/* Mesh-gradient header strip */}
         <div
-          className="px-6 py-5 rounded-t-2xl"
+          className="px-6 py-5"
           style={{
             backgroundImage: "url(/image-mesh-gradient.png)",
             backgroundSize: "200% 200%",
@@ -222,7 +223,7 @@ export function SoapReviewModal({
                 <Button
                   variant="ghost"
                   onClick={onClose}
-                  className="rounded-full text-brand-700 hover:bg-brand-50"
+                  className="rounded-full bg-foresight/10 text-foresight hover:bg-foresight hover:text-white transition-colors px-5"
                 >
                   Discard
                 </Button>
@@ -236,6 +237,7 @@ export function SoapReviewModal({
               </DialogFooter>
             </>
           )}
+        </div>
         </div>
       </DialogContent>
     </Dialog>

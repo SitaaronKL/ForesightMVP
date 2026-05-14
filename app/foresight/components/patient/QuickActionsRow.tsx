@@ -79,23 +79,23 @@ export function QuickActionsRow({
 
   return (
     <>
-      {/* @container lets each button collapse smoothly from "icon + label"
-          to icon-only as the available width shrinks (e.g. when the Sage
-          rail is dragged wider). Single horizontal row — never wraps. */}
-      <div className="@container flex flex-nowrap items-center gap-2 min-w-0">
-        {ACTIONS.map((a) => (
-          <GlassTooltip key={a.key} width={260} content={a.tooltip}>
-            <button
-              onClick={() => setOpen(a.key)}
-              aria-label={a.label}
-              className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0 px-3 @[700px]:px-5 py-2"
-            >
-              <a.Icon className="w-4 h-4 text-foresight" />
-              <span className="hidden @[700px]:inline">{a.label}</span>
-            </button>
-          </GlassTooltip>
-        ))}
-      </div>
+      {/* Labels collapse to icons via the closest @container ancestor in
+          the patient header — they always render, never wrap, and pick up
+          text again the moment there's room. */}
+      {ACTIONS.map((a) => (
+        <GlassTooltip key={a.key} width={260} content={a.tooltip}>
+          <button
+            onClick={() => setOpen(a.key)}
+            aria-label={a.label}
+            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0 px-3 @[800px]:px-5 py-2"
+          >
+            <a.Icon className="w-4 h-4 text-foresight" />
+            <span className="hidden @[800px]:inline whitespace-nowrap">
+              {a.label}
+            </span>
+          </button>
+        </GlassTooltip>
+      ))}
 
       <SendMessageDialog
         open={open === "message"}

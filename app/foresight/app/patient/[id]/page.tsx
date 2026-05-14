@@ -78,7 +78,7 @@ export default function PatientPage({
               Conditions: {patient.chronicConditions.join(", ")}
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap justify-end flex-shrink-0">
+          <div className="@container flex items-center gap-2 flex-nowrap justify-end flex-1 min-w-[200px]">
             <VoiceCaptureButton patientId={patientId} />
             <QuickActionsRow
               patientId={patientId}
