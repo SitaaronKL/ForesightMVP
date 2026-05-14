@@ -87,8 +87,11 @@ export const Thread: FC = () => {
             </AuiIf>
           </div>
 
-          <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mt-auto flex flex-col gap-4 overflow-visible rounded-t-(--composer-radius) bg-background pb-4 md:pb-6">
+          <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mt-auto flex flex-col gap-2 overflow-visible rounded-t-(--composer-radius) bg-background pb-4 md:pb-6">
             <ThreadScrollToBottom />
+            <AuiIf condition={(s) => s.thread.isEmpty}>
+              <ThreadSuggestions />
+            </AuiIf>
             <Composer />
           </ThreadPrimitive.ViewportFooter>
         </div>
@@ -152,7 +155,6 @@ const ThreadWelcome: FC = () => {
           </p>
         </div>
       </div>
-      <ThreadSuggestions />
     </div>
   );
 };
@@ -175,7 +177,7 @@ const ThreadSuggestions: FC = () => {
   }
 
   return (
-    <div className="aui-thread-welcome-suggestions px-4 pt-6 pb-0">
+    <div className="aui-thread-welcome-suggestions px-0 pt-0 pb-0">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
         Try asking Sage
       </p>

@@ -349,13 +349,13 @@ function QuickNoteDialog({
                 onChange={(e) => setTopic(e.target.value)}
                 className="rounded-full border border-brand-100 px-2.5 py-1 text-xs text-brand-950 focus:outline-none focus:border-foresight"
               >
-                <option value="refill">refill</option>
-                <option value="lab_followup">lab follow-up</option>
-                <option value="transitions_of_care">TOC</option>
-                <option value="chart_review">chart review</option>
-                <option value="symptom_check">symptom check</option>
-                <option value="social">social</option>
-                <option value="other">other</option>
+                <option value="refill">Refill</option>
+                <option value="lab_followup">Lab follow-up</option>
+                <option value="transitions_of_care">Transitions of care</option>
+                <option value="chart_review">Chart review</option>
+                <option value="symptom_check">Symptom check</option>
+                <option value="social">Social</option>
+                <option value="other">Other</option>
               </select>
             </label>
             <div className="ml-auto">
