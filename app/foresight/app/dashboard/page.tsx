@@ -68,7 +68,7 @@ function StatsBento({
   return (
     <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
       <header
-        className="px-6 pt-5 pb-4 flex items-center justify-between gap-4"
+        className="px-6 pt-5 pb-4 flex items-center gap-5"
         style={{
           backgroundImage: "url(/image-mesh-gradient.png)",
           backgroundSize: "cover",
@@ -77,6 +77,11 @@ function StatsBento({
         onMouseEnter={() => syringeRef.current?.startAnimation()}
         onMouseLeave={() => syringeRef.current?.stopAnimation()}
       >
+        <SyringeIcon
+          ref={syringeRef}
+          size={56}
+          className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
+        />
         <div className="min-w-0">
           <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
             Today&apos;s Queue
@@ -85,11 +90,6 @@ function StatsBento({
             {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
           </p>
         </div>
-        <SyringeIcon
-          ref={syringeRef}
-          size={56}
-          className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
-        />
       </header>
 
       {/* 2 × 3 stats grid — fills the square evenly */}
