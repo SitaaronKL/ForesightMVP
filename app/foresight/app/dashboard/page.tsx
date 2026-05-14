@@ -25,7 +25,7 @@ export default function DashboardPage() {
       {/* Combined stats + queue panel */}
       <section className="glass overflow-hidden">
         {/* Stats strip */}
-        <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-5 gap-4 border-b border-brand-100/70">
+        <div className="px-5 py-4 flex flex-wrap items-start gap-x-10 gap-y-3 border-b border-brand-100/70">
           <Kpi
             label="Panel size"
             value={kpis?.panelSize ?? "—"}

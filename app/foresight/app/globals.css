@@ -43,7 +43,7 @@
 
 /* ---- shadcn/ui tokens mapped to brand palette ---- */
 :root {
-  --background: #f8fbfd;
+  --background: #f4f4f5;
   --foreground: #0a1224;
 
   --card: rgba(255, 255, 255, 0.9);
@@ -145,11 +145,7 @@ body {
 }
 
 body {
-  background-image:
-    radial-gradient(circle at 0% 0%, rgba(60, 111, 157, 0.10) 0%, transparent 35%),
-    radial-gradient(circle at 100% 0%, rgba(47, 193, 173, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 50% 100%, rgba(11, 59, 92, 0.06) 0%, transparent 50%);
-  background-attachment: fixed;
+  background-color: var(--background);
   min-height: 100vh;
   font-family: var(--font-sans);
 }

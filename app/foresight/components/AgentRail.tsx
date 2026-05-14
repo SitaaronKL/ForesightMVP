@@ -12,7 +12,11 @@ import { HistoryIcon, type HistoryIconHandle } from "./HistoryIcon";
 import { ArrowBigLeftDashIcon, type ArrowBigLeftDashIconHandle } from "./ArrowBigLeftDashIcon";
 import { ArrowBigRightDashIcon, type ArrowBigRightDashIconHandle } from "./ArrowBigRightDashIcon";
 import { useRef } from "react";
-import { useAgentRail } from "./AgentRailContext";
+import {
+  useAgentRail,
+  RAIL_MIN_WIDTH,
+  RAIL_MAX_WIDTH,
+} from "./AgentRailContext";
 
 export function AgentRail({
   user,
@@ -21,7 +25,7 @@ export function AgentRail({
   user: any;
   contextPatientId?: Id<"patients">;
 }) {
-  const { collapsed, setCollapsed } = useAgentRail();
+  const { collapsed, setCollapsed, width, setWidth } = useAgentRail();
   const [reviewSoapId, setReviewSoapId] = useState<Id<"soapNotes"> | null>(null);
   const [reviewPatientId, setReviewPatientId] = useState<Id<"patients"> | null>(null);
   const openIconRef = useRef<ArrowBigLeftDashIconHandle>(null);
@@ -30,6 +34,30 @@ export function AgentRail({
   function openSoapReview(soapNoteId: Id<"soapNotes">, patientId: Id<"patients">) {
     setReviewSoapId(soapNoteId);
     setReviewPatientId(patientId);
+  }
+
+  function startResize(e: React.MouseEvent) {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = width;
+    function onMove(ev: MouseEvent) {
+      const dx = ev.clientX - startX;
+      const next = Math.max(
+        RAIL_MIN_WIDTH,
+        Math.min(RAIL_MAX_WIDTH, startWidth - dx),
+      );
+      setWidth(next);
+    }
+    function onUp() {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    }
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "ew-resize";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
   }
 
   if (collapsed) {
@@ -51,7 +79,10 @@ export function AgentRail({
 
   return (
     <>
-      <aside className="fixed right-0 top-0 w-[380px] xl:w-[420px] h-screen hidden lg:flex z-20">
+      <aside
+        style={{ width }}
+        className="fixed right-0 top-0 h-screen hidden lg:flex z-20"
+      >
         {/* Collapse tab nub: glued to the OUTSIDE of the sidebar's left edge,
             so it visibly attaches to the sidebar instead of overlapping the
             translucent surface and bleeding into dashboard content behind. */}
@@ -67,6 +98,16 @@ export function AgentRail({
             <ArrowBigRightDashIcon ref={hideIconRef} size={18} className="flex items-center" />
           </div>
         </button>
+
+        {/* Drag handle on the rail's left edge — drag to resize. */}
+        <div
+          onMouseDown={startResize}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize Sage panel"
+          title="Drag to resize"
+          className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize z-30 hover:bg-foresight/40 active:bg-foresight/60 transition-colors"
+        />
 
         {/* Translucent liquid-glass sidebar surface, full height, flush right edge */}
         <div className="relative flex flex-col w-full h-full overflow-hidden border-l border-white/40 backdrop-blur-2xl backdrop-saturate-150 bg-white/40 shadow-[-8px_0_32px_rgba(11,59,92,0.08)]">
@@ -132,15 +173,23 @@ function SageInner({
       </div>
 
       <div className="flex flex-1 min-h-0">
-        {/* Thread list panel — dark divider to clearly split off from the chat surface */}
+        {/* Thread list panel — clicking any item closes history and reveals
+            the selected chat full-width. */}
         {showHistory && (
-          <div className="w-[160px] bg-white/30 overflow-y-auto p-2 flex-shrink-0">
+          <div
+            onClick={() => setShowHistory(false)}
+            className="w-[160px] bg-white/30 overflow-y-auto p-2 flex-shrink-0"
+          >
             <ThreadList />
           </div>
         )}
 
-        {/* Active thread / chat surface */}
-        <div className="flex-1 min-w-0 flex flex-col">
+        {/* Active thread / chat surface — clicking anywhere inside also
+            closes the history panel. */}
+        <div
+          onClick={() => showHistory && setShowHistory(false)}
+          className="flex-1 min-w-0 flex flex-col"
+        >
           {threadId && (
             <SageActionTray threadId={threadId} onOpenSoapReview={onOpenSoapReview} />
           )}
