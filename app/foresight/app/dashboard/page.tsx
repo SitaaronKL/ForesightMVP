@@ -72,8 +72,8 @@ function StatsBento({
         className="px-6 pt-5 pb-4 flex items-center gap-5"
         style={{
           backgroundImage: "url(/image-mesh-gradient.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: "200% 200%",
+          backgroundPosition: "0% 0%",
         }}
         onMouseEnter={() => syringeRef.current?.startAnimation()}
         onMouseLeave={() => syringeRef.current?.stopAnimation()}
@@ -152,8 +152,8 @@ function PriorityQueuePanel({ queue }: { queue: any[] | undefined }) {
         className="px-6 pt-5 pb-4 flex items-center gap-5"
         style={{
           backgroundImage: "url(/image-mesh-gradient.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: "200% 200%",
+          backgroundPosition: "50% 100%",
         }}
         onMouseEnter={() => bellRef.current?.startAnimation()}
         onMouseLeave={() => bellRef.current?.stopAnimation()}
@@ -207,12 +207,15 @@ function BriefingBento({
   const triggerEod = useAction(api.admin.triggerEndOfDay);
   const [generating, setGenerating] = useState<null | "morning" | "eod">(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const titleSunRef = useRef<SunIconHandle>(null);
-  const titleMoonRef = useRef<MoonIconHandle>(null);
-  const toggleSunRef = useRef<SunIconHandle>(null);
-  const toggleMoonRef = useRef<MoonIconHandle>(null);
   const emptySunRef = useRef<SunIconHandle>(null);
   const emptyMoonRef = useRef<MoonIconHandle>(null);
+
+  function handleToggle() {
+    const next = active === "morning" ? "eod" : "morning";
+    const exists = next === "morning" ? hasMorning : hasEod;
+    if (exists) setActive(next);
+    else generate(next);
+  }
 
   // Default to whichever briefing exists; prefer morning when both do.
   useEffect(() => {
@@ -298,24 +301,16 @@ function BriefingBento({
         className="px-5 py-3 flex items-center justify-between"
         style={{
           backgroundImage: "url(/image-mesh-gradient.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: "200% 200%",
+          backgroundPosition: "100% 0%",
         }}
       >
-        <div
-          className="flex items-center gap-3 text-brand-950 min-w-0"
-          onMouseEnter={() =>
-            (active === "morning" ? titleSunRef : titleMoonRef).current?.startAnimation()
-          }
-          onMouseLeave={() =>
-            (active === "morning" ? titleSunRef : titleMoonRef).current?.stopAnimation()
-          }
-        >
+        <div className="flex items-center gap-3 text-brand-950 min-w-0">
           <span className="flex items-center justify-center flex-shrink-0">
             {active === "morning" ? (
-              <SunIcon ref={titleSunRef} size={32} className="flex items-center" />
+              <SunIcon size={32} className="flex items-center" />
             ) : (
-              <MoonIcon ref={titleMoonRef} size={32} className="flex items-center" />
+              <MoonIcon size={32} className="flex items-center" />
             )}
           </span>
           <div className="flex flex-col leading-tight min-w-0">
@@ -327,45 +322,45 @@ function BriefingBento({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Sun / Moon toggle. Only shown when both exist OR the inactive one can be generated. */}
-          <div className="flex items-center gap-0.5 bg-white/60 backdrop-blur-sm rounded-full p-0.5">
-            <button
-              type="button"
-              onClick={() =>
-                hasMorning ? setActive("morning") : generate("morning")
-              }
-              onMouseEnter={() => toggleSunRef.current?.startAnimation()}
-              onMouseLeave={() => toggleSunRef.current?.stopAnimation()}
-              disabled={generating !== null}
-              aria-label="Morning briefing"
-              title={hasMorning ? "Show morning briefing" : "Generate morning briefing"}
-              className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
-                active === "morning"
-                  ? "bg-white text-brand-950 shadow-sm"
-                  : "text-brand-700 hover:bg-white/40"
-              }`}
-            >
-              <SunIcon ref={toggleSunRef} size={12} className="flex items-center" />
-            </button>
-            <button
-              type="button"
-              onClick={() => (hasEod ? setActive("eod") : generate("eod"))}
-              onMouseEnter={() => toggleMoonRef.current?.startAnimation()}
-              onMouseLeave={() => toggleMoonRef.current?.stopAnimation()}
-              disabled={generating !== null}
-              aria-label="End-of-day wrap"
-              title={hasEod ? "Show end-of-day wrap" : "Generate end-of-day wrap"}
-              className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
-                active === "eod"
-                  ? "bg-white text-brand-950 shadow-sm"
-                  : "text-brand-700 hover:bg-white/40"
-              }`}
-            >
-              <MoonIcon ref={toggleMoonRef} size={12} className="flex items-center" />
-            </button>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={handleToggle}
+          disabled={generating !== null}
+          aria-label={
+            active === "morning"
+              ? "Switch to end-of-day wrap"
+              : "Switch to morning briefing"
+          }
+          title={
+            active === "morning"
+              ? hasEod
+                ? "Switch to end-of-day wrap"
+                : "Generate end-of-day wrap"
+              : hasMorning
+                ? "Switch to morning briefing"
+                : "Generate morning briefing"
+          }
+          className="flex items-center gap-0.5 bg-white/60 backdrop-blur-sm rounded-full p-0.5 transition hover:bg-white/80 disabled:opacity-50 cursor-pointer"
+        >
+          <span
+            className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
+              active === "morning"
+                ? "bg-white text-brand-950 shadow-sm"
+                : "text-brand-700"
+            }`}
+          >
+            <SunIcon size={12} className="flex items-center" />
+          </span>
+          <span
+            className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
+              active === "eod"
+                ? "bg-white text-brand-950 shadow-sm"
+                : "text-brand-700"
+            }`}
+          >
+            <MoonIcon size={12} className="flex items-center" />
+          </span>
+        </button>
       </div>
 
       <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto">

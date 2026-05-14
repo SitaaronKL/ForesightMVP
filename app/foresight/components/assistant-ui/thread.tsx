@@ -175,7 +175,7 @@ const ThreadSuggestions: FC = () => {
   }
 
   return (
-    <div className="aui-thread-welcome-suggestions px-4 pb-4">
+    <div className="aui-thread-welcome-suggestions px-4 pb-1">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
         Try asking Sage
       </p>
@@ -222,12 +222,12 @@ const GenerateEodPill: FC = () => {
 
   const label =
     status === "running"
-      ? "Generating EOD briefing…"
+      ? "Generating End-of-Day-Wrap…"
       : status === "done"
-        ? "EOD briefing generated"
+        ? "End-of-Day-Wrap generated"
         : status === "error"
           ? "Failed — try again"
-          : "Generate End of day brief";
+          : "Generate End-of-Day-Wrap";
 
   return (
     <button
@@ -239,7 +239,7 @@ const GenerateEodPill: FC = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
-      className="mt-2 w-full inline-flex items-center justify-center gap-2 text-[11px] font-semibold rounded-full px-3 py-2 text-brand-950 shadow-sm border border-white/40 transition hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
+      className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-3 py-1.5 text-brand-950 shadow-sm border border-white/40 transition hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
     >
       {status === "running" && <Spinner size={12} />}
       {label}
