@@ -1,7 +1,8 @@
 "use client";
 
 import { type PropsWithChildren, useEffect, useState, type FC } from "react";
-import { XIcon, PlusIcon, FileText } from "lucide-react";
+import { XIcon, FileText } from "lucide-react";
+import { FolderPlusIcon } from "@/components/FolderPlusIcon";
 import {
   AttachmentPrimitive,
   ComposerPrimitive,
@@ -216,7 +217,7 @@ export const ComposerAddAttachment: FC = () => {
         className="aui-composer-add-attachment size-8 rounded-full p-1 font-semibold text-xs hover:bg-muted-foreground/15 dark:border-muted-foreground/15 dark:hover:bg-muted-foreground/30"
         aria-label="Add Attachment"
       >
-        <PlusIcon className="aui-attachment-add-icon size-5 stroke-[1.5px]" />
+        <FolderPlusIcon size={20} className="aui-attachment-add-icon flex items-center" />
       </TooltipIconButton>
     </ComposerPrimitive.AddAttachment>
   );

@@ -9,10 +9,11 @@ import {
 import {
   ArchiveIcon,
   MoreHorizontalIcon,
-  PlusIcon,
   TrashIcon,
 } from "lucide-react";
 import type { FC } from "react";
+import { useRef } from "react";
+import { PlusIcon, type PlusIconHandle } from "../PlusIcon";
 
 export const ThreadList: FC = () => {
   return (
@@ -31,13 +32,16 @@ export const ThreadList: FC = () => {
 };
 
 const ThreadListNew: FC = () => {
+  const iconRef = useRef<PlusIconHandle>(null);
   return (
     <ThreadListPrimitive.New asChild>
       <Button
         variant="outline"
-        className="aui-thread-list-new h-9 justify-start gap-2 rounded-lg px-3 text-sm hover:bg-muted data-active:bg-muted"
+        onMouseEnter={() => iconRef.current?.startAnimation()}
+        onMouseLeave={() => iconRef.current?.stopAnimation()}
+        className="aui-thread-list-new h-9 justify-start gap-2 rounded-lg px-3 text-sm bg-transparent hover:bg-transparent hover:text-brand-900 transition-colors"
       >
-        <PlusIcon className="size-4" />
+        <PlusIcon ref={iconRef} size={16} className="flex items-center" />
         New Thread
       </Button>
     </ThreadListPrimitive.New>

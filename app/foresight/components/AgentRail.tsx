@@ -62,7 +62,7 @@ export function AgentRail({
         </button>
 
         {/* Translucent liquid-glass sidebar surface, full height, flush right edge */}
-        <div className="flex flex-col w-full h-full overflow-hidden border-l border-white/40 backdrop-blur-2xl backdrop-saturate-150 bg-white/40 shadow-[-8px_0_32px_rgba(11,59,92,0.08)]">
+        <div className="relative flex flex-col w-full h-full overflow-hidden border-l border-white/40 backdrop-blur-2xl backdrop-saturate-150 bg-white/40 shadow-[-8px_0_32px_rgba(11,59,92,0.08)]">
           <SageProvider contextPatientId={contextPatientId}>
             <SageInner onOpenSoapReview={openSoapReview} />
           </SageProvider>
@@ -95,6 +95,12 @@ function SageInner({
 
   return (
     <>
+      {/* Full-height divider between thread list and chat, drawn above the
+          header so it visually splits the rail from the very top. */}
+      {showHistory && (
+        <div className="pointer-events-none absolute top-0 bottom-0 left-[160px] w-px bg-brand-950 z-20" />
+      )}
+
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/30 flex items-center justify-between gap-2 flex-shrink-0">
         <div
@@ -121,7 +127,7 @@ function SageInner({
       <div className="flex flex-1 min-h-0">
         {/* Thread list panel — dark divider to clearly split off from the chat surface */}
         {showHistory && (
-          <div className="w-[160px] border-r-2 border-brand-950 bg-white/30 overflow-y-auto p-2 flex-shrink-0">
+          <div className="w-[160px] bg-white/30 overflow-y-auto p-2 flex-shrink-0">
             <ThreadList />
           </div>
         )}

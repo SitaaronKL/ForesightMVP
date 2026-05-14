@@ -33,6 +33,7 @@ import {
   ThreadPrimitive,
   useAuiState,
 } from "@assistant-ui/react";
+import { ArrowUpRightIcon } from "@/components/ArrowUpRightIcon";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -196,7 +197,7 @@ const ComposerAction: FC = () => {
             className="aui-composer-send size-8 rounded-full"
             aria-label="Send message"
           >
-            <ArrowUpIcon className="aui-composer-send-icon size-4" />
+            <ArrowUpRightIcon size={16} className="aui-composer-send-icon flex items-center" />
           </TooltipIconButton>
         </ComposerPrimitive.Send>
       </AuiIf>
