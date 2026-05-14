@@ -153,7 +153,7 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
               onSelect={() => startRecording()}
               onMouseEnter={() => micItemRef.current?.startAnimation()}
               onMouseLeave={() => micItemRef.current?.stopAnimation()}
-              className="rounded-xl py-2.5 px-3 cursor-pointer focus:bg-foresight/8"
+              className="rounded-full py-2.5 px-4 cursor-pointer focus:bg-foresight/8"
             >
               <MicIcon
                 ref={micItemRef}
@@ -173,7 +173,7 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
               onSelect={handleCallWithoutRecording}
               onMouseEnter={() => micOffItemRef.current?.startAnimation()}
               onMouseLeave={() => micOffItemRef.current?.stopAnimation()}
-              className="rounded-xl py-2.5 px-3 cursor-pointer focus:bg-foresight/8"
+              className="rounded-full py-2.5 px-4 cursor-pointer focus:bg-foresight/8"
             >
               <MicOffIcon
                 ref={micOffItemRef}
