@@ -76,7 +76,7 @@ function StatsBento({
         <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
           Today&apos;s Queue
         </h2>
-        <p className="mt-0.5 text-xs text-brand-700">
+        <p className="mt-0.5 text-xs text-brand-950">
           {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
         </p>
       </header>
