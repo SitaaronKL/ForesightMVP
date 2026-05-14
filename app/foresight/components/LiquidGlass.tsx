@@ -4,6 +4,31 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import "./liquid-glass/glass.css";
 
+function makeFallbackSnapshot(): HTMLCanvasElement {
+  const w = Math.max(window.innerWidth, 1280);
+  const h = Math.max(document.documentElement.scrollHeight, 800);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  ctx.fillStyle = "#f8fbfd";
+  ctx.fillRect(0, 0, w, h);
+  const grads: Array<[number, number, number, [number, number, number, number]]> = [
+    [0, 0, Math.max(w, h) * 0.7, [60, 111, 157, 0.18]],
+    [w, 0, Math.max(w, h) * 0.7, [47, 193, 173, 0.14]],
+    [w * 0.5, h, Math.max(w, h) * 0.8, [11, 59, 92, 0.1]],
+  ];
+  for (const [cx, cy, r, [cr, cg, cb, ca]] of grads) {
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${ca})`);
+    g.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+  return canvas;
+}
+
 interface LiquidGlassProps {
   children: ReactNode;
   borderRadius?: number;
@@ -38,15 +63,17 @@ export function LiquidGlass({
 
       const html2canvas = (h2c as any).default ?? h2c;
 
-      // Wrap html2canvas to surface failures so the lib doesn't fail silently.
+      // html2canvas can't parse oklab/oklch color functions emitted by
+      // Tailwind v4, so wrap it and substitute a soft-gradient canvas on
+      // failure. The WebGL refraction needs *some* texture to refract.
       (window as any).html2canvas = (...args: any[]) => {
-        const promise = html2canvas(...args);
-        if (promise && typeof promise.catch === "function") {
-          promise.catch((err: any) =>
-            console.error("[LiquidGlass] html2canvas failed:", err),
+        return html2canvas(...args).catch((err: any) => {
+          console.warn(
+            "[LiquidGlass] html2canvas failed, using gradient fallback:",
+            err?.message ?? err,
           );
-        }
-        return promise;
+          return makeFallbackSnapshot();
+        });
       };
 
       const instance = new (mod as any).Container({
@@ -73,7 +100,7 @@ export function LiquidGlass({
 
       const canvas: HTMLCanvasElement | null = instance.canvas;
       if (canvas) {
-        canvas.style.zIndex = "0";
+        canvas.style.zIndex = "-1";
         canvas.style.boxShadow = "none";
       }
 

@@ -31,8 +31,8 @@ export function SageActionTray({
   if (pending.length === 0) return null;
 
   return (
-    <div className="border-b border-white/10 p-3 space-y-2 bg-black/15">
-      <div className="text-[10px] uppercase tracking-wider text-teal-300 font-semibold">
+    <div className="border-b border-white/30 p-3 space-y-2 bg-white/30">
+      <div className="text-[10px] uppercase tracking-wider text-teal-700 font-semibold">
         Pending actions ({pending.length})
       </div>
       {pending.map(({ card, messageId, idx }: any) => (
@@ -107,12 +107,12 @@ function ActionCardRow({
   }
 
   return (
-    <div className="rounded-lg bg-white/8 border border-white/15 p-2.5 flex items-center justify-between gap-2">
+    <div className="rounded-lg bg-white/60 border border-white/60 p-2.5 flex items-center justify-between gap-2 shadow-sm">
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wider text-teal-300 font-semibold">
+        <div className="text-[10px] uppercase tracking-wider text-teal-700 font-semibold">
           {label}
         </div>
-        <div className="text-xs text-white/90 mt-0.5 truncate">{card.summary}</div>
+        <div className="text-xs text-brand-900 mt-0.5 truncate">{card.summary}</div>
       </div>
       <div className="flex gap-1 flex-shrink-0">
         <Button
@@ -127,7 +127,7 @@ function ActionCardRow({
           onClick={() => dismiss({ messageId, cardIndex })}
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 text-white/70 hover:bg-white/10 hover:text-white"
+          className="h-7 w-7 p-0 text-brand-600 hover:bg-white/40 hover:text-brand-900"
           aria-label="Dismiss"
         >
           <X className="w-3 h-3" />
