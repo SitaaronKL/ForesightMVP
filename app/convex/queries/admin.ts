@@ -1,16 +1,15 @@
 import { query } from "../_generated/server";
-import { requireUser } from "../lib/auth";
+import { requireUserId } from "../lib/auth";
 
 /**
- * Return all users (for the admin page to pick a nurse to act as in the demo).
+ * Return all users. Available to any authenticated user because the admin page
+ * needs this on first visit (before any seed has been run, the caller has no
+ * role yet). This is a demo console; in production it would be admin-only.
  */
 export const listUsers = query({
   args: {},
   handler: async (ctx) => {
-    const me = await requireUser(ctx);
-    if (me.role !== "admin" && me.role !== "nurse") {
-      throw new Error("Forbidden");
-    }
+    await requireUserId(ctx);
     return await ctx.db.query("users").collect();
   },
 });
