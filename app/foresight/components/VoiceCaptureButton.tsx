@@ -6,7 +6,6 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
 import { Square } from "lucide-react";
-import { MicIcon, type MicIconHandle } from "./MicIcon";
 import { PhoneCallIcon, type PhoneCallIconHandle } from "./PhoneCallIcon";
 import { useAgentRail } from "./AgentRailContext";
 import { Spinner } from "./Spinner";
@@ -22,7 +21,6 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
   const startedAtRef = useRef<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const micRef = useRef<MicIconHandle>(null);
   const phoneRef = useRef<PhoneCallIconHandle>(null);
 
   const { collapsed: railCollapsed } = useAgentRail();
@@ -103,64 +101,41 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
     }
   }
 
-  function handleCall() {
-    alert(
-      "Outbound calling is wired for a future release (Twilio).\n\n" +
-        "For now use Record call to capture an existing nurse-patient call and have Sage draft the SOAP.",
-    );
-  }
-
-  // When the rail is open the patient header is cramped, stack the buttons.
-  // When the rail is collapsed there's room, lay them out side-by-side.
-  const orientation: "row" | "col" = "row";
   void railCollapsed;
 
   return (
     <>
-      <div
-        className={`flex gap-2 ${
-          orientation === "row" ? "flex-row" : "flex-col"
-        }`}
-      >
-        {!recording && !processing && (
-          <button
-            onClick={handleCall}
-            onMouseEnter={() => phoneRef.current?.startAnimation()}
-            onMouseLeave={() => phoneRef.current?.stopAnimation()}
-            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm"
-          >
-            <PhoneCallIcon ref={phoneRef} size={16} className="flex items-center" />
-            Call
-          </button>
-        )}
+      {!recording && !processing && (
+        <button
+          onClick={startRecording}
+          onMouseEnter={() => phoneRef.current?.startAnimation()}
+          onMouseLeave={() => phoneRef.current?.stopAnimation()}
+          title="Start a call. Sage records, transcribes via Whisper, and drafts a SOAP note when you finish."
+          className="inline-flex items-center gap-2 rounded-[100px] bg-foresight text-white px-5 py-2 text-sm font-medium hover:bg-foresight-dark transition shadow-sm flex-shrink-0"
+        >
+          <PhoneCallIcon
+            ref={phoneRef}
+            size={16}
+            className="flex items-center"
+          />
+          Call
+        </button>
+      )}
 
-        {!recording && !processing && (
-          <button
-            onClick={startRecording}
-            onMouseEnter={() => micRef.current?.startAnimation()}
-            onMouseLeave={() => micRef.current?.stopAnimation()}
-            className="inline-flex items-center gap-2 rounded-[100px] bg-brand-900 text-white px-5 py-2 text-sm font-medium hover:bg-brand-800 transition shadow-sm"
-          >
-            <MicIcon ref={micRef} size={16} className="flex items-center" />
-            Record call
-          </button>
-        )}
+      {recording && (
+        <button
+          onClick={stopAndProcess}
+          className="inline-flex items-center gap-2 rounded-[100px] bg-red-warning text-white px-5 py-2 text-sm font-medium hover:bg-red-700 transition shadow-sm flex-shrink-0"
+        >
+          <Square className="w-3 h-3 fill-current" /> Stop ({elapsed}s)
+        </button>
+      )}
 
-        {recording && (
-          <button
-            onClick={stopAndProcess}
-            className="inline-flex items-center gap-2 rounded-[100px] bg-red-warning text-white px-5 py-2 text-sm font-medium hover:bg-red-700 transition shadow-sm"
-          >
-            <Square className="w-3 h-3 fill-current" /> Stop ({elapsed}s)
-          </button>
-        )}
-
-        {processing && (
-          <div className="inline-flex items-center rounded-[100px] bg-brand-100 text-brand-700 px-5 py-2 text-sm">
-            <Spinner size={14} label="Transcribing…" />
-          </div>
-        )}
-      </div>
+      {processing && (
+        <div className="inline-flex items-center rounded-[100px] bg-brand-100 text-brand-700 px-5 py-2 text-sm flex-shrink-0">
+          <Spinner size={14} label="Transcribing…" />
+        </div>
+      )}
 
       {soapNoteId && (
         <SoapReviewModal

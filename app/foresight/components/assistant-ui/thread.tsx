@@ -175,7 +175,7 @@ const ThreadSuggestions: FC = () => {
   }
 
   return (
-    <div className="aui-thread-welcome-suggestions px-4 pb-1">
+    <div className="aui-thread-welcome-suggestions px-4 pt-16 pb-1">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
         Try asking Sage
       </p>
