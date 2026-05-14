@@ -78,8 +78,12 @@ export default function PatientPage({
               Conditions: {patient.chronicConditions.join(", ")}
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-wrap justify-end flex-shrink-0">
             <VoiceCaptureButton patientId={patientId} />
+            <QuickActionsRow
+              patientId={patientId}
+              patientName={`${patient.firstName} ${patient.lastName}`}
+            />
           </div>
         </div>
       </div>
@@ -88,12 +92,6 @@ export default function PatientPage({
       <HospitalEventBanner
         patientId={patientId}
         onCompleteTOC={() => setTab("encounters")}
-      />
-
-      {/* Quick actions strip — sticks under the header on scroll */}
-      <QuickActionsRow
-        patientId={patientId}
-        patientName={`${patient.firstName} ${patient.lastName}`}
       />
 
       {/* Sage's proactive context-aware draft suggestions for this patient */}

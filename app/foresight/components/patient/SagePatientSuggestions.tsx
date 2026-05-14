@@ -4,10 +4,13 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useRef, useState } from "react";
-import { Sparkles, ArrowUpRight } from "lucide-react";
 import { useSageSend } from "../SageRuntime";
 import { useAgentRail } from "../AgentRailContext";
 import { AmbulanceIcon, type AmbulanceIconHandle } from "../AmbulanceIcon";
+import {
+  ArrowUpRightIcon,
+  type ArrowUpRightIconHandle,
+} from "../ArrowUpRightIcon";
 import { HelpHint } from "../HelpHint";
 
 type Suggestion = {
@@ -30,12 +33,10 @@ export function SagePatientSuggestions({
   });
   const sendToSage = useSageSend();
   const rail = useAgentRail();
-  const ambulanceRef = useRef<AmbulanceIconHandle>(null);
   const [sending, setSending] = useState<string | null>(null);
 
   if (!overview) return null;
 
-  const firstName = patientName.split(" ")[0];
   const recent = overview.recentEncounters ?? [];
   const conditionList = overview.patient.chronicConditions.join(", ");
 
@@ -98,52 +99,80 @@ export function SagePatientSuggestions({
   }
 
   return (
-    <div
-      className="rounded-2xl border border-foresight/15 bg-gradient-to-br from-foresight/4 to-white px-5 py-4"
-      onMouseEnter={() => ambulanceRef.current?.startAnimation()}
-      onMouseLeave={() => ambulanceRef.current?.stopAnimation()}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <AmbulanceIcon
-          ref={ambulanceRef}
-          size={16}
-          className="flex items-center text-foresight"
-        />
+    <div>
+      <div className="flex items-center gap-1.5 mb-3 px-1">
         <h3 className="text-xs uppercase tracking-wider font-semibold text-foresight">
-          Sage suggests for {firstName}
+          Sage Actions
         </h3>
         <HelpHint width={300}>
-          Context-aware drafts Sage can prepare for this patient. Click to
-          send the prompt into the agent rail; Sage will return an action
+          Context-aware drafts Sage can prepare for this patient. Click any
+          card to send the prompt into the agent rail; Sage returns an action
           card you can review and apply with one click.
         </HelpHint>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {suggestions.map((s) => (
-          <button
+          <SuggestionCard
             key={s.key}
+            suggestion={s}
+            sending={sending === s.key}
             onClick={() => fire(s)}
-            disabled={sending !== null}
-            className="group text-left rounded-xl border border-brand-100 bg-white hover:border-foresight/40 hover:shadow-sm px-3 py-2.5 transition disabled:opacity-50"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-foresight flex-shrink-0" />
-              <span className="text-sm font-medium text-brand-950 truncate">
-                {s.label}
-              </span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-brand-400 ml-auto group-hover:text-foresight transition flex-shrink-0" />
-            </div>
-            <p className="text-[11px] text-brand-500 mt-1 line-clamp-2">
-              {s.rationale}
-            </p>
-            {sending === s.key && (
-              <div className="text-[10px] uppercase tracking-wider text-foresight mt-1">
-                Sending to Sage…
-              </div>
-            )}
-          </button>
+          />
         ))}
       </div>
     </div>
+  );
+}
+
+function SuggestionCard({
+  suggestion,
+  sending,
+  onClick,
+}: {
+  suggestion: Suggestion;
+  sending: boolean;
+  onClick: () => void;
+}) {
+  const ambulanceRef = useRef<AmbulanceIconHandle>(null);
+  const arrowRef = useRef<ArrowUpRightIconHandle>(null);
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => {
+        ambulanceRef.current?.startAnimation();
+        arrowRef.current?.startAnimation();
+      }}
+      onMouseLeave={() => {
+        ambulanceRef.current?.stopAnimation();
+        arrowRef.current?.stopAnimation();
+      }}
+      disabled={sending}
+      className="group text-left rounded-2xl border border-brand-100 bg-white hover:border-foresight/40 hover:shadow-sm px-4 py-3 transition disabled:opacity-50"
+    >
+      <div className="flex items-center gap-2">
+        <AmbulanceIcon
+          ref={ambulanceRef}
+          size={18}
+          className="flex items-center text-foresight flex-shrink-0"
+        />
+        <span className="text-sm font-medium text-brand-950 truncate">
+          {suggestion.label}
+        </span>
+        <ArrowUpRightIcon
+          ref={arrowRef}
+          size={16}
+          className="flex items-center text-brand-400 group-hover:text-foresight transition ml-auto flex-shrink-0"
+        />
+      </div>
+      <p className="text-[11px] text-brand-500 mt-1 line-clamp-2">
+        {suggestion.rationale}
+      </p>
+      {sending && (
+        <div className="text-[10px] uppercase tracking-wider text-foresight mt-1">
+          Sending to Sage…
+        </div>
+      )}
+    </button>
   );
 }

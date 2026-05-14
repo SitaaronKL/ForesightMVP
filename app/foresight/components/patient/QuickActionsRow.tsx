@@ -62,6 +62,11 @@ const ACTIONS: {
   },
 ];
 
+/**
+ * Inline quick-action pills. Designed to sit in the patient header next to
+ * Call + Record call. Each button matches the "Call" pill recipe (white
+ * backdrop, brand-200 border, rounded-[100px]).
+ */
 export function QuickActionsRow({
   patientId,
   patientName,
@@ -73,32 +78,17 @@ export function QuickActionsRow({
 
   return (
     <>
-      <div className="sticky top-0 z-20 -mx-0">
-        <div className="rounded-2xl border border-brand-100 bg-white/85 backdrop-blur-xl shadow-sm px-3 py-2 flex items-center gap-2 overflow-x-auto">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-brand-500 px-2 flex-shrink-0">
-            Quick actions
-          </span>
-          <div className="h-5 w-px bg-brand-100 flex-shrink-0" />
-          {ACTIONS.map((a) => (
-            <button
-              key={a.key}
-              onClick={() => setOpen(a.key)}
-              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-brand-800 hover:text-brand-950 hover:bg-foresight/8 transition flex-shrink-0"
-              title={a.tooltip}
-            >
-              <a.Icon className="w-3.5 h-3.5 text-foresight" />
-              {a.label}
-            </button>
-          ))}
-          <div className="ml-auto flex items-center pr-1 flex-shrink-0">
-            <HelpHint width={300}>
-              The fast lane for everything a nurse does on a patient besides a
-              full call. Hover any action for what it triggers and which
-              service element it satisfies.
-            </HelpHint>
-          </div>
-        </div>
-      </div>
+      {ACTIONS.map((a) => (
+        <button
+          key={a.key}
+          onClick={() => setOpen(a.key)}
+          title={a.tooltip}
+          className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0"
+        >
+          <a.Icon className="w-4 h-4 text-foresight" />
+          {a.label}
+        </button>
+      ))}
 
       <SendMessageDialog
         open={open === "message"}
