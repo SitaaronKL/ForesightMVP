@@ -7,9 +7,10 @@ import { Thread } from "@/components/assistant-ui/thread";
 import { ThreadList } from "@/components/assistant-ui/thread-list";
 import { SageProvider, useSageThreadId } from "./SageRuntime";
 import { SageActionTray } from "./SageActionTray";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AmbulanceIcon, type AmbulanceIconHandle } from "./AmbulanceIcon";
 import { HistoryIcon, type HistoryIconHandle } from "./HistoryIcon";
+import { ArrowBigLeftDashIcon, type ArrowBigLeftDashIconHandle } from "./ArrowBigLeftDashIcon";
+import { ArrowBigRightDashIcon, type ArrowBigRightDashIconHandle } from "./ArrowBigRightDashIcon";
 import { useRef } from "react";
 import { useAgentRail } from "./AgentRailContext";
 
@@ -23,6 +24,8 @@ export function AgentRail({
   const { collapsed, setCollapsed } = useAgentRail();
   const [reviewSoapId, setReviewSoapId] = useState<Id<"soapNotes"> | null>(null);
   const [reviewPatientId, setReviewPatientId] = useState<Id<"patients"> | null>(null);
+  const openIconRef = useRef<ArrowBigLeftDashIconHandle>(null);
+  const hideIconRef = useRef<ArrowBigRightDashIconHandle>(null);
 
   function openSoapReview(soapNoteId: Id<"soapNotes">, patientId: Id<"patients">) {
     setReviewSoapId(soapNoteId);
@@ -34,11 +37,13 @@ export function AgentRail({
       <button
         className="fixed right-0 top-1/2 -translate-y-1/2 z-30"
         onClick={() => setCollapsed(false)}
+        onMouseEnter={() => openIconRef.current?.startAnimation()}
+        onMouseLeave={() => openIconRef.current?.stopAnimation()}
         aria-label="Open Sage"
         title="Open Sage"
       >
         <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.12)] flex items-center justify-center text-brand-950 hover:text-brand-700 hover:bg-white/85 transition">
-          <ChevronLeft className="w-4 h-4" />
+          <ArrowBigLeftDashIcon ref={openIconRef} size={18} className="flex items-center" />
         </div>
       </button>
     );
@@ -52,12 +57,14 @@ export function AgentRail({
             translucent surface and bleeding into dashboard content behind. */}
         <button
           onClick={() => setCollapsed(true)}
+          onMouseEnter={() => hideIconRef.current?.startAnimation()}
+          onMouseLeave={() => hideIconRef.current?.stopAnimation()}
           aria-label="Hide Sage"
           title="Hide Sage"
           className="absolute right-full top-1/2 -translate-y-1/2 z-20"
         >
           <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.08)] flex items-center justify-center text-brand-950 hover:text-brand-700 hover:bg-white/85 transition">
-            <ChevronRight className="w-4 h-4" />
+            <ArrowBigRightDashIcon ref={hideIconRef} size={18} className="flex items-center" />
           </div>
         </button>
 

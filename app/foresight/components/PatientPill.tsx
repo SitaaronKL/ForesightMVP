@@ -18,8 +18,9 @@ export function PatientPill({ patient: p }: { patient: any }) {
   const conditions: string[] = Array.isArray(p.chronicConditions)
     ? p.chronicConditions
     : [];
-  const tierLabel = TIER_LABEL[p.tier] ?? p.tier;
-  const programLabel = PROGRAM_LABEL[p.billingProgram] ?? p.billingProgram;
+  const tierLabel = TIER_LABEL[String(p.tier).toLowerCase()] ?? p.tier;
+  const programKey = String(p.billingProgram ?? "").toUpperCase();
+  const programLabel = PROGRAM_LABEL[programKey] ?? p.billingProgram;
 
   return (
     <Link
