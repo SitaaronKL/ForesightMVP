@@ -36,28 +36,39 @@ export function AgentRail({
     setReviewPatientId(patientId);
   }
 
-  function startResize(e: React.MouseEvent) {
+  function startResize(e: React.PointerEvent<HTMLDivElement>) {
     e.preventDefault();
+    const handle = e.currentTarget;
+    handle.setPointerCapture(e.pointerId);
     const startX = e.clientX;
     const startWidth = width;
-    function onMove(ev: MouseEvent) {
+    const prevUserSelect = document.body.style.userSelect;
+    const prevCursor = document.body.style.cursor;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "ew-resize";
+
+    const onMove = (ev: PointerEvent) => {
       const dx = ev.clientX - startX;
       const next = Math.max(
         RAIL_MIN_WIDTH,
         Math.min(RAIL_MAX_WIDTH, startWidth - dx),
       );
       setWidth(next);
-    }
-    function onUp() {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-      document.body.style.userSelect = "";
-      document.body.style.cursor = "";
-    }
-    document.body.style.userSelect = "none";
-    document.body.style.cursor = "ew-resize";
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
+    };
+    const onEnd = (ev: PointerEvent) => {
+      try {
+        handle.releasePointerCapture(ev.pointerId);
+      } catch {}
+      handle.removeEventListener("pointermove", onMove);
+      handle.removeEventListener("pointerup", onEnd);
+      handle.removeEventListener("pointercancel", onEnd);
+      document.body.style.userSelect = prevUserSelect;
+      document.body.style.cursor = prevCursor;
+    };
+
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", onEnd);
+    handle.addEventListener("pointercancel", onEnd);
   }
 
   if (collapsed) {
@@ -99,15 +110,21 @@ export function AgentRail({
           </div>
         </button>
 
-        {/* Drag handle on the rail's left edge — drag to resize. */}
+        {/* Drag handle on the rail's left edge — drag to resize.
+            Wider hit-target (8px) than its visible mark so it's easy to grab,
+            and uses Pointer Events with capture so the drag follows the
+            cursor even when it leaves the handle. */}
         <div
-          onMouseDown={startResize}
+          onPointerDown={startResize}
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize Sage panel"
           title="Drag to resize"
-          className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize z-30 hover:bg-foresight/40 active:bg-foresight/60 transition-colors"
-        />
+          style={{ touchAction: "none" }}
+          className="absolute -left-1 top-0 bottom-0 w-3 cursor-ew-resize z-30 group flex items-center justify-center"
+        >
+          <span className="block w-0.5 h-12 rounded-full bg-brand-200 group-hover:bg-foresight transition-colors" />
+        </div>
 
         {/* Translucent liquid-glass sidebar surface, full height, flush right edge */}
         <div className="relative flex flex-col w-full h-full overflow-hidden border-l border-white/40 backdrop-blur-2xl backdrop-saturate-150 bg-white/40 shadow-[-8px_0_32px_rgba(11,59,92,0.08)]">

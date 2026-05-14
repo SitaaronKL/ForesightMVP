@@ -63,7 +63,7 @@ export function HelpHint({
               left: coords.left,
               width,
             }}
-            className="z-[1000] px-2.5 py-1.5 rounded-md bg-brand-900 text-white text-[11px] leading-relaxed shadow-lg pointer-events-none whitespace-normal"
+            className="z-[1000] px-3 py-2 rounded-xl text-[11px] leading-relaxed text-brand-950 whitespace-normal pointer-events-none bg-white/65 backdrop-blur-2xl backdrop-saturate-150 border border-white/60 shadow-[0_8px_32px_rgba(11,59,92,0.18),0_1px_0_rgba(255,255,255,0.8)_inset]"
           >
             {children}
           </span>,

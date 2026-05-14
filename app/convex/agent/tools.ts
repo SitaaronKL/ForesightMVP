@@ -14,6 +14,7 @@ export type AgentContext = {
   userId: Id<"users">;       // auth user id (matches agentThreads.userId)
   nurseId: Id<"users">;      // seeded nurse row id (matches patients.primaryNurseId)
   threadId: Id<"agentThreads">;
+  contextPatientId?: Id<"patients">; // set when the rail is open on a patient page
 };
 
 // ---------- READ TOOLS ----------

@@ -44,25 +44,25 @@ export function PatientPill({ patient: p }: { patient: any }) {
           <HelpHint width={260}>
             <div className="space-y-1">
               <div>
-                <span className="text-white/70">Risk score:</span>{" "}
+                <span className="text-brand-600 font-medium">Risk score:</span>{" "}
                 {Math.round(p.riskScore)} / 100
               </div>
               <div>
-                <span className="text-white/70">Tier:</span> {tierLabel}
+                <span className="text-brand-600 font-medium">Tier:</span> {tierLabel}
               </div>
               <div>
-                <span className="text-white/70">Program:</span> {programLabel}
+                <span className="text-brand-600 font-medium">Program:</span> {programLabel}
               </div>
               {conditions.length > 0 && (
                 <div>
-                  <span className="text-white/70">Conditions:</span>{" "}
+                  <span className="text-brand-600 font-medium">Conditions:</span>{" "}
                   {conditions.slice(0, 4).join(", ")}
                   {conditions.length > 4 ? "…" : ""}
                 </div>
               )}
               {p.urgencyReason && (
                 <div>
-                  <span className="text-white/70">Flagged:</span> {p.urgencyReason}
+                  <span className="text-brand-600 font-medium">Flagged:</span> {p.urgencyReason}
                 </div>
               )}
             </div>

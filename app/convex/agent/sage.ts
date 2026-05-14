@@ -13,8 +13,14 @@ if (process.env.OPENAI_API_KEY) {
 export const sage = new Agent<AgentContext>({
   name: "Sage",
   model: "gpt-4o",
-  instructions: ({ context }) => {
-    return `
+  instructions: (runContext) => {
+    const ctx = runContext.context as AgentContext | undefined;
+    const patientContextLine = ctx?.contextPatientId
+      ? `The nurse is currently viewing patient ${ctx.contextPatientId}. When they refer to "this patient", "them", "her", "him", or "the patient", use that patientId when calling tools.\n\n`
+      : "";
+    return (
+      patientContextLine +
+      `
 You are Sage, the operational assistant for a Chronic Care Management (CCM)
 and Advanced Primary Care Management (APCM) nurse. Your job is to make the
 nurse's day tractable: surface the right patient at the right moment, draft
@@ -40,7 +46,8 @@ Output style:
 
 You are not a medical advisor to the patient. You are an operational copilot
 for the nurse.
-    `.trim();
+      `.trim()
+    );
   },
   tools: allTools,
   inputGuardrails: [noDirectPatientContact],

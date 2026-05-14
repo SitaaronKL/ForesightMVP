@@ -37,13 +37,11 @@ export const runAgentTurn = action({
 
     const session = new ConvexSession(ctx, args.threadId, userId);
 
-    // Prepend a context hint if the user is viewing a patient page
-    const inputWithContext = args.contextPatientId
-      ? `(Context: currently viewing patient ${args.contextPatientId}. If the user refers to "this patient" or "them", use that id.)\n\n${args.userInput}`
-      : args.userInput;
-
     try {
-      const result = await run(sage, inputWithContext, {
+      // Patient context goes via runContext.context, not the user input,
+      // so it ends up in the agent's instructions instead of as a visible
+      // user bubble.
+      const result = await run(sage, args.userInput, {
         session,
         maxTurns: 4,
         context: {
@@ -51,6 +49,7 @@ export const runAgentTurn = action({
           userId,
           nurseId,
           threadId: args.threadId,
+          contextPatientId: args.contextPatientId,
         },
       });
 

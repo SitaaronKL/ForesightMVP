@@ -61,7 +61,7 @@ export default function FullPanelPage() {
         <div className="mt-3 text-center">
           <button
             onClick={() => panel.loadMore(25)}
-            className="text-xs px-4 py-1.5 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-700"
+            className="text-xs px-4 py-1.5 rounded-full bg-foresight hover:bg-foresight-dark text-white transition shadow-sm"
           >
             Load more
           </button>

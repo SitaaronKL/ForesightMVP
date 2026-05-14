@@ -72,16 +72,15 @@ export const Thread: FC = () => {
 
           <div
             data-slot="aui_message-group"
-            className="mb-10 flex flex-col gap-y-3 empty:hidden"
+            className="mb-10 flex flex-col gap-y-3"
           >
             <ThreadPrimitive.Messages>
               {() => <ThreadMessage />}
             </ThreadPrimitive.Messages>
+            <AuiIf condition={(s) => s.thread.isRunning}>
+              <SageThinking />
+            </AuiIf>
           </div>
-
-          <AuiIf condition={(s) => s.thread.isRunning}>
-            <SageThinking />
-          </AuiIf>
 
           <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mt-auto flex flex-col gap-4 overflow-visible rounded-t-(--composer-radius) bg-background pb-4 md:pb-6">
             <ThreadScrollToBottom />
