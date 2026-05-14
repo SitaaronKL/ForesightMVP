@@ -8,6 +8,7 @@ import { HelpHint } from "../../components/HelpHint";
 import { Spinner } from "../../components/Spinner";
 import { SunIcon, type SunIconHandle } from "../../components/SunIcon";
 import { MoonIcon, type MoonIconHandle } from "../../components/MoonIcon";
+import { SyringeIcon, type SyringeIconHandle } from "../../components/SyringeIcon";
 
 export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
@@ -63,22 +64,32 @@ function StatsBento({
   kpis: any;
   queue: any[] | undefined;
 }) {
+  const syringeRef = useRef<SyringeIconHandle>(null);
   return (
     <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
       <header
-        className="px-6 pt-5 pb-4"
+        className="px-6 pt-5 pb-4 flex items-center justify-between gap-4"
         style={{
           backgroundImage: "url(/image-mesh-gradient.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
+        onMouseEnter={() => syringeRef.current?.startAnimation()}
+        onMouseLeave={() => syringeRef.current?.stopAnimation()}
       >
-        <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
-          Today&apos;s Queue
-        </h2>
-        <p className="mt-0.5 text-xs text-brand-950">
-          {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
-        </p>
+        <div className="min-w-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
+            Today&apos;s Queue
+          </h2>
+          <p className="mt-0.5 text-xs text-brand-950">
+            {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
+          </p>
+        </div>
+        <SyringeIcon
+          ref={syringeRef}
+          size={56}
+          className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
+        />
       </header>
 
       {/* 2 × 3 stats grid — fills the square evenly */}
@@ -287,7 +298,7 @@ function BriefingBento({
         </div>
         <div className="flex items-center gap-2">
           {current?.date && (
-            <span className="text-[11px] text-brand-800">{current.date}</span>
+            <span className="text-[11px] text-brand-950">{current.date}</span>
           )}
           {/* Sun / Moon toggle. Only shown when both exist OR the inactive one can be generated. */}
           <div className="flex items-center gap-0.5 bg-white/60 backdrop-blur-sm rounded-full p-0.5">
