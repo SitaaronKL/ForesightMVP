@@ -42,7 +42,7 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
   const me = useMe();
   const { collapsed, width } = useAgentRail();
   const role = (me as any)?.role;
-  const needsSeed = me !== undefined && role !== "nurse" && role !== "admin";
+  const needsSeed = me !== undefined && role !== "nurse";
   const railOpen = !needsSeed && !collapsed;
 
   return (

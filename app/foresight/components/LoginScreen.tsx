@@ -1,6 +1,8 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useAction } from "convex/react";
+import { api } from "@convex/_generated/api";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +17,28 @@ export function LoginScreen() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const resetDemo = useAction(api.seed.resetDemo);
+
+  async function handleResetDemo() {
+    if (
+      !confirm(
+        "Reset the demo? This wipes all patients, auth sessions, and reseeds the panel from scratch.",
+      )
+    )
+      return;
+    setError(null);
+    setInfo(null);
+    setResetting(true);
+    try {
+      await resetDemo({});
+      setInfo("Demo reset. You can sign in now.");
+    } catch (err: any) {
+      setError(err?.message ?? "Reset failed.");
+    } finally {
+      setResetting(false);
+    }
+  }
 
   function describeError(err: any): string {
     const raw = String(err?.message ?? err ?? "");
@@ -175,8 +199,16 @@ export function LoginScreen() {
           <strong className="text-brand-700">Demo:</strong> click Sign in. No
           account? It&apos;s auto-created.
           <div className="mt-1 text-brand-400 truncate">
-            sarah@foresight.demo · admin@foresight.demo
+            sarah@foresight.demo
           </div>
+          <button
+            type="button"
+            onClick={handleResetDemo}
+            disabled={resetting || pending}
+            className="mt-3 text-[11px] text-brand-600 hover:text-red-warning underline-offset-2 hover:underline disabled:opacity-50"
+          >
+            {resetting ? "Resetting demo…" : "Reset demo data (clears auth + patients)"}
+          </button>
         </div>
       </div>
     </div>

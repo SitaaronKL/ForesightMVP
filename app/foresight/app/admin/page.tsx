@@ -118,7 +118,7 @@ function Admin() {
 
   async function handleSetRole(
     userId: Id<"users">,
-    role: "nurse" | "admin" | "patient",
+    role: "nurse" | "patient",
     label: string,
   ) {
     await withSpinner(`Set ${label} role → ${role}`, () =>
@@ -324,7 +324,7 @@ function Admin() {
                           onChange={(e) =>
                             handleSetRole(
                               u._id,
-                              e.target.value as "nurse" | "admin" | "patient",
+                              e.target.value as "nurse" | "patient",
                               label,
                             )
                           }
@@ -336,7 +336,6 @@ function Admin() {
                             change…
                           </option>
                           <option value="nurse">→ Nurse</option>
-                          <option value="admin">→ Admin</option>
                           <option value="patient">→ Patient</option>
                         </select>
                       </div>
