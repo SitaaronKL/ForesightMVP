@@ -35,46 +35,50 @@ export const todaysBriefing = query({
     const today = new Date().toISOString().slice(0, 10);
     const type = args.type ?? "morning";
 
-    // First, the exact match: briefing saved under the calling user's id.
-    const direct = await ctx.db
-      .query("agentBriefings")
-      .withIndex("by_user_and_date", (q) =>
-        q
-          .eq("userId", userId)
-          .eq("date", today)
-          .eq("type", type as any),
-      )
-      .first();
-    if (direct) return direct;
-
-    // Fall back: if the user shares an email with another user row (e.g. an
-    // orphan auth row + a seeded role row both pointing at
-    // sarah@foresight.demo), check briefings saved against any of them.
-    // This makes the dashboard resilient to the duplicate-user case we hit
-    // during demos without forcing a manual cleanup first.
+    // Build the full set of candidate user ids: the caller's auth row + any
+    // other user row sharing the same email (the seeded "Sarah Chen, RN"
+    // row in the demo). Then read all briefings saved under any of them for
+    // today and pick the freshest one with NON-EMPTY panel data. This way
+    // a stale "panel zero" briefing left over from before the auth-bridge
+    // fix doesn't shadow a freshly-generated one with real data.
     const me = await ctx.db.get(userId);
     const email = (me as any)?.email;
-    if (!email) return null;
+    const candidateIds: any[] = [userId];
+    if (typeof email === "string" && email.trim()) {
+      const sameEmail = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", email.toLowerCase().trim()))
+        .collect();
+      for (const u of sameEmail) {
+        if (!candidateIds.includes(u._id)) candidateIds.push(u._id);
+      }
+    }
 
-    const sameEmail = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", email))
-      .collect();
-
-    for (const u of sameEmail) {
-      if (u._id === userId) continue;
-      const found = await ctx.db
+    const found: any[] = [];
+    for (const uid of candidateIds) {
+      const row = await ctx.db
         .query("agentBriefings")
         .withIndex("by_user_and_date", (q) =>
           q
-            .eq("userId", u._id)
+            .eq("userId", uid as any)
             .eq("date", today)
             .eq("type", type as any),
         )
         .first();
-      if (found) return found;
+      if (row) found.push(row);
     }
-    return null;
+    if (found.length === 0) return null;
+
+    // Prefer briefings whose content has a non-zero panel size — that's the
+    // signal of a "real" generation vs the empty-auth-row case.
+    const real = found.find((b) => {
+      const c: any = b.content;
+      return (c?.kpis?.panelSize ?? 0) > 0 || (c?.priorityQueue?.length ?? 0) > 0;
+    });
+    if (real) return real;
+
+    // Otherwise return the most recently created one.
+    return found.sort((a, b) => b._creationTime - a._creationTime)[0];
   },
 });
 
