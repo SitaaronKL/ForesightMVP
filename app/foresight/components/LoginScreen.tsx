@@ -5,8 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import LiquidGlass from "liquid-glass-react";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function LoginScreen() {
   const { signIn } = useAuthActions();
@@ -31,7 +30,10 @@ export function LoginScreen() {
     if (raw.includes("AlreadyExists") || raw.includes("already exists")) {
       return "Account already exists. Switch to Sign in.";
     }
-    return raw.replace(/^\[CONVEX[^\]]+\]\s*/, "").slice(0, 240) || "Authentication failed.";
+    return (
+      raw.replace(/^\[CONVEX[^\]]+\]\s*/, "").slice(0, 240) ||
+      "Authentication failed."
+    );
   }
 
   async function attempt(currentStep: "signIn" | "signUp"): Promise<void> {
@@ -47,9 +49,19 @@ export function LoginScreen() {
     setError(null);
     setInfo(null);
     setPending(true);
+    // Surface a clear error if Convex auth hangs for more than 15s so the
+    // button doesn't appear silently stuck.
+    const timeout = setTimeout(() => {
+      setError(
+        "Sign-in is taking longer than expected. Check your network and try again.",
+      );
+      setPending(false);
+    }, 15000);
+
     try {
       await attempt(step);
     } catch (err: any) {
+      console.error("[LoginScreen] sign-in failed:", err);
       const raw = String(err?.message ?? "");
       if (step === "signIn" && raw.includes("InvalidAccountId")) {
         try {
@@ -58,136 +70,114 @@ export function LoginScreen() {
           setInfo("Account created. You're signed in.");
           return;
         } catch (err2: any) {
+          console.error("[LoginScreen] auto sign-up failed:", err2);
           setError(describeError(err2));
           return;
         }
       }
       setError(describeError(err));
     } finally {
+      clearTimeout(timeout);
       setPending(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background mesh */}
-      <div className="absolute inset-0 -z-10 gradient-mesh opacity-90" />
-      <div
-        className="absolute inset-0 -z-10 opacity-40"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 30% 20%, rgba(128,229,216,0.4) 0%, transparent 40%), radial-gradient(circle at 70% 80%, rgba(94,142,183,0.5) 0%, transparent 50%)",
-        }}
-      />
+    <div
+      className="fixed inset-0 overflow-hidden flex items-center justify-center p-6"
+      style={{
+        backgroundImage: "url(/image-mesh-gradient.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
 
-      <div className="max-w-md w-full">
-        <LiquidGlass
-          displacementScale={50}
-          blurAmount={0.04}
-          saturation={140}
-          aberrationIntensity={2}
-          elasticity={0.15}
-          cornerRadius={28}
-          padding="0"
-          mode="standard"
-        >
-          <div className="p-10 w-full">
-            <div className="mb-8 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-white tracking-tight">
-                  Foresight
-                </h1>
-                <p className="text-xs text-white/70">
-                  Care operations
-                </p>
-              </div>
-            </div>
+      {/* White sign-in card */}
+      <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-white/60 p-8">
+        <div className="mb-7">
+          <h1 className="text-4xl font-semibold text-brand-950 tracking-tight">
+            ForesightHealth
+          </h1>
+        </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="email" className="text-xs text-white/80">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="mt-1 bg-white/15 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-teal-300"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="password" className="text-xs text-white/80">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete={step === "signUp" ? "new-password" : "current-password"}
-                  className="mt-1 bg-white/15 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-teal-300"
-                />
-              </div>
-
-              {info && (
-                <div className="text-xs text-teal-200 bg-teal-500/15 border border-teal-300/30 rounded-md px-3 py-2">
-                  {info}
-                </div>
-              )}
-              {error && (
-                <div className="text-xs text-red-200 bg-red-500/15 border border-red-300/30 rounded-md px-3 py-2">
-                  {error}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={pending}
-                className="w-full bg-white text-brand-950 hover:bg-white/90 font-medium"
-              >
-                {pending
-                  ? "…"
-                  : step === "signIn"
-                    ? "Sign in (or create account)"
-                    : "Create account"}
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setStep(step === "signIn" ? "signUp" : "signIn");
-                  setError(null);
-                  setInfo(null);
-                }}
-                className="w-full text-xs text-white/70 hover:text-white"
-              >
-                {step === "signIn"
-                  ? "Need an account? Create one explicitly."
-                  : "Have an account? Sign in."}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-6 border-t border-white/15 text-xs text-white/60 leading-relaxed">
-              <strong className="text-white/85">Demo</strong>
-              <br />
-              Click Sign in. No account? It's auto-created.
-              <br />
-              <span className="text-white/40">
-                sarah@foresight.demo · admin@foresight.demo
-              </span>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="email" className="text-xs text-brand-700 font-medium">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="mt-1.5 border-brand-100 focus-visible:ring-foresight"
+            />
           </div>
-        </LiquidGlass>
+
+          <div>
+            <Label htmlFor="password" className="text-xs text-brand-700 font-medium">
+              Password
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete={step === "signUp" ? "new-password" : "current-password"}
+              className="mt-1.5 border-brand-100 focus-visible:ring-foresight"
+            />
+          </div>
+
+          {info && (
+            <div className="text-xs text-foresight bg-foresight/10 border border-foresight/20 rounded-md px-3 py-2">
+              {info}
+            </div>
+          )}
+          {error && (
+            <div className="text-xs text-red-warning bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {error}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-full bg-foresight hover:bg-foresight-dark text-white font-medium shadow-sm h-10"
+          >
+            {pending
+              ? "…"
+              : step === "signIn"
+                ? "Sign in"
+                : "Create account"}
+            <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setStep(step === "signIn" ? "signUp" : "signIn");
+              setError(null);
+              setInfo(null);
+            }}
+            className="w-full text-xs text-brand-600 hover:text-foresight transition-colors"
+          >
+            {step === "signIn"
+              ? "Need an account? Create one."
+              : "Have an account? Sign in."}
+          </button>
+        </form>
+
+        <div className="mt-6 pt-5 border-t border-brand-100 text-[11px] text-brand-500 leading-relaxed">
+          <strong className="text-brand-700">Demo:</strong> click Sign in. No
+          account? It&apos;s auto-created.
+          <div className="mt-1 text-brand-400 truncate">
+            sarah@foresight.demo · admin@foresight.demo
+          </div>
+        </div>
       </div>
     </div>
   );

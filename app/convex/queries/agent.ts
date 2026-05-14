@@ -34,7 +34,9 @@ export const todaysBriefing = query({
     const userId = await requireUserId(ctx);
     const today = new Date().toISOString().slice(0, 10);
     const type = args.type ?? "morning";
-    return await ctx.db
+
+    // First, the exact match: briefing saved under the calling user's id.
+    const direct = await ctx.db
       .query("agentBriefings")
       .withIndex("by_user_and_date", (q) =>
         q
@@ -43,6 +45,36 @@ export const todaysBriefing = query({
           .eq("type", type as any),
       )
       .first();
+    if (direct) return direct;
+
+    // Fall back: if the user shares an email with another user row (e.g. an
+    // orphan auth row + a seeded role row both pointing at
+    // sarah@foresight.demo), check briefings saved against any of them.
+    // This makes the dashboard resilient to the duplicate-user case we hit
+    // during demos without forcing a manual cleanup first.
+    const me = await ctx.db.get(userId);
+    const email = (me as any)?.email;
+    if (!email) return null;
+
+    const sameEmail = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .collect();
+
+    for (const u of sameEmail) {
+      if (u._id === userId) continue;
+      const found = await ctx.db
+        .query("agentBriefings")
+        .withIndex("by_user_and_date", (q) =>
+          q
+            .eq("userId", u._id)
+            .eq("date", today)
+            .eq("type", type as any),
+        )
+        .first();
+      if (found) return found;
+    }
+    return null;
   },
 });
 

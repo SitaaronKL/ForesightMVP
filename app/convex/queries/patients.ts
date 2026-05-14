@@ -61,6 +61,31 @@ export const encountersList = query({
   },
 });
 
+/**
+ * Full detail for a single encounter: the encounter, its SOAP note (if any),
+ * and the transcript (if any). Used by the click-into-encounter modal.
+ */
+export const encounterDetail = query({
+  args: { encounterId: v.id("encounters") },
+  handler: async (ctx, { encounterId }) => {
+    const encounter = await ctx.db.get(encounterId);
+    if (!encounter) return null;
+    await requirePatientAccess(ctx, encounter.patientId);
+
+    const soapNote = await ctx.db
+      .query("soapNotes")
+      .withIndex("by_encounter", (q) => q.eq("encounterId", encounterId))
+      .first();
+
+    const transcript = await ctx.db
+      .query("transcripts")
+      .withIndex("by_encounter", (q) => q.eq("encounterId", encounterId))
+      .first();
+
+    return { encounter, soapNote, transcript };
+  },
+});
+
 export const documents = query({
   args: { patientId: v.id("patients") },
   handler: async (ctx, { patientId }) => {

@@ -89,15 +89,6 @@ export const seed = action({
       status: "active",
     });
 
-    // Create admin
-    const adminId: Id<"users"> = await ctx.runMutation(internal.seed._internalCreateUser, {
-      name: "Demo Admin",
-      email: "admin@foresight.demo",
-      role: "admin",
-      practiceId,
-      status: "active",
-    });
-
     // Maria Rodriguez: the showcase patient
     const mariaId: Id<"patients"> = await ctx.runMutation(internal.seed._internalCreatePatient, {
       medicareId: makeMedicareId(),
@@ -240,8 +231,8 @@ export const seed = action({
 import { internalMutation, internalQuery } from "./_generated/server";
 
 export const _internalWipe = internalMutation({
-  args: {},
-  handler: async (ctx) => {
+  args: { fullAuthReset: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
     const tables = [
       "patients","carePlans","carePlanVersions","encounters","soapNotes",
       "transcripts","agentThreads","agentMessages","agentBriefings","notifications",
@@ -252,13 +243,48 @@ export const _internalWipe = internalMutation({
       const rows = await ctx.db.query(t as any).collect();
       for (const r of rows) await ctx.db.delete(r._id);
     }
-    // Clean app-overlay user rows (leave auth-managed rows so login still works)
-    const users = await ctx.db.query("users").collect();
-    for (const u of users) {
-      if (u.role === "nurse" || u.role === "patient" || u.role === "admin") {
-        await ctx.db.delete(u._id);
+
+    if (args.fullAuthReset) {
+      // Nuclear: clear every user row AND the auth-provider tables so a
+      // stuck demo session can recover. Run only via the public resetDemo
+      // action below.
+      const authTables = [
+        "authAccounts","authSessions","authRefreshTokens","authVerifiers",
+        "authVerificationCodes","authRateLimits",
+      ] as const;
+      for (const t of authTables) {
+        try {
+          const rows = await ctx.db.query(t as any).collect();
+          for (const r of rows) await ctx.db.delete(r._id);
+        } catch {
+          // Table may not exist on this Convex Auth version; ignore.
+        }
+      }
+      const users = await ctx.db.query("users").collect();
+      for (const u of users) await ctx.db.delete(u._id);
+    } else {
+      // Default: drop only role-bearing seed rows; leave auth-provider users.
+      const users = await ctx.db.query("users").collect();
+      for (const u of users) {
+        if (u.role === "nurse" || u.role === "patient" || u.role === "admin") {
+          await ctx.db.delete(u._id);
+        }
       }
     }
+  },
+});
+
+/**
+ * Public demo reset. Wipes everything (including the auth-provider tables),
+ * then reseeds via the main `seed` action. Intended for the "Reset demo"
+ * button on the login screen so a stuck session can recover without auth.
+ */
+export const resetDemo = action({
+  args: {},
+  handler: async (ctx): Promise<{ ok: boolean }> => {
+    await ctx.runMutation(internal.seed._internalWipe, { fullAuthReset: true });
+    await ctx.runAction(api.seed.seed, { reset: false });
+    return { ok: true };
   },
 });
 

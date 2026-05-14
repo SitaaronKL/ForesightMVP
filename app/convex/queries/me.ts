@@ -1,4 +1,5 @@
-import { query } from "../_generated/server";
+import { v } from "convex/values";
+import { internalQuery, query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
@@ -28,5 +29,18 @@ export const current = query({
       }
     }
     return user;
+  },
+});
+
+/**
+ * Fetch a user row by id, no auth check.
+ * Used by node actions that need to read a user record after resolving the
+ * caller id via `getAuthUserId` directly (since `ctx.runQuery` in node
+ * actions doesn't always carry the caller's auth context).
+ */
+export const _byId = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db.get(userId);
   },
 });

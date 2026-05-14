@@ -79,7 +79,7 @@ export function LiquidGlass({
       el.style.isolation = "isolate";
       el.style.background = "transparent";
       el.style.border = "1px solid rgba(255, 255, 255, 0.5)";
-      el.style.boxShadow = "0 8px 32px rgba(11, 59, 92, 0.08)";
+      el.style.boxShadow = "0 8px 32px rgba(28, 36, 79, 0.08)";
 
       const canvas: HTMLCanvasElement | null = instance.canvas;
       if (canvas) {

@@ -5,27 +5,28 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Brand */
-  --color-brand-50: #f3f8fc;
-  --color-brand-100: #e3edf5;
-  --color-brand-200: #c2d6e7;
-  --color-brand-300: #94b6d2;
-  --color-brand-400: #5e8eb7;
-  --color-brand-500: #3c6f9d;
-  --color-brand-600: #2b5780;
-  --color-brand-700: #234566;
-  --color-brand-800: #1a3550;
-  --color-brand-900: #283B9E;
-  --color-brand-950: #0a1224;
+  /* Brand — Smalt palette (Foresight official blue family) */
+  --color-brand-50: #F0F5FE;
+  --color-brand-100: #DEE8FB;
+  --color-brand-200: #C4D8F9;
+  --color-brand-300: #9BBFF5;
+  --color-brand-400: #6C9DEE;
+  --color-brand-500: #4A7AE7;
+  --color-brand-600: #355DDB;
+  --color-brand-700: #2C4AC9;
+  --color-brand-800: #283B9E;
+  --color-brand-900: #273881;
+  --color-brand-950: #1C244F;
 
   --color-teal-300: #80e5d8;
   --color-teal-500: #2fc1ad;
   --color-teal-700: #15756a;
 
-  /* Foresight official blue — primary brand accent for buttons and highlights */
+  /* Foresight official blue — primary brand accent for buttons and highlights.
+     Mapped to the Smalt palette so all UI references stay consistent. */
   --color-foresight: #283B9E;
-  --color-foresight-light: #4A5DC4;
-  --color-foresight-dark: #1c2b76;
+  --color-foresight-light: #6C9DEE;
+  --color-foresight-dark: #273881;
 
   --color-amber-warning: #f0a300;
   --color-red-warning: #de3a3a;
@@ -33,8 +34,8 @@
 
   --color-surface: #f8fbfd;
 
-  --shadow-glass: 0 8px 32px rgba(11, 59, 92, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-  --shadow-glow: 0 0 24px rgba(60, 111, 157, 0.25);
+  --shadow-glass: 0 8px 32px rgba(28, 36, 79, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  --shadow-glow: 0 0 24px rgba(108, 157, 238, 0.25);
 
   --radius-glass: 16px;
 
@@ -43,21 +44,21 @@
 
 /* ---- shadcn/ui tokens mapped to brand palette ---- */
 :root {
-  --background: #f4f4f5;
-  --foreground: #0a1224;
+  --background: #F0F5FE;
+  --foreground: #1C244F;
 
   --card: rgba(255, 255, 255, 0.9);
-  --card-foreground: #0a1224;
+  --card-foreground: #1C244F;
   --popover: #ffffff;
-  --popover-foreground: #0a1224;
+  --popover-foreground: #1C244F;
 
   --primary: #283B9E;
   --primary-foreground: #ffffff;
-  --secondary: #e3edf5;
+  --secondary: #DEE8FB;
   --secondary-foreground: #283B9E;
 
-  --muted: #f3f8fc;
-  --muted-foreground: #2b5780;
+  --muted: #F0F5FE;
+  --muted-foreground: #355DDB;
 
   --accent: #2fc1ad;
   --accent-foreground: #ffffff;
@@ -65,42 +66,42 @@
   --destructive: #de3a3a;
   --destructive-foreground: #ffffff;
 
-  --border: #e3edf5;
-  --input: #e3edf5;
-  --ring: #5e8eb7;
+  --border: #DEE8FB;
+  --input: #DEE8FB;
+  --ring: #6C9DEE;
 
   --radius: 0.625rem;
 
   --sidebar: #ffffff;
-  --sidebar-foreground: #0a1224;
+  --sidebar-foreground: #1C244F;
   --sidebar-primary: #283B9E;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3f8fc;
+  --sidebar-accent: #F0F5FE;
   --sidebar-accent-foreground: #283B9E;
-  --sidebar-border: #e3edf5;
-  --sidebar-ring: #5e8eb7;
+  --sidebar-border: #DEE8FB;
+  --sidebar-ring: #6C9DEE;
 }
 
 .dark {
-  --background: #0a1224;
-  --foreground: #f3f8fc;
-  --card: rgba(11, 59, 92, 0.6);
-  --card-foreground: #f3f8fc;
+  --background: #1C244F;
+  --foreground: #F0F5FE;
+  --card: rgba(40, 59, 158, 0.6);
+  --card-foreground: #F0F5FE;
   --popover: #283B9E;
-  --popover-foreground: #f3f8fc;
-  --primary: #94b6d2;
-  --primary-foreground: #0a1224;
-  --secondary: #1a3550;
-  --secondary-foreground: #f3f8fc;
-  --muted: #1a3550;
-  --muted-foreground: #94b6d2;
+  --popover-foreground: #F0F5FE;
+  --primary: #9BBFF5;
+  --primary-foreground: #1C244F;
+  --secondary: #273881;
+  --secondary-foreground: #F0F5FE;
+  --muted: #273881;
+  --muted-foreground: #9BBFF5;
   --accent: #2fc1ad;
   --accent-foreground: #ffffff;
   --destructive: #de3a3a;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.15);
-  --ring: #5e8eb7;
+  --ring: #6C9DEE;
 }
 
 @theme inline {
@@ -161,17 +162,17 @@ body {
 }
 
 .glass-dark {
-  background: linear-gradient(140deg, rgba(11, 59, 92, 0.92), rgba(35, 69, 102, 0.88));
-  color: #f0f6fb;
+  background: linear-gradient(140deg, rgba(40, 59, 158, 0.92), rgba(44, 74, 201, 0.88));
+  color: #F0F5FE;
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(11, 59, 92, 0.18);
+  box-shadow: 0 8px 32px rgba(28, 36, 79, 0.18);
   border-radius: var(--radius-glass);
 }
 
 .gradient-mesh {
-  background: linear-gradient(135deg, #283B9E 0%, #234566 40%, #2fc1ad 100%);
+  background: linear-gradient(135deg, #1C244F 0%, #283B9E 45%, #2fc1ad 100%);
 }
 
 .shadow-glow {

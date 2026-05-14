@@ -3,10 +3,13 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
+import { useState } from "react";
 import { TopicChipList } from "../TopicChip";
+import { EncounterDetailModal } from "./EncounterDetailModal";
 
 export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
   const overview = useQuery(api.queries.patients.overview, { patientId });
+  const [openId, setOpenId] = useState<Id<"encounters"> | null>(null);
   if (!overview) return null;
 
   const fmt = (t: number) => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -48,7 +51,17 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
             {overview.recentEncounters.slice(0, 6).map((e: any) => (
               <li
                 key={e._id}
-                className="flex items-center justify-between text-sm py-1.5 border-b border-brand-50 last:border-0"
+                onClick={() => setOpenId(e._id)}
+                onKeyDown={(ev) => {
+                  if (ev.key === "Enter" || ev.key === " ") {
+                    ev.preventDefault();
+                    setOpenId(e._id);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open encounter from ${fmt(e.startedAt)}`}
+                className="flex items-center justify-between text-sm py-1.5 px-1 -mx-1 rounded border-b border-brand-50 last:border-0 cursor-pointer hover:bg-foresight/5 transition-colors"
               >
                 <div>
                   <div className="font-medium text-brand-950">{fmt(e.startedAt)}</div>
@@ -56,7 +69,9 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
                     {e.type.replace("_", " ")} · {Math.round(e.durationSeconds / 60)} min · {e.status}
                   </div>
                 </div>
-                <TopicChipList topics={e.topicTags} />
+                <span onClick={(ev) => ev.stopPropagation()}>
+                  <TopicChipList topics={e.topicTags} />
+                </span>
               </li>
             ))}
           </ul>
@@ -122,6 +137,11 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
           </div>
         </div>
       </Card>
+
+      <EncounterDetailModal
+        encounterId={openId}
+        onClose={() => setOpenId(null)}
+      />
     </div>
   );
 }

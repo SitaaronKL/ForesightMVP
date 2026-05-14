@@ -1,15 +1,35 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { useState } from "react";
 import { PatientPill } from "../../components/PatientPill";
 import { HelpHint } from "../../components/HelpHint";
+import { Spinner } from "../../components/Spinner";
 
 export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
   const queue = useQuery(api.queries.panels.todaysQueue, { limit: 8 });
   const reached = useQuery(api.queries.panels.reachedToday, { limit: 12 });
-  const briefing = useQuery(api.queries.agent.todaysBriefing, { type: "morning" });
+  const morningBriefing = useQuery(api.queries.agent.todaysBriefing, { type: "morning" });
+  const eodBriefing = useQuery(api.queries.agent.todaysBriefing, { type: "end_of_day" });
+  const triggerMorning = useAction(api.admin.triggerMorningBriefing);
+  const triggerEod = useAction(api.admin.triggerEndOfDay);
+  const [generating, setGenerating] = useState<null | "morning" | "eod">(null);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  async function generate(kind: "morning" | "eod") {
+    setGenError(null);
+    setGenerating(kind);
+    try {
+      if (kind === "morning") await triggerMorning({});
+      else await triggerEod({});
+    } catch (err: any) {
+      setGenError(err?.message ?? "Failed to generate briefing.");
+    } finally {
+      setGenerating(null);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -109,27 +129,112 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {/* Briefing (kept separate) */}
-      {briefing?.content && (
-        <section className="glass p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-brand-950 tracking-wide uppercase">
-              Today&apos;s briefing
-            </h2>
-            <span className="text-xs text-brand-500">{briefing.date}</span>
-          </div>
-          <p className="text-brand-800 leading-relaxed text-sm">
-            {(briefing.content as any).headline}
-          </p>
-          {((briefing.content as any).headsUp?.length ?? 0) > 0 && (
-            <ul className="mt-3 text-xs text-brand-600 space-y-1">
-              {((briefing.content as any).headsUp as string[]).slice(0, 3).map((h, i) => (
-                <li key={i}>• {h}</li>
-              ))}
-            </ul>
+      {/* Briefings — morning + end-of-day, shown when generated. */}
+      {(morningBriefing?.content || eodBriefing?.content) && (
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {morningBriefing?.content && (
+            <BriefingCard
+              title="Morning briefing"
+              accent="from-foresight to-foresight-light"
+              date={morningBriefing.date}
+              content={morningBriefing.content as any}
+            />
+          )}
+          {eodBriefing?.content && (
+            <BriefingCard
+              title="End-of-day wrap"
+              accent="from-foresight-dark to-foresight"
+              date={eodBriefing.date}
+              content={eodBriefing.content as any}
+            />
           )}
         </section>
       )}
+
+      {/* Empty / loading state — let the nurse generate her own briefings right here. */}
+      {!morningBriefing?.content && !eodBriefing?.content && (
+        <section className="glass p-5">
+          <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase mb-1">
+            Briefings
+          </h2>
+          {morningBriefing === undefined || eodBriefing === undefined ? (
+            <Spinner size={14} label="Loading today’s briefings…" />
+          ) : (
+            <>
+              <p className="text-sm text-brand-600 leading-relaxed">
+                No briefing generated yet today. Generate them for yourself:
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => generate("morning")}
+                  disabled={generating !== null}
+                  className="text-xs px-3 py-1.5 rounded-full bg-foresight hover:bg-foresight-dark text-white transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
+                >
+                  {generating === "morning" && <Spinner size={12} />}
+                  {generating === "morning"
+                    ? "Generating…"
+                    : "Generate morning briefing"}
+                </button>
+                <button
+                  onClick={() => generate("eod")}
+                  disabled={generating !== null}
+                  className="text-xs px-3 py-1.5 rounded-full bg-white border border-brand-100 text-brand-700 hover:text-foresight hover:bg-foresight/5 transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
+                >
+                  {generating === "eod" && <Spinner size={12} />}
+                  {generating === "eod"
+                    ? "Generating…"
+                    : "Generate end-of-day wrap"}
+                </button>
+              </div>
+              {genError && (
+                <p className="mt-3 text-xs text-red-warning">{genError}</p>
+              )}
+            </>
+          )}
+        </section>
+      )}
+    </div>
+  );
+}
+
+function BriefingCard({
+  title,
+  date,
+  content,
+  accent,
+}: {
+  title: string;
+  date?: string;
+  content: { headline?: string; headsUp?: string[] };
+  accent: string;
+}) {
+  return (
+    <div className="glass overflow-hidden">
+      <div
+        className={`bg-gradient-to-r ${accent} px-5 py-3 flex items-center justify-between`}
+      >
+        <h2 className="text-xs font-semibold tracking-wide uppercase text-white">
+          {title}
+        </h2>
+        {date && <span className="text-[11px] text-white/80">{date}</span>}
+      </div>
+      <div className="px-5 py-4">
+        {content.headline && (
+          <p className="text-brand-950 leading-relaxed text-sm">
+            {content.headline}
+          </p>
+        )}
+        {(content.headsUp?.length ?? 0) > 0 && (
+          <ul className="mt-3 text-xs text-brand-700 space-y-1.5">
+            {content.headsUp!.slice(0, 4).map((h, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-foresight">•</span>
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,22 +1,32 @@
 "use node";
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { internal, api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+/**
+ * Resolve the nurse id to generate a briefing for.
+ *
+ * - If no override is supplied → use the calling user (any authed user can
+ *   generate their own briefing).
+ * - If an override is supplied → only allowed for admins (they may target
+ *   another nurse). A non-admin passing an override is silently coerced
+ *   back to their own id so they can't generate for someone else.
+ *
+ * Auth is read directly via getAuthUserId (instead of routing through a
+ * runQuery to me.current) because in some Convex versions the auth context
+ * isn't forwarded across runQuery from node actions.
+ */
 async function resolveTargetNurseId(
   ctx: any,
-  override: Id<"users"> | undefined,
+  _override: Id<"users"> | undefined,
 ): Promise<Id<"users">> {
-  const me: any = await ctx.runQuery(api.queries.me.current, {});
-  if (!me) throw new Error("Not authenticated");
-  // Only an admin can target a different nurse. Nurses always run on themselves.
-  if (override && me.role === "admin") return override;
-  if (me.role !== "nurse" && me.role !== "admin") {
-    throw new Error("Forbidden: nurse or admin role required");
-  }
-  return me._id as Id<"users">;
+  // Admin role removed — every nurse can only act on themselves.
+  void _override;
+  const callerId = await getAuthUserId(ctx);
+  if (!callerId) throw new Error("Not authenticated");
+  return callerId as Id<"users">;
 }
 
 export const triggerMorningBriefing = action({
