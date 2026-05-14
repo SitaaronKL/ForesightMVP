@@ -1,23 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useAction } from "convex/react";
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
+import { Thread } from "@/components/assistant-ui/thread";
+import { SageProvider } from "./SageRuntime";
+import { SageActionTray } from "./SageActionTray";
 import { PlusIcon, type PlusIconHandle } from "./PlusIcon";
-import ReactMarkdown from "react-markdown";
 import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  ArrowUp,
-  X,
-  Wrench,
   Trash2,
-  MessageSquarePlus,
 } from "lucide-react";
+import { useRef } from "react";
 
 type View = "list" | "thread";
 
@@ -31,30 +29,12 @@ export function AgentRail({
   const [collapsed, setCollapsed] = useState(false);
   const [view, setView] = useState<View>("list");
   const [threadId, setThreadId] = useState<Id<"agentThreads"> | null>(null);
-  const [input, setInput] = useState("");
-  const [pending, setPending] = useState(false);
   const [reviewSoapId, setReviewSoapId] = useState<Id<"soapNotes"> | null>(null);
   const [reviewPatientId, setReviewPatientId] = useState<Id<"patients"> | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const threads = useQuery(api.queries.agent.myThreads, { limit: 50 });
-  const messages = useQuery(
-    api.queries.agent.messages,
-    threadId && view === "thread" ? { threadId } : ("skip" as any),
-  );
-
   const createThread = useMutation(api.mutations.agent.createThread);
-  const renameThreadIfDefault = useMutation(
-    api.mutations.agent.renameThreadIfDefault,
-  );
   const deleteThread = useMutation(api.mutations.agent.deleteThread);
-  const runAgentTurn = useAction(api.agent.runAgentTurn.runAgentTurn);
-
-  useEffect(() => {
-    if (scrollRef.current && view === "thread") {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages?.length, view]);
 
   async function startNewThread() {
     const id = await createThread({
@@ -73,49 +53,6 @@ export function AgentRail({
   function backToList() {
     setView("list");
     setThreadId(null);
-  }
-
-  async function handleSend() {
-    if (!input.trim()) return;
-
-    // Make sure we have a thread
-    let activeId = threadId;
-    let isFirst = false;
-    if (!activeId) {
-      activeId = await createThread({
-        title: contextPatientId ? "Patient session" : "New thread",
-        contextPatientId,
-      });
-      setThreadId(activeId);
-      setView("thread");
-      isFirst = true;
-    } else {
-      isFirst = (messages?.length ?? 0) === 0;
-    }
-
-    const userMessage = input;
-    setInput("");
-    setPending(true);
-
-    // If this is the first message, rename the thread from "New thread" → first user msg
-    if (isFirst) {
-      void renameThreadIfDefault({
-        threadId: activeId,
-        title: userMessage,
-      });
-    }
-
-    try {
-      await runAgentTurn({
-        threadId: activeId,
-        userInput: userMessage,
-        contextPatientId,
-      });
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      setPending(false);
-    }
   }
 
   async function handleDelete(id: Id<"agentThreads">) {
@@ -144,7 +81,7 @@ export function AgentRail({
 
   return (
     <>
-      <aside className="w-[340px] xl:w-[380px] flex-shrink-0 sticky top-0 self-start h-screen p-4 hidden lg:flex relative">
+      <aside className="w-[380px] xl:w-[420px] flex-shrink-0 sticky top-0 self-start h-screen p-4 hidden lg:flex relative">
         <button
           onClick={() => setCollapsed(true)}
           aria-label="Hide Sage"
@@ -174,34 +111,13 @@ export function AgentRail({
             />
           )}
 
-          {view === "thread" && (
-            <>
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                {(messages ?? []).length === 0 && (
-                  <div className="text-xs text-white/60 italic mt-8 text-center px-4">
-                    Sage is ready. Try: "show me overdue Level 3 patients" or "draft a SOAP for Maria's last call"
-                  </div>
-                )}
-                {messages?.map((m) => (
-                  <MessageBubble
-                    key={m._id}
-                    message={m}
-                    onOpenSoapReview={openSoapReview}
-                  />
-                ))}
-                {pending && (
-                  <div className="text-xs text-white/60 italic">Sage is thinking…</div>
-                )}
+          {view === "thread" && threadId && (
+            <SageProvider threadId={threadId} contextPatientId={contextPatientId}>
+              <SageActionTray threadId={threadId} onOpenSoapReview={openSoapReview} />
+              <div className="flex-1 min-h-0 overflow-hidden sage-thread">
+                <Thread />
               </div>
-
-              <Composer
-                input={input}
-                setInput={setInput}
-                onSend={handleSend}
-                pending={pending}
-                contextPatientId={contextPatientId}
-              />
-            </>
+            </SageProvider>
           )}
         </div>
       </aside>
@@ -232,7 +148,7 @@ function Header({
   onNewThread: () => void;
 }) {
   return (
-    <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-2">
+    <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-2 flex-shrink-0">
       <div className="flex items-center gap-2 min-w-0">
         {view === "list" ? (
           <>
@@ -255,36 +171,23 @@ function Header({
           </>
         )}
       </div>
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <NewThreadButton onClick={onNewThread} variant="compact" />
-      </div>
+      <NewThreadButton onClick={onNewThread} />
     </div>
   );
 }
 
-function NewThreadButton({
-  onClick,
-  variant,
-}: {
-  onClick: () => void;
-  variant: "compact" | "prominent";
-}) {
+function NewThreadButton({ onClick }: { onClick: () => void }) {
   const iconRef = useRef<PlusIconHandle>(null);
-  const sizeClass =
-    variant === "compact"
-      ? "text-[11px] px-2 py-1 gap-1"
-      : "text-sm px-4 py-2 gap-1.5";
-  const iconSize = variant === "compact" ? 12 : 14;
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onMouseLeave={() => iconRef.current?.stopAnimation()}
-      className={`inline-flex items-center rounded-full bg-teal-500 hover:bg-teal-700 text-white ${sizeClass}`}
+      className="inline-flex items-center text-[11px] px-2 py-1 gap-1 rounded-full bg-teal-500 hover:bg-teal-700 text-white"
       title="New chat"
     >
       New
-      <PlusIcon ref={iconRef} size={iconSize} className="flex items-center" />
+      <PlusIcon ref={iconRef} size={12} className="flex items-center" />
     </button>
   );
 }
@@ -305,11 +208,11 @@ function ThreadList({
       {threads.length === 0 ? (
         <div className="p-6 text-center">
           <p className="text-xs text-white/70 leading-relaxed mb-5">
-            You can ask Sage different questions and different things about your
-            patients and help you plan out stuff for the day.
+            Ask Sage about your patients, draft SOAP notes, suggest care plan
+            changes. Sage runs on your panel only.
           </p>
           <div className="flex justify-center">
-            <NewThreadButton onClick={onNewThread} variant="prominent" />
+            <NewThreadButton onClick={onNewThread} />
           </div>
         </div>
       ) : (
@@ -344,71 +247,6 @@ function ThreadList({
   );
 }
 
-function Composer({
-  input,
-  setInput,
-  onSend,
-  pending,
-  contextPatientId,
-}: {
-  input: string;
-  setInput: (s: string) => void;
-  onSend: () => void;
-  pending: boolean;
-  contextPatientId?: Id<"patients">;
-}) {
-  const suggestions = contextPatientId
-    ? ["Summarize this patient", "Draft a SOAP note", "Suggest care plan changes"]
-    : ["Today's queue", "Overdue Level 3", "Reach rate"];
-  return (
-    <div className="border-t border-white/10 p-3 space-y-2">
-      <div className="flex flex-wrap gap-1.5">
-        {suggestions.map((s) => (
-          <button
-            key={s}
-            onClick={() => setInput(s)}
-            className="text-[10px] px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80"
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              onSend();
-            }
-          }}
-          placeholder="Ask Sage…"
-          rows={2}
-          className="flex-1 px-3 py-2 rounded-lg bg-white/10 text-white placeholder:text-white/40 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-teal-300"
-        />
-        <button
-          onClick={onSend}
-          disabled={pending || !input.trim()}
-          className="px-3 rounded-lg bg-teal-500 hover:bg-teal-700 text-white disabled:opacity-30 flex items-center justify-center"
-          aria-label="Send"
-        >
-          <ArrowUp className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function truncateJson(obj: any): string {
-  try {
-    const s = JSON.stringify(obj);
-    return s.length > 80 ? s.slice(0, 77) + "..." : s;
-  } catch {
-    return String(obj).slice(0, 80);
-  }
-}
-
 function formatRelative(ms: number): string {
   const diff = Date.now() - ms;
   const min = Math.floor(diff / 60_000);
@@ -419,195 +257,4 @@ function formatRelative(ms: number): string {
   const day = Math.floor(hr / 24);
   if (day < 7) return `${day}d ago`;
   return new Date(ms).toLocaleDateString();
-}
-
-function MessageBubble({
-  message,
-  onOpenSoapReview,
-}: {
-  message: any;
-  onOpenSoapReview: (soapNoteId: Id<"soapNotes">, patientId: Id<"patients">) => void;
-}) {
-  if (message.role === "user") {
-    return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-2xl bg-teal-500/30 px-3 py-2 text-sm">
-          {message.content}
-        </div>
-      </div>
-    );
-  }
-  if (message.role === "tool") {
-    return (
-      <div className="text-[11px] text-white/55 font-mono pl-1 flex items-center gap-1.5">
-        <Wrench className="w-3 h-3 text-teal-300" />
-        <span className="text-white/80">{message.toolName ?? "tool"}</span>
-        {message.toolArgs && (
-          <span className="text-white/40">
-            ({truncateJson(message.toolArgs)})
-          </span>
-        )}
-      </div>
-    );
-  }
-  if (message.role === "system") {
-    return (
-      <div className="text-[11px] text-amber-warning italic">{message.content}</div>
-    );
-  }
-  // Skip empty assistant bubbles or raw __rawItem JSON envelopes
-  if (
-    message.role === "assistant" &&
-    (!message.content || message.content.startsWith('{"__rawItem'))
-  ) {
-    return null;
-  }
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex">
-        <div className="max-w-[90%] rounded-2xl bg-white/10 px-3 py-2 text-sm leading-relaxed">
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => (
-                <p className="my-1 first:mt-0 last:mb-0">{children}</p>
-              ),
-              ol: ({ children }) => (
-                <ol className="list-decimal list-inside space-y-0.5 my-1">{children}</ol>
-              ),
-              ul: ({ children }) => (
-                <ul className="list-disc list-inside space-y-0.5 my-1">{children}</ul>
-              ),
-              li: ({ children }) => <li className="leading-snug">{children}</li>,
-              strong: ({ children }) => (
-                <strong className="font-semibold text-white">{children}</strong>
-              ),
-              em: ({ children }) => <em className="italic text-white/90">{children}</em>,
-              code: ({ children }) => (
-                <code className="font-mono text-[11px] bg-black/30 px-1 py-0.5 rounded">
-                  {children}
-                </code>
-              ),
-              a: ({ href, children }) => (
-                <a
-                  href={href}
-                  className="text-teal-300 underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {children}
-                </a>
-              ),
-            }}
-          >
-            {message.content}
-          </ReactMarkdown>
-        </div>
-      </div>
-      {message.actionCards?.map((card: any, i: number) => (
-        <ActionCard
-          key={i}
-          messageId={message._id}
-          cardIndex={i}
-          card={card}
-          onOpenSoapReview={onOpenSoapReview}
-        />
-      ))}
-    </div>
-  );
-}
-
-function ActionCard({
-  messageId,
-  cardIndex,
-  card,
-  onOpenSoapReview,
-}: {
-  messageId: Id<"agentMessages">;
-  cardIndex: number;
-  card: any;
-  onOpenSoapReview: (soapNoteId: Id<"soapNotes">, patientId: Id<"patients">) => void;
-}) {
-  const applySoap = useMutation(api.mutations.applyActions.applySoapDraft);
-  const applyCarePlan = useMutation(api.mutations.applyActions.applyCarePlanRevision);
-  const applyMessage = useMutation(api.mutations.applyActions.applyPatientMessage);
-  const dismiss = useMutation(api.mutations.agent.dismissActionCard);
-  const [pending, setPending] = useState(false);
-
-  const label =
-    {
-      soap_draft: "SOAP draft",
-      care_plan_revision: "Care plan revision",
-      patient_message: "Portal message",
-      outreach: "Outreach scheduled",
-    }[card.kind as string] ?? "Action";
-
-  async function handleApply() {
-    setPending(true);
-    try {
-      if (card.kind === "soap_draft" && card.targetId) {
-        const result = await applySoap({
-          messageId,
-          cardIndex,
-          soapNoteId: card.targetId,
-        });
-        onOpenSoapReview(result.soapNoteId, result.patientId);
-      } else if (card.kind === "care_plan_revision" && card.targetId) {
-        await applyCarePlan({
-          messageId,
-          cardIndex,
-          versionId: card.targetId,
-        });
-      } else if (card.kind === "patient_message" && card.targetId) {
-        await applyMessage({
-          messageId,
-          cardIndex,
-          patientId: card.targetId,
-          content: card.summary,
-        });
-      } else {
-        await dismiss({ messageId, cardIndex });
-      }
-    } catch (err: any) {
-      alert(err?.message ?? "Failed");
-    } finally {
-      setPending(false);
-    }
-  }
-
-  return (
-    <div className="ml-1 rounded-lg bg-white/8 border border-white/15 p-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-teal-300 font-semibold">
-            {label}
-          </div>
-          <div className="text-xs text-white/90 mt-0.5 truncate">{card.summary}</div>
-        </div>
-        {card.status === "applied" ? (
-          <span className="text-[10px] uppercase text-green-ok bg-green-500/15 px-2 py-1 rounded">
-            Applied
-          </span>
-        ) : card.status === "dismissed" ? (
-          <span className="text-[10px] uppercase text-white/40">Dismissed</span>
-        ) : (
-          <div className="flex gap-1 flex-shrink-0">
-            <button
-              onClick={handleApply}
-              disabled={pending}
-              className="text-[10px] px-2 py-1 rounded bg-teal-500 hover:bg-teal-700 text-white disabled:opacity-50"
-            >
-              {pending ? "…" : card.kind === "soap_draft" ? "Review" : "Apply"}
-            </button>
-            <button
-              onClick={() => dismiss({ messageId, cardIndex })}
-              className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white/80"
-              aria-label="Dismiss"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
