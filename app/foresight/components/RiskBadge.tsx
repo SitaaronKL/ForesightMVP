@@ -98,7 +98,7 @@ export function BillingBadge({
   if (iconOnly && Icon) {
     return (
       <span
-        className="inline-flex items-center justify-center w-5 h-5 rounded text-teal-700 bg-teal-500/10"
+        className="inline-flex items-center justify-center w-5 h-5 text-teal-700"
         aria-label={full}
         title={full}
       >
@@ -109,7 +109,7 @@ export function BillingBadge({
 
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-700 uppercase tracking-wider"
+      className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 text-teal-700 uppercase tracking-wider"
       title={full}
     >
       {Icon && <Icon size={11} className="flex items-center" />}

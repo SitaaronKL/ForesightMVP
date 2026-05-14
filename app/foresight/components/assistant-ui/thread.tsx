@@ -36,8 +36,7 @@ import {
 import { ArrowUpRightIcon } from "@/components/ArrowUpRightIcon";
 import { AmbulanceIcon, type AmbulanceIconHandle } from "@/components/AmbulanceIcon";
 import { useEffect, useRef, useState } from "react";
-import { useSageSuggestions } from "@/components/SageRuntime";
-import { useThreadRuntime } from "@assistant-ui/react";
+import { useSageSuggestions, useSageSend } from "@/components/SageRuntime";
 import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/Spinner";
@@ -161,19 +160,20 @@ const ThreadWelcome: FC = () => {
 
 const ThreadSuggestions: FC = () => {
   const prompts = useSageSuggestions();
-  const runtime = useThreadRuntime();
+  const sageSend = useSageSend();
   const isRunning = useAuiState((s) => s.thread.isRunning);
   const [sent, setSent] = useState(false);
 
   if (!prompts.length) return null;
 
   function send(p: string) {
-    if (sent || isRunning) return;
+    if (sent || isRunning || !sageSend) return;
     setSent(true);
-    runtime.append({
-      role: "user",
-      content: [{ type: "text", text: p }],
-    });
+    // Route through useSageSend → onNew → appendUserMessage so the
+    // bubble is stored once in Convex. runtime.append() was also
+    // queuing an optimistic local copy, which caused the user bubble
+    // to render twice.
+    void sageSend(p);
   }
 
   return (
