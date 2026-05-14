@@ -44,3 +44,37 @@ export const _byId = internalQuery({
     return await ctx.db.get(userId);
   },
 });
+
+/**
+ * Resolve the "primary nurse id" for an authenticated user. This is the
+ * user row that patients.primaryNurseId actually points at. Logic:
+ *
+ *   1. If the auth user row itself has role "nurse" or "admin", use it.
+ *   2. Otherwise, if the auth user has an email, find another user row with
+ *      the same email and role nurse/admin (the seeded row) and use that.
+ *   3. Fallback: return the auth user id unchanged.
+ *
+ * Without this, briefings / admin actions for a freshly-signed-up auth user
+ * read from an empty panel (because their auth row owns zero patients).
+ */
+export const _primaryNurseIdForAuth = internalQuery({
+  args: { authUserId: v.id("users") },
+  handler: async (ctx, { authUserId }) => {
+    const authUser = await ctx.db.get(authUserId);
+    if (!authUser) return authUserId;
+    if ((authUser as any).role === "nurse" || (authUser as any).role === "admin") {
+      return authUserId;
+    }
+    const email = (authUser as any).email;
+    if (typeof email === "string" && email.trim()) {
+      const normalized = email.toLowerCase().trim();
+      const seeded = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", normalized))
+        .filter((q) => q.neq(q.field("_id"), authUserId))
+        .first();
+      if (seeded) return seeded._id;
+    }
+    return authUserId;
+  },
+});

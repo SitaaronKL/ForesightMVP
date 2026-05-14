@@ -22,11 +22,18 @@ async function resolveTargetNurseId(
   ctx: any,
   _override: Id<"users"> | undefined,
 ): Promise<Id<"users">> {
-  // Admin role removed — every nurse can only act on themselves.
   void _override;
   const callerId = await getAuthUserId(ctx);
   if (!callerId) throw new Error("Not authenticated");
-  return callerId as Id<"users">;
+  // Bridge: if the caller's auth row has no patients (Convex Auth created
+  // a fresh row separate from the seeded "Sarah Chen, RN" row), find the
+  // seeded user row by email and use that — that's the row patients are
+  // actually assigned to.
+  const primary: Id<"users"> = await ctx.runQuery(
+    internal.queries.me._primaryNurseIdForAuth,
+    { authUserId: callerId },
+  );
+  return primary;
 }
 
 export const triggerMorningBriefing = action({
