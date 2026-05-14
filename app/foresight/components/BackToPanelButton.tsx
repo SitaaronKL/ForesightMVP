@@ -13,16 +13,6 @@ type Origin = {
 
 const DEFAULT_ORIGIN: Origin = { path: "/dashboard", label: "Back to dashboard" };
 
-function originFor(path: string): Origin | null {
-  if (path.startsWith("/dashboard"))
-    return { path: "/dashboard", label: "Back to dashboard" };
-  if (path.startsWith("/panel"))
-    return { path: "/panel", label: "Back to panel" };
-  if (path.startsWith("/admin"))
-    return { path: "/admin", label: "Back to admin" };
-  return null;
-}
-
 /**
  * Context-aware back button. Tracks the last non-patient page the user
  * visited in sessionStorage so that patient → patient navigation still
@@ -36,42 +26,23 @@ export function BackToPanelButton() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    // 1. If the referrer is a dashboard/panel/admin page on this origin,
-    //    treat that as the origin and persist it.
-    let next: Origin | null = null;
+    // Source of truth is OriginTracker's sessionStorage entry, written
+    // whenever the user lands on /dashboard, /panel, or /admin. We don't
+    // look at document.referrer because client-side Next.js <Link> nav
+    // doesn't update it (it stays pinned to the initial page-load URL).
     try {
-      if (document.referrer) {
-        const ref = new URL(document.referrer);
-        if (ref.origin === window.location.origin) {
-          next = originFor(ref.pathname);
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Origin;
+        if (parsed?.path && parsed?.label) {
+          setOrigin(parsed);
+          return;
         }
       }
     } catch {
-      // ignore bad referrer
+      // ignore parse / storage errors
     }
-
-    // 2. If the referrer wasn't usable (e.g. navigated patient → patient),
-    //    fall back to whatever we stashed last time.
-    if (!next) {
-      try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw) as Origin;
-          if (parsed?.path && parsed?.label) next = parsed;
-        }
-      } catch {
-        // ignore parse error
-      }
-    }
-
-    const resolved = next ?? DEFAULT_ORIGIN;
-    setOrigin(resolved);
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(resolved));
-    } catch {
-      // ignore quota / disabled storage
-    }
+    setOrigin(DEFAULT_ORIGIN);
   }, []);
 
   function handleBack() {
