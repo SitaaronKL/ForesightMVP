@@ -4,6 +4,7 @@ import { Authenticated, Unauthenticated, AuthLoading, useQuery, useMutation } fr
 import { api } from "@convex/_generated/api";
 import { LoginScreen } from "../../components/LoginScreen";
 import { useMe } from "../../components/useMe";
+import { Spinner } from "../../components/Spinner";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
 
@@ -12,7 +13,9 @@ export default function PortalPage() {
     <>
       <AuthLoading>
         <div className="min-h-screen flex items-center justify-center text-brand-700">
-          <div className="glass px-8 py-6">Loading…</div>
+          <div className="glass px-8 py-6">
+            <Spinner size={20} label="Loading…" />
+          </div>
         </div>
       </AuthLoading>
       <Unauthenticated>

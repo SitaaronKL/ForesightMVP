@@ -6,6 +6,7 @@ import { Id } from "@convex/_generated/dataModel";
 import { use, useState } from "react";
 import { Mars, Venus, CircleUser } from "lucide-react";
 import { RiskBadge, TierBadge, BillingBadge } from "../../../components/RiskBadge";
+import { Spinner } from "../../../components/Spinner";
 import { BackToPanelButton } from "../../../components/BackToPanelButton";
 import { OverviewTab } from "../../../components/patient/OverviewTab";
 import { CarePlanTab } from "../../../components/patient/CarePlanTab";
@@ -28,7 +29,9 @@ export default function PatientPage({
 
   if (!overview) {
     return (
-      <div className="glass p-8 text-center text-brand-500">Loading patient…</div>
+      <div className="glass p-8 text-center text-brand-500 flex items-center justify-center">
+        <Spinner size={20} label="Loading patient…" />
+      </div>
     );
   }
 

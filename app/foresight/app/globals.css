@@ -209,20 +209,19 @@ body {
   padding: 1px 4px;
 }
 
-/* Scrollbar tidy */
+/* Hidden scrollbars — content stays scrollable, the bar just isn't visible.
+   Matches the look of polished web apps (Linear, Slack, Notion). */
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: rgba(11, 59, 92, 0.25);
-  border-radius: 8px;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(11, 59, 92, 0.4);
-}
-*::-webkit-scrollbar-track {
   background: transparent;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* Smooth focus rings — only apply to non-form-field elements so we don't

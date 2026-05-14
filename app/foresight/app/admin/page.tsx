@@ -4,6 +4,7 @@ import { Authenticated, Unauthenticated, AuthLoading, useQuery, useMutation, use
 import { api } from "@convex/_generated/api";
 import { LoginScreen } from "../../components/LoginScreen";
 import { Sidebar } from "../../components/Sidebar";
+import { Spinner } from "../../components/Spinner";
 import { useMe } from "../../components/useMe";
 import { useState } from "react";
 
@@ -12,7 +13,9 @@ export default function AdminPage() {
     <>
       <AuthLoading>
         <div className="min-h-screen flex items-center justify-center text-brand-700">
-          <div className="glass px-8 py-6">Loading…</div>
+          <div className="glass px-8 py-6">
+            <Spinner size={20} label="Loading…" />
+          </div>
         </div>
       </AuthLoading>
       <Unauthenticated>

@@ -92,7 +92,7 @@ export const draftSoapFromTranscript = action({
       messages: [
         {
           role: "system",
-          content: `You are a clinical documentation assistant. Given a transcript of a nurse-patient phone call, produce a structured SOAP note (Subjective, Objective, Assessment, Plan). Use clinical shorthand. Be specific. Return JSON with keys: subjective, objective, assessment, plan, confidence (0-100).`,
+          content: `You are a clinical documentation assistant. Given a transcript of a nurse-patient phone call, produce a structured SOAP note (Subjective, Objective, Assessment, Plan). Write in plain professional English — spell out full words instead of clinical abbreviations (write "Patient" not "Pt", "shortness of breath" not "SOB", "twice daily" not "BID"). Be specific. Return JSON with keys: subjective, objective, assessment, plan, confidence (0-100).`,
         },
         {
           role: "user",

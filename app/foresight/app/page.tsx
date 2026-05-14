@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LoginScreen } from "../components/LoginScreen";
 import { useMe } from "../components/useMe";
+import { Spinner } from "../components/Spinner";
 
 export default function Home() {
   return (
@@ -25,7 +26,9 @@ export default function Home() {
 function Splash({ text }: { text: string }) {
   return (
     <div className="min-h-screen flex items-center justify-center text-brand-700">
-      <div className="glass px-8 py-6">{text}</div>
+      <div className="glass px-8 py-6">
+        <Spinner size={20} label={text} />
+      </div>
     </div>
   );
 }

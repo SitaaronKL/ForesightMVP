@@ -7,6 +7,7 @@ import { Sidebar } from "../../../components/Sidebar";
 import { AgentRail } from "../../../components/AgentRail";
 import { AgentRailProvider, useAgentRail } from "../../../components/AgentRailContext";
 import { LoginScreen } from "../../../components/LoginScreen";
+import { Spinner } from "../../../components/Spinner";
 import { useParams } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 
@@ -15,7 +16,9 @@ export default function PatientLayout({ children }: { children: ReactNode }) {
     <>
       <AuthLoading>
         <div className="min-h-screen flex items-center justify-center text-brand-700">
-          <div className="glass px-8 py-6">Loading…</div>
+          <div className="glass px-8 py-6">
+            <Spinner size={20} label="Loading…" />
+          </div>
         </div>
       </AuthLoading>
       <Unauthenticated>
