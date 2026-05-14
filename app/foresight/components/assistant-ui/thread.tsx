@@ -38,6 +38,9 @@ import { AmbulanceIcon, type AmbulanceIconHandle } from "@/components/AmbulanceI
 import { useEffect, useRef, useState } from "react";
 import { useSageSuggestions } from "@/components/SageRuntime";
 import { useThreadRuntime } from "@assistant-ui/react";
+import { useAction } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Spinner } from "@/components/Spinner";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -189,7 +192,58 @@ const ThreadSuggestions: FC = () => {
           </button>
         ))}
       </div>
+      <GenerateEodPill />
     </div>
+  );
+};
+
+/**
+ * One-tap pill that triggers today's End-of-Day briefing without going
+ * through Sage's chat turn loop. Lives at the bottom of the suggestions.
+ */
+const GenerateEodPill: FC = () => {
+  const triggerEod = useAction(api.admin.triggerEndOfDay);
+  const [status, setStatus] = useState<"idle" | "running" | "done" | "error">(
+    "idle",
+  );
+
+  async function run() {
+    if (status === "running") return;
+    setStatus("running");
+    try {
+      await triggerEod({});
+      setStatus("done");
+      window.setTimeout(() => setStatus("idle"), 2500);
+    } catch {
+      setStatus("error");
+      window.setTimeout(() => setStatus("idle"), 4000);
+    }
+  }
+
+  const label =
+    status === "running"
+      ? "Generating EOD briefing…"
+      : status === "done"
+        ? "EOD briefing generated"
+        : status === "error"
+          ? "Failed — try again"
+          : "Generate End of day brief";
+
+  return (
+    <button
+      type="button"
+      onClick={run}
+      disabled={status === "running"}
+      style={{
+        backgroundImage: "url(/image-mesh-gradient.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+      className="mt-2 w-full inline-flex items-center justify-center gap-2 text-[11px] font-semibold rounded-full px-3 py-2 text-brand-950 shadow-sm border border-white/40 transition hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
+    >
+      {status === "running" && <Spinner size={12} />}
+      {label}
+    </button>
   );
 };
 
