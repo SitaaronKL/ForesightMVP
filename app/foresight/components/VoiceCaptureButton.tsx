@@ -153,7 +153,7 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
               onSelect={() => startRecording()}
               onMouseEnter={() => micItemRef.current?.startAnimation()}
               onMouseLeave={() => micItemRef.current?.stopAnimation()}
-              className="rounded-full py-2.5 px-4 cursor-pointer bg-white border border-brand-100 hover:border-foresight/40 focus:bg-foresight/8 focus:border-foresight/40 transition outline-none"
+              className="rounded-full py-2.5 px-4 cursor-pointer bg-white border border-brand-100 transition outline-none focus:bg-white data-[highlighted]:bg-white"
             >
               <MicIcon
                 ref={micItemRef}
@@ -173,7 +173,7 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
               onSelect={handleCallWithoutRecording}
               onMouseEnter={() => micOffItemRef.current?.startAnimation()}
               onMouseLeave={() => micOffItemRef.current?.stopAnimation()}
-              className="rounded-full py-2.5 px-4 cursor-pointer bg-white border border-brand-100 hover:border-foresight/40 focus:bg-foresight/8 focus:border-foresight/40 transition outline-none"
+              className="rounded-full py-2.5 px-4 cursor-pointer bg-white border border-brand-100 transition outline-none focus:bg-white data-[highlighted]:bg-white"
             >
               <MicOffIcon
                 ref={micOffItemRef}
