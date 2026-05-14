@@ -163,7 +163,10 @@ function PriorityQueuePanel({ queue }: { queue: any[] | undefined }) {
           size={56}
           className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
         />
-        <div className="min-w-0 flex-1">
+        <div
+          className="min-w-0 flex-1"
+          onMouseEnter={() => bellRef.current?.startAnimation()}
+        >
           <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
             Priority Queue
           </h2>
