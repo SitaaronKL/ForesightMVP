@@ -9,6 +9,7 @@ import { Spinner } from "../../components/Spinner";
 import { SunIcon, type SunIconHandle } from "../../components/SunIcon";
 import { MoonIcon, type MoonIconHandle } from "../../components/MoonIcon";
 import { SyringeIcon, type SyringeIconHandle } from "../../components/SyringeIcon";
+import { BellIcon, type BellIconHandle } from "../../components/BellIcon";
 
 export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
@@ -143,17 +144,37 @@ function StatsBento({
 }
 
 function PriorityQueuePanel({ queue }: { queue: any[] | undefined }) {
+  const bellRef = useRef<BellIconHandle>(null);
+  const count = queue?.length ?? 0;
   return (
-    <section className="rounded-2xl border border-brand-100 bg-white p-5">
-      <div className="flex items-center justify-between mb-3 gap-3">
-        <h2 className="text-xs font-semibold text-brand-700 tracking-wider uppercase">
-          Priority queue
-        </h2>
-        <span className="text-xs text-brand-500 flex-shrink-0 uppercase tracking-wider">
-          {queue?.length ?? 0} flagged
-        </span>
-      </div>
-      <div className="grid gap-2">
+    <section className="rounded-2xl border border-brand-100 bg-white overflow-hidden">
+      <header
+        className="px-6 pt-5 pb-4 flex items-center gap-5"
+        style={{
+          backgroundImage: "url(/image-mesh-gradient.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        onMouseEnter={() => bellRef.current?.startAnimation()}
+        onMouseLeave={() => bellRef.current?.stopAnimation()}
+      >
+        <BellIcon
+          ref={bellRef}
+          size={56}
+          className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
+        />
+        <div className="min-w-0 flex-1">
+          <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
+            Priority Queue
+          </h2>
+          <p className="mt-0.5 text-xs text-brand-950">
+            {queue
+              ? `${count} ${count === 1 ? "patient" : "patients"} flagged for today.`
+              : "Loading…"}
+          </p>
+        </div>
+      </header>
+      <div className="p-5 grid gap-2">
         {queue?.map((p) => (
           <PatientPill key={p._id} patient={p} billingIconOnly />
         ))}
@@ -279,7 +300,7 @@ function BriefingBento({
         }}
       >
         <div
-          className="flex items-center gap-2 text-brand-950"
+          className="flex items-center gap-3 text-brand-950 min-w-0"
           onMouseEnter={() =>
             (active === "morning" ? titleSunRef : titleMoonRef).current?.startAnimation()
           }
@@ -287,19 +308,23 @@ function BriefingBento({
             (active === "morning" ? titleSunRef : titleMoonRef).current?.stopAnimation()
           }
         >
-          {active === "morning" ? (
-            <SunIcon ref={titleSunRef} size={14} className="flex items-center" />
-          ) : (
-            <MoonIcon ref={titleMoonRef} size={14} className="flex items-center" />
-          )}
-          <h2 className="text-xs font-semibold tracking-wide uppercase">
-            {title}
-          </h2>
+          <span className="flex items-center justify-center flex-shrink-0">
+            {active === "morning" ? (
+              <SunIcon ref={titleSunRef} size={32} className="flex items-center" />
+            ) : (
+              <MoonIcon ref={titleMoonRef} size={32} className="flex items-center" />
+            )}
+          </span>
+          <div className="flex flex-col leading-tight min-w-0">
+            <h2 className="text-xs font-semibold tracking-wide uppercase truncate">
+              {title}
+            </h2>
+            {current?.date && (
+              <span className="text-[11px] text-brand-950">{current.date}</span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          {current?.date && (
-            <span className="text-[11px] text-brand-950">{current.date}</span>
-          )}
           {/* Sun / Moon toggle. Only shown when both exist OR the inactive one can be generated. */}
           <div className="flex items-center gap-0.5 bg-white/60 backdrop-blur-sm rounded-full p-0.5">
             <button
