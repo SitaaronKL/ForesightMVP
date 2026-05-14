@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import Link from "next/link";
 import { useMe } from "../../components/useMe";
-import { Header } from "../../components/Header";
+import { Sidebar } from "../../components/Sidebar";
 import { AgentRail } from "../../components/AgentRail";
 import { LoginScreen } from "../../components/LoginScreen";
 
@@ -33,14 +33,14 @@ function Workspace({ children }: { children: ReactNode }) {
   const needsSeed = me !== undefined && role !== "nurse" && role !== "admin";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header user={me} />
-      <div className="flex-1 flex">
-        <main className="flex-1 max-w-[1280px] w-full mx-auto px-6 py-6">
+    <div className="min-h-screen flex">
+      <Sidebar user={me} />
+      <main className="flex-1 min-w-0 w-full px-6 py-6">
+        <div className="max-w-[960px] mx-auto">
           {needsSeed ? <SeedFirstNotice /> : children}
-        </main>
-        {needsSeed ? null : <AgentRail user={me} />}
-      </div>
+        </div>
+      </main>
+      {needsSeed ? null : <AgentRail user={me} />}
     </div>
   );
 }

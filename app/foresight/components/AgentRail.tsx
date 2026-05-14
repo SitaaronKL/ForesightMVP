@@ -131,7 +131,7 @@ export function AgentRail({
 
   return (
     <>
-      <aside className="w-[380px] flex-shrink-0 sticky top-[60px] self-start h-[calc(100vh-60px)] p-4 hidden lg:flex">
+      <aside className="w-[340px] xl:w-[380px] flex-shrink-0 sticky top-0 self-start h-screen p-4 hidden lg:flex">
         <div className="glass-dark flex flex-col w-full h-full overflow-hidden">
           <Header
             view={view}

@@ -3,7 +3,7 @@
 import { Authenticated, Unauthenticated, AuthLoading, useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { LoginScreen } from "../../components/LoginScreen";
-import { Header } from "../../components/Header";
+import { Sidebar } from "../../components/Sidebar";
 import { useMe } from "../../components/useMe";
 import { useState } from "react";
 
@@ -54,9 +54,9 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header user={me} />
-      <main className="flex-1 max-w-5xl w-full mx-auto p-6 space-y-5">
+    <div className="min-h-screen flex">
+      <Sidebar user={me} />
+      <main className="flex-1 min-w-0 w-full p-6 space-y-5 max-w-5xl mx-auto">
         <h1 className="text-2xl font-semibold text-brand-900">Admin console</h1>
 
         <section className="glass p-5">
