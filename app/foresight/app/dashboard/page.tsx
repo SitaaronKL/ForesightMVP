@@ -13,34 +13,36 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* KPI bento (WebGL liquid glass) */}
-      <LiquidGlass borderRadius={20} tintOpacity={0.08}>
-        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/30 px-5 py-4">
-          <KpiCell label="Panel size" value={kpis?.panelSize ?? "—"} />
-          <KpiCell label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
-          <KpiCell
-            label="Reach rate"
-            value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
-            tone={kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"}
-          />
-          <KpiCell
-            label="Avg doc / patient"
-            value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
-          />
-          <KpiCell
-            label="APCM coverage"
-            value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
-            tone={
-              kpis
-                ? kpis.serviceElementCoverage >= 0.7
-                  ? "ok"
-                  : kpis.serviceElementCoverage >= 0.5
-                    ? "warn"
-                    : "bad"
-                : "neutral"
-            }
-          />
-        </div>
-      </LiquidGlass>
+      <div className="w-[280px]">
+        <LiquidGlass borderRadius={20} tintOpacity={0.08}>
+          <div className="flex flex-col gap-2 p-5 w-[280px] h-[280px] justify-center">
+            <KpiRow label="Panel size" value={kpis?.panelSize ?? "—"} />
+            <KpiRow label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
+            <KpiRow
+              label="Reach rate"
+              value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
+              tone={kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"}
+            />
+            <KpiRow
+              label="Avg doc / patient"
+              value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
+            />
+            <KpiRow
+              label="APCM coverage"
+              value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
+              tone={
+                kpis
+                  ? kpis.serviceElementCoverage >= 0.7
+                    ? "ok"
+                    : kpis.serviceElementCoverage >= 0.5
+                      ? "warn"
+                      : "bad"
+                  : "neutral"
+              }
+            />
+          </div>
+        </LiquidGlass>
+      </div>
 
       {/* Briefing */}
       {briefing?.content && (
@@ -89,7 +91,7 @@ export default function DashboardPage() {
   );
 }
 
-function KpiCell({
+function KpiRow({
   label,
   value,
   tone = "neutral",
@@ -105,13 +107,9 @@ function KpiCell({
     bad: "text-red-warning",
   }[tone];
   return (
-    <div className="px-4 py-1 first:pl-1 last:pr-1">
-      <div className="text-[10px] text-brand-500 uppercase tracking-wider leading-tight">
-        {label}
-      </div>
-      <div className={`mt-1 text-xl font-semibold leading-tight ${toneClass}`}>
-        {value}
-      </div>
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-xs text-brand-600">{label}</span>
+      <span className={`text-sm font-semibold ${toneClass}`}>{value}</span>
     </div>
   );
 }
