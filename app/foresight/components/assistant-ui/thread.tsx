@@ -34,6 +34,8 @@ import {
   useAuiState,
 } from "@assistant-ui/react";
 import { ArrowUpRightIcon } from "@/components/ArrowUpRightIcon";
+import { AmbulanceIcon, type AmbulanceIconHandle } from "@/components/AmbulanceIcon";
+import { useEffect, useRef } from "react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -77,6 +79,10 @@ export const Thread: FC = () => {
             </ThreadPrimitive.Messages>
           </div>
 
+          <AuiIf condition={(s) => s.thread.isRunning}>
+            <SageThinking />
+          </AuiIf>
+
           <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mt-auto flex flex-col gap-4 overflow-visible rounded-t-(--composer-radius) bg-background pb-4 md:pb-6">
             <ThreadScrollToBottom />
             <Composer />
@@ -84,6 +90,25 @@ export const Thread: FC = () => {
         </div>
       </ThreadPrimitive.Viewport>
     </ThreadPrimitive.Root>
+  );
+};
+
+const SageThinking: FC = () => {
+  const iconRef = useRef<AmbulanceIconHandle>(null);
+  useEffect(() => {
+    iconRef.current?.startAnimation();
+    return () => iconRef.current?.stopAnimation();
+  }, []);
+  return (
+    <div className="mb-4 flex items-center gap-2 text-xs text-foresight">
+      <AmbulanceIcon ref={iconRef} size={18} className="flex items-center" />
+      <span className="font-medium">Sage is thinking…</span>
+      <span className="inline-flex items-center gap-0.5 ml-1">
+        <span className="w-1 h-1 rounded-full bg-foresight pulse-dot" style={{ animationDelay: "0ms" }} />
+        <span className="w-1 h-1 rounded-full bg-foresight pulse-dot" style={{ animationDelay: "200ms" }} />
+        <span className="w-1 h-1 rounded-full bg-foresight pulse-dot" style={{ animationDelay: "400ms" }} />
+      </span>
+    </div>
   );
 };
 

@@ -109,6 +109,7 @@ export function SageProvider({
   const createThread = useMutation(api.mutations.agent.createThread);
   const deleteThread = useMutation(api.mutations.agent.deleteThread);
   const renameThread = useMutation(api.mutations.agent.renameThreadIfDefault);
+  const appendUserMessage = useMutation(api.mutations.agent.appendUserMessage);
   const runAgentTurn = useAction(api.agent.runAgentTurn.runAgentTurn);
 
   const [isRunning, setIsRunning] = useState(false);
@@ -135,6 +136,11 @@ export function SageProvider({
         void renameThread({ threadId: activeId, title: text });
       }
 
+      // Optimistically persist the user message FIRST so the bubble shows up
+      // instantly in the rail (the Convex query fires immediately). The agent
+      // run will then append assistant + tool items via ConvexSession.
+      await appendUserMessage({ threadId: activeId, content: text });
+
       setIsRunning(true);
       try {
         await runAgentTurn({
@@ -152,6 +158,7 @@ export function SageProvider({
       createThread,
       runAgentTurn,
       renameThread,
+      appendUserMessage,
       messages?.length,
     ],
   );
