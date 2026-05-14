@@ -1,7 +1,18 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+} from "motion/react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export type PatientTabKey =
   | "overview"
@@ -19,9 +30,17 @@ const TABS: { key: PatientTabKey; label: string }[] = [
 ];
 
 /**
- * Patient detail tab bar. Big outer pill, mini pill indicator that animates
- * between tabs on click and is also draggable — release to snap to the
- * nearest tab.
+ * Big outer pill with a draggable mini-pill indicator.
+ *
+ * - Outer container: rounded-full, translucent white, soft border + shadow
+ * - Mini pill indicator: sits BEHIND labels (no z-index), in foresight blue
+ *   with a slightly smaller corner radius so it reads as nested
+ * - Labels are always visible (z-10 above the indicator)
+ * - Text color of each label is controlled by hoverIdx — the tab whose
+ *   center is currently closest to the indicator's center. So as you
+ *   drag the pill, the label currently under it becomes white and the
+ *   one it left becomes dark again. No "white on white" disappearing act.
+ * - Click a label to jump. Drag the pill to slide. On drag release, snap.
  */
 export function PatientTabs({
   value,
@@ -32,83 +51,103 @@ export function PatientTabs({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [indicator, setIndicator] = useState({ x: 0, width: 0 });
+
+  const x = useMotionValue(0);
+  const [width, setWidth] = useState(0);
 
   const activeIdx = Math.max(
     0,
     TABS.findIndex((t) => t.key === value),
   );
 
-  // Sync indicator position to active tab
-  useLayoutEffect(() => {
-    const btn = buttonRefs.current[activeIdx];
-    if (!btn || !containerRef.current) return;
-    const containerLeft = containerRef.current.getBoundingClientRect().left;
-    const btnRect = btn.getBoundingClientRect();
-    setIndicator({
-      x: btnRect.left - containerLeft,
-      width: btnRect.width,
-    });
-  }, [activeIdx, value]);
+  // hoverIdx is which tab the indicator visually sits on right now.
+  // Driven both by user drag and by programmatic position changes.
+  const [hoverIdx, setHoverIdx] = useState(activeIdx);
 
-  // Reposition on resize (label widths can shift)
-  useEffect(() => {
-    function reflow() {
-      const btn = buttonRefs.current[activeIdx];
+  const measureAndPlace = useCallback(
+    (idx: number, opts: { animateX?: boolean } = { animateX: true }) => {
+      const btn = buttonRefs.current[idx];
       if (!btn || !containerRef.current) return;
       const containerLeft = containerRef.current.getBoundingClientRect().left;
       const btnRect = btn.getBoundingClientRect();
-      setIndicator({
-        x: btnRect.left - containerLeft,
-        width: btnRect.width,
-      });
-    }
-    window.addEventListener("resize", reflow);
-    return () => window.removeEventListener("resize", reflow);
+      const targetX = btnRect.left - containerLeft;
+      setWidth(btnRect.width);
+      if (opts.animateX) {
+        animate(x, targetX, {
+          type: "spring",
+          stiffness: 500,
+          damping: 40,
+          mass: 0.5,
+        });
+      } else {
+        x.set(targetX);
+      }
+    },
+    [x],
+  );
+
+  // Sync indicator to the active tab whenever it changes (click or external).
+  useLayoutEffect(() => {
+    // First mount: snap without animation so we don't flash from 0.
+    measureAndPlace(activeIdx, { animateX: x.get() !== 0 });
+    setHoverIdx(activeIdx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIdx]);
 
-  function snapToNearest(currentX: number) {
-    // currentX is the indicator's left edge in container coords; use its center
-    const indicatorCenter = currentX + indicator.width / 2;
-    let nearestIdx = 0;
+  // Reposition on resize.
+  useEffect(() => {
+    const onResize = () => measureAndPlace(activeIdx, { animateX: false });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [activeIdx, measureAndPlace]);
+
+  // Real-time: update hoverIdx as x changes (drag or animate).
+  useMotionValueEvent(x, "change", (latest) => {
+    if (!containerRef.current || width === 0) return;
+    const containerLeft = containerRef.current.getBoundingClientRect().left;
+    const indicatorCenter = latest + width / 2;
+    let nearest = 0;
     let nearestDist = Infinity;
     buttonRefs.current.forEach((btn, i) => {
-      if (!btn || !containerRef.current) return;
-      const containerLeft = containerRef.current.getBoundingClientRect().left;
+      if (!btn) return;
       const btnRect = btn.getBoundingClientRect();
       const btnCenter = btnRect.left - containerLeft + btnRect.width / 2;
       const dist = Math.abs(btnCenter - indicatorCenter);
       if (dist < nearestDist) {
         nearestDist = dist;
-        nearestIdx = i;
+        nearest = i;
       }
     });
-    onChange(TABS[nearestIdx].key);
+    if (nearest !== hoverIdx) setHoverIdx(nearest);
+  });
+
+  function handleDragEnd() {
+    onChange(TABS[hoverIdx].key);
   }
 
   return (
     <div
       ref={containerRef}
-      className="relative inline-flex p-1 bg-white/70 border border-brand-100 rounded-[100px] shadow-sm select-none overflow-hidden"
+      className="relative inline-flex items-center p-1 bg-white/70 border border-brand-100 rounded-full shadow-sm select-none"
       role="tablist"
     >
-      {/* Sliding mini pill */}
+      {/* Mini pill indicator — sits BEHIND labels. No z-index = default
+          stacking, labels' z-10 puts them on top. Rounded a bit less than
+          the outer pill so it reads as nested. */}
       <motion.div
-        layout
         drag="x"
         dragConstraints={containerRef}
-        dragElastic={0.1}
+        dragElastic={0}
         dragMomentum={false}
-        onDragEnd={(_, info) => snapToNearest(indicator.x + info.offset.x)}
-        animate={{ x: indicator.x, width: indicator.width }}
-        transition={{ type: "spring", stiffness: 500, damping: 40, mass: 0.5 }}
-        className="absolute top-1 bottom-1 left-0 bg-foresight rounded-full shadow-sm cursor-grab active:cursor-grabbing z-0"
+        onDragEnd={handleDragEnd}
+        style={{ x, width }}
+        className="absolute top-1 bottom-1 left-0 bg-foresight rounded-[28px] shadow-sm cursor-grab active:cursor-grabbing"
         aria-hidden
       />
 
-      {/* Tab labels */}
+      {/* Labels — always visible above the indicator */}
       {TABS.map((t, i) => {
-        const active = t.key === value;
+        const isOver = hoverIdx === i;
         return (
           <button
             key={t.key}
@@ -117,9 +156,9 @@ export function PatientTabs({
             }}
             onClick={() => onChange(t.key)}
             role="tab"
-            aria-selected={active}
+            aria-selected={t.key === value}
             className={`relative z-10 px-4 py-1.5 text-xs font-medium rounded-full transition-colors duration-150 ${
-              active ? "text-white" : "text-brand-700 hover:text-brand-950"
+              isOver ? "text-white" : "text-brand-700 hover:text-brand-950"
             }`}
           >
             {t.label}
