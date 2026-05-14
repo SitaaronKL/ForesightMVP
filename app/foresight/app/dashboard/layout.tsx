@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useMe } from "../../components/useMe";
 import { Sidebar } from "../../components/Sidebar";
 import { AgentRail } from "../../components/AgentRail";
+import { AgentRailProvider, useAgentRail } from "../../components/AgentRailContext";
 import { LoginScreen } from "../../components/LoginScreen";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -27,17 +28,26 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 }
 
 function Workspace({ children }: { children: ReactNode }) {
+  return (
+    <AgentRailProvider>
+      <WorkspaceInner>{children}</WorkspaceInner>
+    </AgentRailProvider>
+  );
+}
+
+function WorkspaceInner({ children }: { children: ReactNode }) {
   const me = useMe();
-  // me is undefined while loading, an object after.
+  const { collapsed } = useAgentRail();
   const role = (me as any)?.role;
   const needsSeed = me !== undefined && role !== "nurse" && role !== "admin";
+  const railOpen = !needsSeed && !collapsed;
 
   return (
     <div className="min-h-screen">
       <Sidebar user={me} />
       <main
-        className={`min-h-screen pl-[13.5rem] pr-6 py-6 ${
-          needsSeed ? "" : "lg:pr-[380px] xl:pr-[420px]"
+        className={`min-h-screen pl-[13.5rem] py-6 transition-[padding] duration-300 ease-out ${
+          railOpen ? "pr-6 lg:pr-[404px] xl:pr-[444px]" : "pr-6"
         }`}
       >
         <div className="max-w-[960px] mx-auto">

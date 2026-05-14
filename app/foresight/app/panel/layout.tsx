@@ -5,6 +5,7 @@ import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { useMe } from "../../components/useMe";
 import { Sidebar } from "../../components/Sidebar";
 import { AgentRail } from "../../components/AgentRail";
+import { AgentRailProvider, useAgentRail } from "../../components/AgentRailContext";
 import { LoginScreen } from "../../components/LoginScreen";
 
 export default function PanelLayout({ children }: { children: ReactNode }) {
@@ -26,11 +27,24 @@ export default function PanelLayout({ children }: { children: ReactNode }) {
 }
 
 function Workspace({ children }: { children: ReactNode }) {
+  return (
+    <AgentRailProvider>
+      <WorkspaceInner>{children}</WorkspaceInner>
+    </AgentRailProvider>
+  );
+}
+
+function WorkspaceInner({ children }: { children: ReactNode }) {
   const me = useMe();
+  const { collapsed } = useAgentRail();
   return (
     <div className="min-h-screen">
       <Sidebar user={me} />
-      <main className="min-h-screen pl-[12rem] pr-6 py-6 lg:pr-[380px] xl:pr-[420px]">
+      <main
+        className={`min-h-screen pl-[13.5rem] py-6 transition-[padding] duration-300 ease-out ${
+          collapsed ? "pr-6" : "pr-6 lg:pr-[404px] xl:pr-[444px]"
+        }`}
+      >
         <div className="max-w-[960px] mx-auto">{children}</div>
       </main>
       <AgentRail user={me} />

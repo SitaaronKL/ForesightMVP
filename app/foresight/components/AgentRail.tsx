@@ -9,6 +9,7 @@ import { SageProvider, useSageThreadId } from "./SageRuntime";
 import { SageActionTray } from "./SageActionTray";
 import { ChevronLeft, ChevronRight, History } from "lucide-react";
 import { AmbulanceIcon } from "./AmbulanceIcon";
+import { useAgentRail } from "./AgentRailContext";
 
 export function AgentRail({
   user,
@@ -17,7 +18,7 @@ export function AgentRail({
   user: any;
   contextPatientId?: Id<"patients">;
 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useAgentRail();
   const [reviewSoapId, setReviewSoapId] = useState<Id<"soapNotes"> | null>(null);
   const [reviewPatientId, setReviewPatientId] = useState<Id<"patients"> | null>(null);
 

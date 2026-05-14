@@ -3,7 +3,7 @@ import { ConvexClientProvider } from "../components/ConvexClientProvider";
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "Foresight Care",
+  title: "ForesightHealth",
   description: "Care operations for CCM and APCM nurses.",
 };
 

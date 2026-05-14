@@ -24,13 +24,13 @@ export function Sidebar({ user }: { user: any }) {
   const panelActive = pathname?.startsWith("/panel") ?? false;
 
   return (
-    <aside className="fixed left-3 top-3 bottom-3 w-44 flex flex-col backdrop-blur-md bg-white/70 border border-brand-100 rounded-[100px] shadow-[0_8px_32px_rgba(11,59,92,0.08)] py-4 z-30">
+    <aside className="fixed left-0 top-0 h-screen w-44 flex flex-col backdrop-blur-md bg-white/70 border-r border-brand-100 z-30">
       <div className="px-5 pt-5 pb-4">
         <Link
           href="/dashboard"
           className="text-brand-900 font-semibold tracking-tight text-lg"
         >
-          Foresight
+          ForesightHealth
         </Link>
       </div>
 
@@ -39,7 +39,7 @@ export function Sidebar({ user }: { user: any }) {
           href="/dashboard"
           onMouseEnter={() => dashRef.current?.startAnimation()}
           onMouseLeave={() => dashRef.current?.stopAnimation()}
-          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition ${
             dashActive
               ? "bg-brand-900 text-white"
               : "text-brand-700 hover:bg-brand-50"
@@ -57,7 +57,7 @@ export function Sidebar({ user }: { user: any }) {
           href="/panel"
           onMouseEnter={() => panelRef.current?.startAnimation()}
           onMouseLeave={() => panelRef.current?.stopAnimation()}
-          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition ${
             panelActive
               ? "bg-brand-900 text-white"
               : "text-brand-700 hover:bg-brand-50"
@@ -80,7 +80,7 @@ export function Sidebar({ user }: { user: any }) {
           aria-label="Settings"
           onMouseEnter={() => settingsRef.current?.startAnimation()}
           onMouseLeave={() => settingsRef.current?.stopAnimation()}
-          className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-brand-700 hover:bg-brand-50"
+          className="flex items-center gap-2 px-3 py-2 rounded-full text-sm text-brand-700 hover:bg-brand-50"
         >
           <SettingsIcon
             ref={settingsRef}
