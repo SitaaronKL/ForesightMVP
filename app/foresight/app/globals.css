@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand */
+  --color-brand-50: #f3f8fc;
+  --color-brand-100: #e3edf5;
+  --color-brand-200: #c2d6e7;
+  --color-brand-300: #94b6d2;
+  --color-brand-400: #5e8eb7;
+  --color-brand-500: #3c6f9d;
+  --color-brand-600: #2b5780;
+  --color-brand-700: #234566;
+  --color-brand-800: #1a3550;
+  --color-brand-900: #0b3b5c;
+  --color-brand-950: #061f31;
+
+  --color-teal-300: #80e5d8;
+  --color-teal-500: #2fc1ad;
+  --color-teal-700: #15756a;
+
+  --color-amber-warning: #f0a300;
+  --color-red-warning: #de3a3a;
+  --color-green-ok: #34a853;
+
+  --color-surface: #f8fbfd;
+
+  --shadow-glass: 0 8px 32px rgba(11, 59, 92, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  --shadow-glow: 0 0 24px rgba(60, 111, 157, 0.25);
+
+  --radius-glass: 16px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fbfd;
+  --foreground: #061f31;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(60, 111, 157, 0.10) 0%, transparent 35%),
+    radial-gradient(circle at 100% 0%, rgba(47, 193, 173, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(11, 59, 92, 0.06) 0%, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+}
+
+/* Liquid glass primitives */
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-glass);
+}
+
+.glass-dark {
+  background: linear-gradient(140deg, rgba(11, 59, 92, 0.92), rgba(35, 69, 102, 0.88));
+  color: #f0f6fb;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-glass);
+}
+
+.gradient-mesh {
+  background: linear-gradient(135deg, #0b3b5c 0%, #234566 40%, #2fc1ad 100%);
+}
+
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Pulse dot for "thinking" / "recording" states */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.18);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+/* Diff styling for care plan history */
+.diff-add {
+  background: rgba(52, 168, 83, 0.16);
+  color: #185c2a;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+.diff-remove {
+  background: rgba(222, 58, 58, 0.16);
+  color: #7a1818;
+  text-decoration: line-through;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+/* Scrollbar tidy */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(11, 59, 92, 0.25);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 59, 92, 0.4);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Smooth focus rings */
+:focus-visible {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
 }

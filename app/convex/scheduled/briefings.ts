@@ -52,27 +52,33 @@ export const generateMorningForNurse = internalAction({
     } catch {}
 
     if (!parsed) {
-      // Fallback: build a deterministic briefing from queries
-      parsed = await ctx.runQuery(api.queries.panels.kpis, {}).then(async (k: any) => {
-        const queue = await ctx.runQuery(api.queries.panels.todaysQueue, { limit: 8 });
-        return {
-          headline: text.slice(0, 200) || `${queue.length} patients flagged for today.`,
-          priorityQueue: queue.map((p: any) => ({
-            patientId: p._id,
-            patientName: `${p.firstName} ${p.lastName}`,
-            tier: p.tier,
-            reason: p.urgencyReason,
-          })),
-          kpis: {
-            panelSize: k.panelSize,
-            reachedThisMonth: k.reachedThisMonth,
-            reachRate: k.reachRate,
-            avgDocMinutes: k.avgDocMinutes,
-            serviceElementCoverage: k.serviceElementCoverage,
-          },
-          headsUp: [],
-        };
-      });
+      // Fallback: build a deterministic briefing from internal queries
+      // (no caller-identity dependency; uses the explicit nurseId)
+      const k: any = await ctx.runQuery(
+        internal.queries.panels._internalKpisForNurse,
+        { nurseId: args.nurseId },
+      );
+      const queue: any = await ctx.runQuery(
+        internal.queries.panels._internalTodaysQueueForNurse,
+        { nurseId: args.nurseId, limit: 8 },
+      );
+      parsed = {
+        headline: text.slice(0, 200) || `${queue.length} patients flagged for today.`,
+        priorityQueue: queue.map((p: any) => ({
+          patientId: p._id,
+          patientName: `${p.firstName} ${p.lastName}`,
+          tier: p.tier,
+          reason: p.urgencyReason,
+        })),
+        kpis: {
+          panelSize: k.panelSize,
+          reachedThisMonth: k.reachedThisMonth,
+          reachRate: k.reachRate,
+          avgDocMinutes: k.avgDocMinutes,
+          serviceElementCoverage: k.serviceElementCoverage,
+        },
+        headsUp: [],
+      };
     }
 
     await ctx.runMutation(internal.scheduled.briefingHelpers._internalSaveBriefing, {
@@ -90,8 +96,14 @@ export const generateEndOfDayForNurse = internalAction({
   args: { nurseId: v.id("users") },
   handler: async (ctx, args) => {
     const today = new Date().toISOString().slice(0, 10);
-    const kpis: any = await ctx.runQuery(api.queries.panels.kpis, {});
-    const queue: any = await ctx.runQuery(api.queries.panels.todaysQueue, { limit: 5 });
+    const kpis: any = await ctx.runQuery(
+      internal.queries.panels._internalKpisForNurse,
+      { nurseId: args.nurseId },
+    );
+    const queue: any = await ctx.runQuery(
+      internal.queries.panels._internalTodaysQueueForNurse,
+      { nurseId: args.nurseId, limit: 5 },
+    );
     const recap = {
       headline: `Day wrap-up: ${kpis.reachedThisMonth} patients reached this month.`,
       priorityQueue: queue.map((p: any) => ({

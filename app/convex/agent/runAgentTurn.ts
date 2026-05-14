@@ -16,8 +16,12 @@ export const runAgentTurn = action({
   args: {
     threadId: v.id("agentThreads"),
     userInput: v.string(),
+    contextPatientId: v.optional(v.id("patients")),
   },
-  handler: async (ctx, args): Promise<
+  handler: async (
+    ctx,
+    args,
+  ): Promise<
     | { kind: "final"; text: string }
     | { kind: "needs_continue" }
     | { kind: "guardrail_blocked"; reason: string }
@@ -26,15 +30,26 @@ export const runAgentTurn = action({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
+    // Resolve the seeded nurse id (matches patients.primaryNurseId). For demo
+    // users, the signup auth row and the seeded role row are bridged by email.
+    const me: any = await ctx.runQuery(api.queries.me.current, {});
+    const nurseId: Id<"users"> = (me?._id as Id<"users">) ?? userId;
+
     const session = new ConvexSession(ctx, args.threadId, userId);
 
+    // Prepend a context hint if the user is viewing a patient page
+    const inputWithContext = args.contextPatientId
+      ? `(Context: currently viewing patient ${args.contextPatientId}. If the user refers to "this patient" or "them", use that id.)\n\n${args.userInput}`
+      : args.userInput;
+
     try {
-      const result = await run(sage, args.userInput, {
+      const result = await run(sage, inputWithContext, {
         session,
         maxTurns: 4,
         context: {
           ctx,
-          nurseId: userId,
+          userId,
+          nurseId,
           threadId: args.threadId,
         },
       });
@@ -43,10 +58,6 @@ export const runAgentTurn = action({
         typeof result.finalOutput === "string"
           ? result.finalOutput
           : JSON.stringify(result.finalOutput ?? "");
-
-      // The session adapter already wrote tool calls + assistant items as they
-      // streamed in. Belt-and-suspenders: write a final assistant message if the
-      // last persisted message isn't the final.
       return { kind: "final", text };
     } catch (err: any) {
       if (err instanceof MaxTurnsExceededError) {

@@ -159,6 +159,15 @@ function HistoryModal({
               Drafted by {selected.drafter?.name ?? "—"}
               {selected.approver && `, approved by ${selected.approver.name}`}
             </p>
+            {prev ? (
+              <p className="text-[10px] text-brand-500 mt-2 italic">
+                Diff shows changes from v{prev.versionNumber} ({new Date(prev.draftedAt).toLocaleDateString()}) → v{selected.versionNumber}
+              </p>
+            ) : (
+              <p className="text-[10px] text-brand-500 mt-2 italic">
+                Initial version. All items shown as additions.
+              </p>
+            )}
           </div>
 
           <div className="space-y-4">

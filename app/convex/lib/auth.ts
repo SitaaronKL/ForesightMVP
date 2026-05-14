@@ -24,11 +24,12 @@ export async function requireUser(ctx: QueryCtx | MutationCtx) {
   const authUser = await ctx.db.get(userId);
   if (!authUser) throw new Error("User not found");
   if (authUser.role) return authUser;
-  // Demo fallback: look up the seeded overlay row by email
+  // Demo fallback: look up the seeded overlay row by email (case-insensitive)
   if (authUser.email) {
+    const normalizedEmail = authUser.email.toLowerCase().trim();
     const seeded = await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", authUser.email))
+      .withIndex("email", (q) => q.eq("email", normalizedEmail))
       .filter((q) => q.neq(q.field("_id"), userId))
       .first();
     if (seeded) return seeded;

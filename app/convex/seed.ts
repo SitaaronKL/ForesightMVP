@@ -278,7 +278,10 @@ export const _internalCreateUser = internalMutation({
     status: v.union(v.literal("active"), v.literal("inactive")),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("users", args);
+    return await ctx.db.insert("users", {
+      ...args,
+      email: args.email.toLowerCase().trim(),
+    });
   },
 });
 

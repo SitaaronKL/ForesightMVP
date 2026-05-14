@@ -6,12 +6,13 @@ import type { ActionCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 
 /**
- * Agent tool context. Carries the Convex ActionCtx, the calling nurse id,
- * and the active thread for inline action card persistence.
+ * Agent tool context. Carries the Convex ActionCtx, the calling auth user id,
+ * the resolved seeded nurse id, and the active thread for action-card persistence.
  */
 export type AgentContext = {
   ctx: ActionCtx;
-  nurseId: Id<"users">;
+  userId: Id<"users">;       // auth user id (matches agentThreads.userId)
+  nurseId: Id<"users">;      // seeded nurse row id (matches patients.primaryNurseId)
   threadId: Id<"agentThreads">;
 };
 
@@ -22,18 +23,14 @@ export const listPanel = tool({
   description:
     "List patients in the calling nurse's panel with filters and a smart-urgency sort.",
   parameters: z.object({
-    tier: z
-      .enum(["level_1", "level_2", "level_3"])
-      .nullable()
-      .optional()
-      .describe("Filter by clinical tier"),
-    overdue: z.boolean().nullable().optional().describe("Only patients more than 30 days since last touch"),
-    search: z.string().nullable().optional().describe("Substring match on patient name"),
+    tier: z.enum(["level_1", "level_2", "level_3"]).nullable().optional(),
+    overdue: z.boolean().nullable().optional(),
+    search: z.string().nullable().optional(),
     limit: z.number().min(1).max(50).default(25),
   }),
   execute: async (input, runContext) => {
-    const { ctx } = runContext.context as AgentContext;
-    const result = await ctx.runQuery(api.queries.panels.list, {
+    const { ctx } = runContext!.context as AgentContext;
+    const result: any = await ctx.runQuery(api.queries.panels.list, {
       paginationOpts: { numItems: input.limit, cursor: null },
       tierFilter: input.tier ?? undefined,
       overdueOnly: input.overdue ?? undefined,
@@ -55,16 +52,18 @@ export const listPanel = tool({
 
 export const getPatient = tool({
   name: "getPatient",
-  description: "Fetch full patient context including conditions, demographics, risk, and current care plan.",
+  description:
+    "Fetch full patient context: conditions, demographics, risk, current care plan, recent encounters, hospital events.",
   parameters: z.object({
     patientId: z.string().describe("Convex patient id"),
   }),
   execute: async (input, runContext) => {
-    const { ctx } = runContext.context as AgentContext;
-    const result = await ctx.runQuery(api.queries.patients.overview, {
+    const { ctx } = runContext!.context as AgentContext;
+    const result: any = await ctx.runQuery(api.queries.patients.overview, {
       patientId: input.patientId as Id<"patients">,
     });
     return {
+      id: result.patient._id,
       name: `${result.patient.firstName} ${result.patient.lastName}`,
       age:
         new Date().getUTCFullYear() -
@@ -75,6 +74,7 @@ export const getPatient = tool({
       conditions: result.patient.chronicConditions,
       currentCarePlan: result.currentVersion?.content ?? null,
       recentEncounters: result.recentEncounters.map((e: any) => ({
+        id: e._id,
         date: new Date(e.startedAt).toISOString().slice(0, 10),
         type: e.type,
         duration: Math.round(e.durationSeconds / 60),
@@ -93,11 +93,11 @@ export const getPatient = tool({
 
 export const getOverdue = tool({
   name: "getOverdue",
-  description: "Patients on the nurse's panel that are more than 30 days since last touch.",
+  description: "Patients on the nurse's panel more than 30 days since last touch.",
   parameters: z.object({}),
   execute: async (_input, runContext) => {
-    const { ctx } = runContext.context as AgentContext;
-    const result = await ctx.runQuery(api.queries.panels.list, {
+    const { ctx } = runContext!.context as AgentContext;
+    const result: any = await ctx.runQuery(api.queries.panels.list, {
       paginationOpts: { numItems: 50, cursor: null },
       overdueOnly: true,
     });
@@ -113,11 +113,11 @@ export const getOverdue = tool({
 
 export const getDueToday = tool({
   name: "getDueToday",
-  description: "Today's priority queue: the most urgent patients to call today.",
+  description: "Today's priority queue: most urgent patients to call today.",
   parameters: z.object({ limit: z.number().default(10) }),
   execute: async (input, runContext) => {
-    const { ctx } = runContext.context as AgentContext;
-    const result = await ctx.runQuery(api.queries.panels.todaysQueue, {
+    const { ctx } = runContext!.context as AgentContext;
+    const result: any = await ctx.runQuery(api.queries.panels.todaysQueue, {
       limit: input.limit,
     });
     return result.map((p: any) => ({
@@ -135,8 +135,8 @@ export const getMonthlyKPIs = tool({
   description: "Dashboard KPIs for the calling nurse for the current month.",
   parameters: z.object({}),
   execute: async (_input, runContext) => {
-    const { ctx } = runContext.context as AgentContext;
-    const kpis = await ctx.runQuery(api.queries.panels.kpis, {});
+    const { ctx } = runContext!.context as AgentContext;
+    const kpis: any = await ctx.runQuery(api.queries.panels.kpis, {});
     return {
       panelSize: kpis.panelSize,
       reachedThisMonth: kpis.reachedThisMonth,
@@ -150,13 +150,12 @@ export const getMonthlyKPIs = tool({
 
 export const getServiceElementCoverage = tool({
   name: "getServiceElementCoverage",
-  description: "APCM service-element coverage matrix for a specific patient in the current month.",
-  parameters: z.object({
-    patientId: z.string(),
-  }),
+  description:
+    "APCM service-element coverage matrix for a specific patient in the current month.",
+  parameters: z.object({ patientId: z.string() }),
   execute: async (input, runContext) => {
-    const { ctx } = runContext.context as AgentContext;
-    const elements = await ctx.runQuery(
+    const { ctx } = runContext!.context as AgentContext;
+    const elements: any = await ctx.runQuery(
       api.queries.patients.serviceElementsForMonth,
       { patientId: input.patientId as Id<"patients"> },
     );
@@ -168,96 +167,137 @@ export const getServiceElementCoverage = tool({
   },
 });
 
-// ---------- WRITE TOOLS (drafts; never auto-apply) ----------
+// ---------- WRITE TOOLS ----------
+// Each write tool creates a real DB draft AND an action card on the agent
+// message, so the right rail can render an Apply button.
 
 export const draftSoapNote = tool({
   name: "draftSoapNote",
-  description: "Draft a SOAP note for a recent encounter. Returns a draft soapNote that the nurse must sign.",
+  description:
+    "Draft a SOAP note for a recent encounter and surface an Apply card to the nurse. " +
+    "Use the patient's most recent completed encounter id if the nurse does not specify one.",
   parameters: z.object({
+    patientId: z.string(),
     encounterId: z.string(),
     subjective: z.string(),
     objective: z.string(),
     assessment: z.string(),
     plan: z.string(),
-    confidence: z.number().min(0).max(100),
+    confidence: z.number().min(0).max(100).default(75),
   }),
   execute: async (input, runContext) => {
-    const { ctx, nurseId } = runContext.context as AgentContext;
-    // Fetch encounter to get patientId
-    const result = await ctx.runQuery(api.queries.patients.encountersList, {
-      // This requires patientAccess; the agent's calls are scoped to its panel, but
-      // here we need a different shape. Skip strict check by looking up encounter directly.
-      patientId: "" as any,
-    }).catch(() => null);
-    // Simpler path: rely on the apply mutation to verify; we just stage the draft.
+    const { ctx, userId, nurseId, threadId } =
+      runContext!.context as AgentContext;
+    const soapNoteId = await ctx.runMutation(
+      internal.mutations.agentDrafts._internalCreateSoapDraft,
+      {
+        threadId,
+        userId,
+        nurseId,
+        patientId: input.patientId as Id<"patients">,
+        encounterId: input.encounterId as Id<"encounters">,
+        subjective: input.subjective,
+        objective: input.objective,
+        assessment: input.assessment,
+        plan: input.plan,
+        confidence: input.confidence,
+      },
+    );
     return {
-      draftedSummary:
-        `S: ${input.subjective}\nO: ${input.objective}\nA: ${input.assessment}\nP: ${input.plan}`,
-      confidence: input.confidence,
-      note: "Draft created. Nurse must open the SOAP modal to review and sign.",
+      draftCreated: true,
+      soapNoteId,
+      note: "Draft created. The nurse can review and sign via the Apply button in the right rail.",
     };
   },
 });
 
 export const suggestCarePlanRevision = tool({
   name: "suggestCarePlanRevision",
-  description: "Suggest a care plan revision for a patient with specific rationale. Creates a pending-review version.",
+  description:
+    "Suggest a care plan revision: appends one or more changes to the named sections and creates a pending-review version with an Apply card.",
   parameters: z.object({
     patientId: z.string(),
     rationale: z.string(),
     changedSections: z.array(
       z.object({
-        section: z.string(),
-        change: z.string(),
+        section: z
+          .string()
+          .describe(
+            "One of: problem list, expected outcomes, treatment goals, symptom management, planned interventions, medication management, community resources, provider coordination",
+          ),
+        change: z.string().describe("The new line to add to that section"),
       }),
     ),
   }),
-  execute: async (input, _runContext) => {
+  execute: async (input, runContext) => {
+    const { ctx, userId, nurseId, threadId } =
+      runContext!.context as AgentContext;
+    const versionId = await ctx.runMutation(
+      internal.mutations.agentDrafts._internalCreateCarePlanSuggestion,
+      {
+        threadId,
+        userId,
+        nurseId,
+        patientId: input.patientId as Id<"patients">,
+        rationale: input.rationale,
+        changedSections: input.changedSections,
+      },
+    );
     return {
-      suggested: true,
-      patientId: input.patientId,
-      rationale: input.rationale,
-      changes: input.changedSections,
-      note: "Suggestion staged. Nurse approves from the patient detail view to apply.",
+      versionCreated: true,
+      versionId,
+      note: "Pending-review version drafted. Nurse approves via Apply card.",
     };
   },
 });
 
 export const draftPatientMessage = tool({
   name: "draftPatientMessage",
-  description: "Draft a message for the nurse to review and send to a patient via the portal. Never sends directly.",
+  description:
+    "Draft a portal message for the nurse to review and send. Body must be plain English at 8th-grade reading level. Never sends directly.",
   parameters: z.object({
     patientId: z.string(),
-    intent: z.string().describe("Why this message; e.g. medication confirmation, appointment reminder"),
-    body: z.string().describe("Plain English message body, 8th-grade reading level"),
+    intent: z.string(),
+    body: z.string(),
   }),
-  execute: async (input, _runContext) => {
-    return {
-      drafted: true,
-      patientId: input.patientId,
-      intent: input.intent,
-      body: input.body,
-      note: "Draft staged. Nurse must click Send in the portal to deliver.",
-    };
+  execute: async (input, runContext) => {
+    const { ctx, userId, threadId } = runContext!.context as AgentContext;
+    await ctx.runMutation(
+      internal.mutations.agentDrafts._internalCreatePatientMessageDraft,
+      {
+        threadId,
+        userId,
+        patientId: input.patientId as Id<"patients">,
+        intent: input.intent,
+        body: input.body,
+      },
+    );
+    return { drafted: true, note: "Message staged for nurse approval." };
   },
 });
 
 export const scheduleOutreachAttempt = tool({
   name: "scheduleOutreachAttempt",
-  description: "Schedule a future outreach attempt for the nurse to make (call, SMS, portal).",
+  description:
+    "Schedule a future outreach attempt (call, SMS, portal, email) for the nurse to make.",
   parameters: z.object({
     patientId: z.string(),
     method: z.enum(["call", "sms", "portal", "email"]),
-    whenIso: z.string().describe("ISO 8601 timestamp for the scheduled attempt"),
+    whenIso: z.string().describe("ISO 8601 timestamp"),
   }),
-  execute: async (input, _runContext) => {
-    return {
-      scheduled: true,
-      patientId: input.patientId,
-      method: input.method,
-      whenIso: input.whenIso,
-      note: "Outreach scheduled. Will appear in the nurse's queue.",
-    };
+  execute: async (input, runContext) => {
+    const { ctx, userId, threadId } = runContext!.context as AgentContext;
+    const id = await ctx.runMutation(
+      internal.mutations.agentDrafts._internalScheduleOutreach,
+      {
+        threadId,
+        userId,
+        patientId: input.patientId as Id<"patients">,
+        method: input.method,
+        whenIso: input.whenIso,
+      },
+    );
+    return { scheduled: true, outreachId: id };
   },
 });
 

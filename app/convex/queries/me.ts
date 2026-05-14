@@ -17,9 +17,10 @@ export const current = query({
     if (user.role) return user;
     // Otherwise, try to find a seeded user with the same email
     if (user.email) {
+      const normalizedEmail = user.email.toLowerCase().trim();
       const seeded = await ctx.db
         .query("users")
-        .withIndex("email", (q) => q.eq("email", user.email))
+        .withIndex("email", (q) => q.eq("email", normalizedEmail))
         .filter((q) => q.neq(q.field("_id"), userId))
         .first();
       if (seeded) {

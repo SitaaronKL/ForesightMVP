@@ -21,6 +21,13 @@ export const transcribeAudio = action({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
+    // Scope check: caller must have access to this patient
+    const access: any = await ctx.runQuery(
+      internal.agent.whisperHelpers._internalCheckPatientAccess,
+      { patientId: args.patientId, callerId: userId },
+    );
+    if (!access.allowed) throw new Error("Forbidden: patient not in your scope");
+
     // Fetch audio bytes from Convex storage
     const audioBlob = await ctx.storage.get(args.storageId);
     if (!audioBlob) throw new Error("Audio not found in storage");
@@ -61,6 +68,14 @@ export const draftSoapFromTranscript = action({
   handler: async (ctx, args): Promise<{ soapNoteId: Id<"soapNotes"> }> => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
+
+    // Resolve the seeded nurse id (so soapNotes.nurseId is consistent with encounters.nurseId)
+    const access: any = await ctx.runQuery(
+      internal.agent.whisperHelpers._internalCheckPatientAccess,
+      { patientId: args.patientId, callerId: userId },
+    );
+    if (!access.allowed) throw new Error("Forbidden: patient not in your scope");
+    const nurseId: Id<"users"> = access.nurseId;
 
     const transcript: any = await ctx.runQuery(internal.agent.whisperHelpers._internalGetTranscript, {
       transcriptId: args.transcriptId,
@@ -111,7 +126,7 @@ Produce the SOAP note now as JSON.`,
       {
         patientId: args.patientId,
         encounterId: args.encounterId,
-        nurseId: userId,
+        nurseId,
         subjective: parsed.subjective ?? "",
         objective: parsed.objective ?? "",
         assessment: parsed.assessment ?? "",

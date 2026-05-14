@@ -88,7 +88,7 @@ function Admin() {
                   disabled={running !== null}
                   onClick={() =>
                     withSpinner("Generate morning briefing", () =>
-                      triggerBriefing({ nurseId: nurse._id }),
+                      triggerBriefing({ targetNurseId: nurse._id }),
                     )
                   }
                   className="px-4 py-2 rounded-lg bg-teal-500 hover:bg-teal-700 text-white text-sm disabled:opacity-50"
@@ -99,7 +99,7 @@ function Admin() {
                   disabled={running !== null}
                   onClick={() =>
                     withSpinner("Generate EOD wrap", () =>
-                      triggerEOD({ nurseId: nurse._id }),
+                      triggerEOD({ targetNurseId: nurse._id }),
                     )
                   }
                   className="px-4 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-sm disabled:opacity-50"
