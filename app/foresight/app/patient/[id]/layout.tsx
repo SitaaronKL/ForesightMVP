@@ -40,14 +40,13 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
   const me = useMe();
   const params = useParams();
   const patientId = params.id as Id<"patients">;
-  const { collapsed } = useAgentRail();
+  const { collapsed, width } = useAgentRail();
   return (
     <div className="min-h-screen">
       <Sidebar user={me} />
       <main
-        className={`min-h-screen pl-[13.5rem] py-6 transition-[padding] duration-300 ease-out ${
-          collapsed ? "pr-6" : "pr-6 lg:pr-[440px] xl:pr-[480px]"
-        }`}
+        style={{ paddingRight: collapsed ? 24 : width + 60 }}
+        className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
       >
         <div className="max-w-[960px] mx-auto">{children}</div>
       </main>

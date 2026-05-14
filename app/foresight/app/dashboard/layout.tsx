@@ -37,7 +37,7 @@ function Workspace({ children }: { children: ReactNode }) {
 
 function WorkspaceInner({ children }: { children: ReactNode }) {
   const me = useMe();
-  const { collapsed } = useAgentRail();
+  const { collapsed, width } = useAgentRail();
   const role = (me as any)?.role;
   const needsSeed = me !== undefined && role !== "nurse" && role !== "admin";
   const railOpen = !needsSeed && !collapsed;
@@ -46,9 +46,8 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
     <div className="min-h-screen">
       <Sidebar user={me} />
       <main
-        className={`min-h-screen pl-[13.5rem] py-6 transition-[padding] duration-300 ease-out ${
-          railOpen ? "pr-6 lg:pr-[440px] xl:pr-[480px]" : "pr-6"
-        }`}
+        style={{ paddingRight: railOpen ? width + 60 : 24 }}
+        className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
       >
         <div className="max-w-[960px] mx-auto">
           {needsSeed ? <SeedFirstNotice /> : children}
