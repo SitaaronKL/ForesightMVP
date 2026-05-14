@@ -146,18 +146,18 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
           </GlassTooltip>
           <DropdownMenuContent
             align="start"
-            sideOffset={6}
-            className="min-w-[220px] rounded-2xl border-brand-100 shadow-xl p-1.5"
+            sideOffset={8}
+            className="min-w-[300px] rounded-3xl border-brand-100 shadow-xl p-2 bg-white/95 backdrop-blur-xl flex flex-col gap-1.5"
           >
             <DropdownMenuItem
               onSelect={() => startRecording()}
               onMouseEnter={() => micItemRef.current?.startAnimation()}
               onMouseLeave={() => micItemRef.current?.stopAnimation()}
-              className="rounded-full py-2.5 px-4 cursor-pointer focus:bg-foresight/8"
+              className="rounded-full py-2.5 px-4 cursor-pointer bg-white border border-brand-100 hover:border-foresight/40 focus:bg-foresight/8 focus:border-foresight/40 transition outline-none"
             >
               <MicIcon
                 ref={micItemRef}
-                size={16}
+                size={18}
                 className="flex items-center text-foresight"
               />
               <div className="flex flex-col">
@@ -173,11 +173,11 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
               onSelect={handleCallWithoutRecording}
               onMouseEnter={() => micOffItemRef.current?.startAnimation()}
               onMouseLeave={() => micOffItemRef.current?.stopAnimation()}
-              className="rounded-full py-2.5 px-4 cursor-pointer focus:bg-foresight/8"
+              className="rounded-full py-2.5 px-4 cursor-pointer bg-white border border-brand-100 hover:border-foresight/40 focus:bg-foresight/8 focus:border-foresight/40 transition outline-none"
             >
               <MicOffIcon
                 ref={micOffItemRef}
-                size={16}
+                size={18}
                 className="flex items-center text-brand-600"
               />
               <div className="flex flex-col">

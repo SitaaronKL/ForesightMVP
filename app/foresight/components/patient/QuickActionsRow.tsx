@@ -81,8 +81,8 @@ export function QuickActionsRow({
     <>
       {/* @container lets each button collapse smoothly from "icon + label"
           to icon-only as the available width shrinks (e.g. when the Sage
-          rail is dragged wider). */}
-      <div className="@container flex flex-wrap items-center gap-2">
+          rail is dragged wider). Single horizontal row — never wraps. */}
+      <div className="@container flex flex-nowrap items-center gap-2 min-w-0">
         {ACTIONS.map((a) => (
           <GlassTooltip key={a.key} width={260} content={a.tooltip}>
             <button
