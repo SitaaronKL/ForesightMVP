@@ -80,7 +80,7 @@ function StatsBento({
       >
         <SyringeIcon
           ref={syringeRef}
-          size={56}
+          size={44}
           className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
         />
         <div className="min-w-0">
@@ -160,7 +160,7 @@ function PriorityQueuePanel({ queue }: { queue: any[] | undefined }) {
       >
         <BellIcon
           ref={bellRef}
-          size={56}
+          size={44}
           className="flex items-center flex-shrink-0 text-brand-950/85 drop-shadow-sm"
         />
         <div
