@@ -93,15 +93,22 @@ export function SoapReviewModal({
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 border-0 bg-white shadow-2xl rounded-2xl"
+        className="!max-w-5xl w-[min(96vw,72rem)] max-h-[90vh] overflow-y-auto p-0 border-0 bg-white shadow-2xl rounded-2xl"
       >
-        {/* Solid foresight header strip */}
-        <div className="bg-foresight px-6 py-5 rounded-t-2xl">
+        {/* Mesh-gradient header strip */}
+        <div
+          className="px-6 py-5 rounded-t-2xl"
+          style={{
+            backgroundImage: "url(/image-mesh-gradient.png)",
+            backgroundSize: "200% 200%",
+            backgroundPosition: "0% 100%",
+          }}
+        >
           <DialogHeader>
-            <DialogTitle className="text-white text-lg">
+            <DialogTitle className="text-brand-950 text-xl">
               Review SOAP draft
             </DialogTitle>
-            <DialogDescription className="text-white/85 text-xs">
+            <DialogDescription className="text-brand-950/75 text-xs">
               {draft?.draftSource === "ai_from_transcript"
                 ? "Drafted from call transcript"
                 : "Drafted from notes"}
@@ -111,10 +118,10 @@ export function SoapReviewModal({
                   <span
                     className={`font-mono font-semibold ${
                       confidence >= 85
-                        ? "text-green-200"
+                        ? "text-green-800"
                         : confidence >= 70
-                          ? "text-amber-200"
-                          : "text-red-200"
+                          ? "text-amber-800"
+                          : "text-red-warning"
                     }`}
                   >
                     {Math.round(confidence)}%
