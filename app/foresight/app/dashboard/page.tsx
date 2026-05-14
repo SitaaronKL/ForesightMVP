@@ -2,11 +2,12 @@
 
 import { useQuery, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { PatientPill } from "../../components/PatientPill";
 import { HelpHint } from "../../components/HelpHint";
 import { Spinner } from "../../components/Spinner";
+import { SunIcon, type SunIconHandle } from "../../components/SunIcon";
+import { MoonIcon, type MoonIconHandle } from "../../components/MoonIcon";
 
 export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
@@ -171,6 +172,12 @@ function BriefingBento({
   const triggerEod = useAction(api.admin.triggerEndOfDay);
   const [generating, setGenerating] = useState<null | "morning" | "eod">(null);
   const [genError, setGenError] = useState<string | null>(null);
+  const titleSunRef = useRef<SunIconHandle>(null);
+  const titleMoonRef = useRef<MoonIconHandle>(null);
+  const toggleSunRef = useRef<SunIconHandle>(null);
+  const toggleMoonRef = useRef<MoonIconHandle>(null);
+  const emptySunRef = useRef<SunIconHandle>(null);
+  const emptyMoonRef = useRef<MoonIconHandle>(null);
 
   // Default to whichever briefing exists; prefer morning when both do.
   useEffect(() => {
@@ -219,20 +226,24 @@ function BriefingBento({
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             onClick={() => generate("morning")}
+            onMouseEnter={() => emptySunRef.current?.startAnimation()}
+            onMouseLeave={() => emptySunRef.current?.stopAnimation()}
             disabled={generating !== null}
             className="text-xs px-3 py-1.5 rounded-full bg-foresight hover:bg-foresight-dark text-white transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
           >
-            <Sun className="w-3.5 h-3.5" />
+            <SunIcon ref={emptySunRef} size={14} className="flex items-center" />
             {generating === "morning"
               ? "Generating…"
               : "Generate morning briefing"}
           </button>
           <button
             onClick={() => generate("eod")}
+            onMouseEnter={() => emptyMoonRef.current?.startAnimation()}
+            onMouseLeave={() => emptyMoonRef.current?.stopAnimation()}
             disabled={generating !== null}
             className="text-xs px-3 py-1.5 rounded-full bg-white border border-brand-100 text-brand-700 hover:text-foresight hover:bg-foresight/5 transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
           >
-            <Moon className="w-3.5 h-3.5" />
+            <MoonIcon ref={emptyMoonRef} size={14} className="flex items-center" />
             {generating === "eod"
               ? "Generating…"
               : "Generate end-of-day wrap"}
@@ -256,13 +267,21 @@ function BriefingBento({
           backgroundPosition: "center",
         }}
       >
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 text-brand-950"
+          onMouseEnter={() =>
+            (active === "morning" ? titleSunRef : titleMoonRef).current?.startAnimation()
+          }
+          onMouseLeave={() =>
+            (active === "morning" ? titleSunRef : titleMoonRef).current?.stopAnimation()
+          }
+        >
           {active === "morning" ? (
-            <Sun className="w-3.5 h-3.5 text-brand-950" />
+            <SunIcon ref={titleSunRef} size={14} className="flex items-center" />
           ) : (
-            <Moon className="w-3.5 h-3.5 text-brand-950" />
+            <MoonIcon ref={titleMoonRef} size={14} className="flex items-center" />
           )}
-          <h2 className="text-xs font-semibold tracking-wide uppercase text-brand-950">
+          <h2 className="text-xs font-semibold tracking-wide uppercase">
             {title}
           </h2>
         </div>
@@ -277,6 +296,8 @@ function BriefingBento({
               onClick={() =>
                 hasMorning ? setActive("morning") : generate("morning")
               }
+              onMouseEnter={() => toggleSunRef.current?.startAnimation()}
+              onMouseLeave={() => toggleSunRef.current?.stopAnimation()}
               disabled={generating !== null}
               aria-label="Morning briefing"
               title={hasMorning ? "Show morning briefing" : "Generate morning briefing"}
@@ -286,11 +307,13 @@ function BriefingBento({
                   : "text-brand-700 hover:bg-white/40"
               }`}
             >
-              <Sun className="w-3 h-3" />
+              <SunIcon ref={toggleSunRef} size={12} className="flex items-center" />
             </button>
             <button
               type="button"
               onClick={() => (hasEod ? setActive("eod") : generate("eod"))}
+              onMouseEnter={() => toggleMoonRef.current?.startAnimation()}
+              onMouseLeave={() => toggleMoonRef.current?.stopAnimation()}
               disabled={generating !== null}
               aria-label="End-of-day wrap"
               title={hasEod ? "Show end-of-day wrap" : "Generate end-of-day wrap"}
@@ -300,7 +323,7 @@ function BriefingBento({
                   : "text-brand-700 hover:bg-white/40"
               }`}
             >
-              <Moon className="w-3 h-3" />
+              <MoonIcon ref={toggleMoonRef} size={12} className="flex items-center" />
             </button>
           </div>
         </div>
