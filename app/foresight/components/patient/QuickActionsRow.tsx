@@ -23,6 +23,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { HelpHint } from "../HelpHint";
+import { GlassTooltip } from "../GlassTooltip";
 
 type ActionKey = "message" | "note" | "element" | "retry";
 
@@ -79,15 +80,15 @@ export function QuickActionsRow({
   return (
     <>
       {ACTIONS.map((a) => (
-        <button
-          key={a.key}
-          onClick={() => setOpen(a.key)}
-          title={a.tooltip}
-          className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0"
-        >
-          <a.Icon className="w-4 h-4 text-foresight" />
-          {a.label}
-        </button>
+        <GlassTooltip key={a.key} width={260} content={a.tooltip}>
+          <button
+            onClick={() => setOpen(a.key)}
+            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0"
+          >
+            <a.Icon className="w-4 h-4 text-foresight" />
+            {a.label}
+          </button>
+        </GlassTooltip>
       ))}
 
       <SendMessageDialog
