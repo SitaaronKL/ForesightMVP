@@ -50,7 +50,7 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
                 className="flex items-center justify-between text-sm py-1.5 border-b border-brand-50 last:border-0"
               >
                 <div>
-                  <div className="font-medium text-brand-900">{fmt(e.startedAt)}</div>
+                  <div className="font-medium text-brand-950">{fmt(e.startedAt)}</div>
                   <div className="text-xs text-brand-500 capitalize">
                     {e.type.replace("_", " ")} · {Math.round(e.durationSeconds / 60)} min · {e.status}
                   </div>
@@ -81,7 +81,7 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
                   >
                     {h.eventType}
                   </span>
-                  <span className="font-medium text-brand-900">{fmt(h.eventDate)}</span>
+                  <span className="font-medium text-brand-950">{fmt(h.eventDate)}</span>
                   <span className="text-xs text-brand-500">{h.facility}</span>
                 </div>
                 {h.reason && (
@@ -97,25 +97,25 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
         <div className="text-sm space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-brand-500">Risk score</span>
-            <span className="font-mono text-brand-900 font-semibold">
+            <span className="font-mono text-brand-950 font-semibold">
               {Math.round(overview.patient.riskScore)} / 100
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-brand-500">Tier</span>
-            <span className="font-medium text-brand-900 capitalize">
+            <span className="font-medium text-brand-950 capitalize">
               {overview.patient.tier.replace("_", " ")}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-brand-500">Billing program</span>
-            <span className="font-medium text-brand-900 uppercase">
+            <span className="font-medium text-brand-950 uppercase">
               {overview.patient.billingProgram}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-brand-500">Last touch</span>
-            <span className="text-brand-900">
+            <span className="text-brand-950">
               {overview.patient.lastTouchedAt
                 ? fmt(overview.patient.lastTouchedAt)
                 : "—"}

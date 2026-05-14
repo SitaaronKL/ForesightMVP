@@ -26,10 +26,10 @@ export function ServiceElementsTab({ patientId }: { patientId: Id<"patients"> })
     <div className="space-y-4">
       <div className="glass p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-brand-900 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-brand-950 uppercase tracking-wide">
             APCM service elements
           </h3>
-          <span className="text-sm font-mono text-brand-900">
+          <span className="text-sm font-mono text-brand-950">
             {delivered} / {total} ({pct}%)
           </span>
         </div>
@@ -59,7 +59,7 @@ export function ServiceElementsTab({ patientId }: { patientId: Id<"patients"> })
                   >
                     {el.elementId}
                   </span>
-                  <span className="text-sm text-brand-900">{el.elementName}</span>
+                  <span className="text-sm text-brand-950">{el.elementName}</span>
                 </div>
                 <span
                   className={`text-xs uppercase tracking-wider ${

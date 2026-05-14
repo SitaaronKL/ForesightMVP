@@ -24,7 +24,7 @@ export function MessagesTab({ patientId }: { patientId: Id<"patients"> }) {
 
   return (
     <div className="glass p-5">
-      <h3 className="text-sm font-semibold text-brand-900 uppercase tracking-wide mb-3">
+      <h3 className="text-sm font-semibold text-brand-950 uppercase tracking-wide mb-3">
         Portal messages
       </h3>
       <div className="space-y-2 max-h-[320px] overflow-y-auto mb-4">
@@ -49,7 +49,7 @@ export function MessagesTab({ patientId }: { patientId: Id<"patients"> }) {
                 {m.senderType === "patient" ? "Patient" : "Nurse"} ·{" "}
                 {new Date(m._creationTime).toLocaleDateString()}
               </div>
-              <div className="text-brand-900">{m.content}</div>
+              <div className="text-brand-950">{m.content}</div>
             </div>
           ))}
       </div>

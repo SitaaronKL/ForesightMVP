@@ -28,7 +28,7 @@ export function Sidebar({ user }: { user: any }) {
       <div className="px-5 pt-5 pb-4">
         <Link
           href="/dashboard"
-          className="text-brand-900 font-semibold tracking-tight text-lg"
+          className="text-brand-950 font-semibold tracking-tight text-lg"
         >
           ForesightHealth
         </Link>
@@ -91,7 +91,7 @@ export function Sidebar({ user }: { user: any }) {
         </Link>
 
         <div className="mt-2 flex items-center gap-2 px-3 py-2">
-          <span className="flex-1 text-sm text-brand-900 font-medium truncate">
+          <span className="flex-1 text-sm text-brand-950 font-medium truncate">
             {displayName}
           </span>
           <button
@@ -100,7 +100,7 @@ export function Sidebar({ user }: { user: any }) {
             onMouseLeave={() => logoutRef.current?.stopAnimation()}
             aria-label="Sign out"
             title="Sign out"
-            className="p-1 rounded-md text-brand-600 hover:text-brand-900 hover:bg-brand-50"
+            className="p-1 rounded-md text-brand-600 hover:text-brand-950 hover:bg-brand-50"
           >
             <LogoutIcon ref={logoutRef} size={16} className="flex items-center" />
           </button>

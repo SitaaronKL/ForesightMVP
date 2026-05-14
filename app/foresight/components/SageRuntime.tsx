@@ -199,6 +199,29 @@ export function SageProvider({
     ],
   );
 
+  // Suggestion pills Sage offers in the empty state. These cover Sage's
+  // core read + write capabilities so a nurse who's never used the agent
+  // can see what's possible at a glance.
+  const suggestions = useMemo(() => {
+    if (contextPatientId) {
+      return [
+        { prompt: "Summarize this patient" },
+        { prompt: "Draft a SOAP note for the last call" },
+        { prompt: "Suggest care plan changes" },
+        { prompt: "Show service-element coverage this month" },
+        { prompt: "What did we cover in the last 3 encounters?" },
+      ];
+    }
+    return [
+      { prompt: "Show today's priority queue" },
+      { prompt: "Who's overdue this week?" },
+      { prompt: "What's my reach rate this month?" },
+      { prompt: "Show Level 3 patients with high risk scores" },
+      { prompt: "Find APCM patients missing service elements" },
+      { prompt: "Suggest care plan changes for my highest-risk patient" },
+    ];
+  }, [contextPatientId]);
+
   const runtime = useExternalStoreRuntime({
     isLoading: messages === undefined && threadId !== null,
     isRunning,
@@ -206,6 +229,7 @@ export function SageProvider({
     setMessages: () => {},
     convertMessage,
     onNew,
+    suggestions,
     adapters: {
       threadList: threadListAdapter,
     },

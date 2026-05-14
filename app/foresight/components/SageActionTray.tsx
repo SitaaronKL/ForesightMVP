@@ -112,7 +112,7 @@ function ActionCardRow({
         <div className="text-[10px] uppercase tracking-wider text-teal-700 font-semibold">
           {label}
         </div>
-        <div className="text-xs text-brand-900 mt-0.5 truncate">{card.summary}</div>
+        <div className="text-xs text-brand-950 mt-0.5 truncate">{card.summary}</div>
       </div>
       <div className="flex gap-1 flex-shrink-0">
         <Button
@@ -127,7 +127,7 @@ function ActionCardRow({
           onClick={() => dismiss({ messageId, cardIndex })}
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 text-brand-600 hover:bg-white/40 hover:text-brand-900"
+          className="h-7 w-7 p-0 text-brand-600 hover:bg-white/40 hover:text-brand-950"
           aria-label="Dismiss"
         >
           <X className="w-3 h-3" />

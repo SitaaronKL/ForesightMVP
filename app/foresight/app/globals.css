@@ -16,7 +16,7 @@
   --color-brand-700: #234566;
   --color-brand-800: #1a3550;
   --color-brand-900: #283B9E;
-  --color-brand-950: #1c2b76;
+  --color-brand-950: #0a1224;
 
   --color-teal-300: #80e5d8;
   --color-teal-500: #2fc1ad;
@@ -44,12 +44,12 @@
 /* ---- shadcn/ui tokens mapped to brand palette ---- */
 :root {
   --background: #f8fbfd;
-  --foreground: #1c2b76;
+  --foreground: #0a1224;
 
   --card: rgba(255, 255, 255, 0.9);
-  --card-foreground: #1c2b76;
+  --card-foreground: #0a1224;
   --popover: #ffffff;
-  --popover-foreground: #1c2b76;
+  --popover-foreground: #0a1224;
 
   --primary: #283B9E;
   --primary-foreground: #ffffff;
@@ -72,7 +72,7 @@
   --radius: 0.625rem;
 
   --sidebar: #ffffff;
-  --sidebar-foreground: #1c2b76;
+  --sidebar-foreground: #0a1224;
   --sidebar-primary: #283B9E;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f3f8fc;
@@ -82,14 +82,14 @@
 }
 
 .dark {
-  --background: #1c2b76;
+  --background: #0a1224;
   --foreground: #f3f8fc;
   --card: rgba(11, 59, 92, 0.6);
   --card-foreground: #f3f8fc;
   --popover: #283B9E;
   --popover-foreground: #f3f8fc;
   --primary: #94b6d2;
-  --primary-foreground: #1c2b76;
+  --primary-foreground: #0a1224;
   --secondary: #1a3550;
   --secondary-foreground: #f3f8fc;
   --muted: #1a3550;

@@ -35,7 +35,7 @@ function Portal() {
     <div className="min-h-screen p-6">
       <div className="max-w-3xl mx-auto">
         <header className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-brand-900">My Care</h1>
+          <h1 className="text-2xl font-semibold text-brand-950">My Care</h1>
           <button
             onClick={() => signOut()}
             className="text-xs px-3 py-1.5 rounded-md bg-brand-50 hover:bg-brand-100 text-brand-700"
@@ -45,7 +45,7 @@ function Portal() {
         </header>
 
         <div className="glass p-6 text-center">
-          <h2 className="text-lg font-semibold text-brand-900 mb-2">
+          <h2 className="text-lg font-semibold text-brand-950 mb-2">
             Portal preview
           </h2>
           <p className="text-sm text-brand-600 leading-relaxed">

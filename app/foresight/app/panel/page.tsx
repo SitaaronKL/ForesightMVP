@@ -19,7 +19,7 @@ export default function FullPanelPage() {
   return (
     <section className="glass p-5 overflow-hidden">
       <div className="flex flex-wrap items-center justify-between mb-3 gap-2">
-        <h1 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
+        <h1 className="text-sm font-semibold text-brand-950 tracking-wide uppercase">
           Full panel
         </h1>
         <div className="flex flex-wrap items-center gap-2">

@@ -39,7 +39,7 @@ const ThreadListNew: FC = () => {
         variant="outline"
         onMouseEnter={() => iconRef.current?.startAnimation()}
         onMouseLeave={() => iconRef.current?.stopAnimation()}
-        className="aui-thread-list-new h-9 justify-start gap-2 rounded-lg px-3 text-sm bg-transparent hover:bg-transparent hover:text-brand-900 transition-colors"
+        className="aui-thread-list-new h-9 justify-start gap-2 rounded-lg px-3 text-sm bg-transparent hover:bg-transparent hover:text-brand-950 transition-colors"
       >
         <PlusIcon ref={iconRef} size={16} className="flex items-center" />
         New Thread

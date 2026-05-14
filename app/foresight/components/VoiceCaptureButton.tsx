@@ -152,7 +152,7 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
             onClick={handleCall}
             onMouseEnter={() => phoneRef.current?.startAnimation()}
             onMouseLeave={() => phoneRef.current?.stopAnimation()}
-            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-900 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm"
+            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm"
           >
             <PhoneCallIcon ref={phoneRef} size={16} className="flex items-center" />
             Call

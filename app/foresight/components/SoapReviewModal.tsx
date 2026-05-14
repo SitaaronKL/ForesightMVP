@@ -71,7 +71,7 @@ export function SoapReviewModal({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto glass border-white/60">
         <DialogHeader>
-          <DialogTitle className="text-brand-900">Review SOAP draft</DialogTitle>
+          <DialogTitle className="text-brand-950">Review SOAP draft</DialogTitle>
           <DialogDescription className="text-brand-500">
             {draft?.draftSource === "ai_from_transcript"
               ? "Drafted from call transcript"

@@ -14,7 +14,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Page title */}
       <header>
-        <h1 className="text-4xl font-semibold tracking-tight text-brand-900">
+        <h1 className="text-4xl font-semibold tracking-tight text-brand-950">
           Today&apos;s Queue
         </h1>
         <p className="mt-1 text-sm text-brand-600">
@@ -92,7 +92,7 @@ export default function DashboardPage() {
       {briefing?.content && (
         <section className="glass p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
+            <h2 className="text-sm font-semibold text-brand-950 tracking-wide uppercase">
               Today&apos;s briefing
             </h2>
             <span className="text-xs text-brand-500">{briefing.date}</span>
@@ -125,7 +125,7 @@ function Kpi({
   hint?: string;
 }) {
   const toneClass = {
-    neutral: "text-brand-900",
+    neutral: "text-brand-950",
     ok: "text-green-700",
     warn: "text-amber-700",
     bad: "text-red-warning",

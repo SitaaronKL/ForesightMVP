@@ -29,7 +29,7 @@ export function EncountersTab({ patientId }: { patientId: Id<"patients"> }) {
         <tbody>
           {encounters.map((e) => (
             <tr key={e._id} className="border-b border-brand-50 last:border-0">
-              <td className="py-2 text-brand-900">
+              <td className="py-2 text-brand-950">
                 {new Date(e.startedAt).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",

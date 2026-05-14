@@ -46,7 +46,7 @@ export default function PatientPage({
       <div className="glass p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold text-brand-900">
+            <h1 className="text-2xl font-semibold text-brand-950">
               {patient.firstName} {patient.lastName}
             </h1>
             <div className="mt-2 flex items-center gap-2 flex-wrap text-xs text-brand-600">

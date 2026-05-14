@@ -152,7 +152,7 @@ export function LoginScreen() {
               <Button
                 type="submit"
                 disabled={pending}
-                className="w-full bg-white text-brand-900 hover:bg-white/90 font-medium"
+                className="w-full bg-white text-brand-950 hover:bg-white/90 font-medium"
               >
                 {pending
                   ? "…"

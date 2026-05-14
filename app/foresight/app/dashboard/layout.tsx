@@ -62,7 +62,7 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
 function SeedFirstNotice() {
   return (
     <div className="glass p-8 max-w-2xl mx-auto mt-12">
-      <h2 className="text-lg font-semibold text-brand-900 mb-2">
+      <h2 className="text-lg font-semibold text-brand-950 mb-2">
         Set up your demo workspace
       </h2>
       <p className="text-sm text-brand-700 leading-relaxed">

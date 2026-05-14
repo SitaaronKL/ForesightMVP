@@ -20,7 +20,7 @@ export function TierBadge({ tier }: { tier: string }) {
   const label = tier.replace("level_", "L");
   const styles = {
     level_3: "bg-brand-900 text-white",
-    level_2: "bg-brand-200 text-brand-900",
+    level_2: "bg-brand-200 text-brand-950",
     level_1: "bg-brand-50 text-brand-700",
   }[tier as keyof typeof styles] ?? "bg-brand-50 text-brand-700";
   return (

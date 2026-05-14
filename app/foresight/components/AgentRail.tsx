@@ -37,7 +37,7 @@ export function AgentRail({
         aria-label="Open Sage"
         title="Open Sage"
       >
-        <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.12)] flex items-center justify-center text-brand-900 hover:text-brand-700 hover:bg-white/85 transition">
+        <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.12)] flex items-center justify-center text-brand-950 hover:text-brand-700 hover:bg-white/85 transition">
           <ChevronLeft className="w-4 h-4" />
         </div>
       </button>
@@ -56,7 +56,7 @@ export function AgentRail({
           title="Hide Sage"
           className="absolute right-full top-1/2 -translate-y-1/2 z-20"
         >
-          <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.08)] flex items-center justify-center text-brand-900 hover:text-brand-700 hover:bg-white/85 transition">
+          <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.08)] flex items-center justify-center text-brand-950 hover:text-brand-700 hover:bg-white/85 transition">
             <ChevronRight className="w-4 h-4" />
           </div>
         </button>
@@ -104,7 +104,7 @@ function SageInner({
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/30 flex items-center justify-between gap-2 flex-shrink-0">
         <div
-          className="flex items-center gap-2 min-w-0 text-brand-900 cursor-default"
+          className="flex items-center gap-2 min-w-0 text-brand-950 cursor-default"
           onMouseEnter={() => ambulanceRef.current?.startAnimation()}
           onMouseLeave={() => ambulanceRef.current?.stopAnimation()}
         >

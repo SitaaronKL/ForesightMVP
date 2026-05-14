@@ -58,10 +58,10 @@ function Admin() {
       <Sidebar user={me} />
       <main className="min-h-screen pl-[13.5rem] pr-6 py-6 space-y-5">
         <div className="max-w-5xl mx-auto space-y-5">
-        <h1 className="text-2xl font-semibold text-brand-900">Admin console</h1>
+        <h1 className="text-2xl font-semibold text-brand-950">Admin console</h1>
 
         <section className="glass p-5">
-          <h2 className="text-sm font-semibold text-brand-900 uppercase tracking-wide mb-4">
+          <h2 className="text-sm font-semibold text-brand-950 uppercase tracking-wide mb-4">
             Seed data
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -118,7 +118,7 @@ function Admin() {
         </section>
 
         <section className="glass p-5">
-          <h2 className="text-sm font-semibold text-brand-900 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-brand-950 uppercase tracking-wide mb-3">
             Activity log
           </h2>
           <div className="space-y-1 font-mono text-xs text-brand-700 max-h-64 overflow-y-auto">
@@ -132,7 +132,7 @@ function Admin() {
         </section>
 
         <section className="glass p-5">
-          <h2 className="text-sm font-semibold text-brand-900 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-brand-950 uppercase tracking-wide mb-3">
             Users
           </h2>
           <table className="w-full text-sm">

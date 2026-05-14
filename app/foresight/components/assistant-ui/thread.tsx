@@ -131,25 +131,30 @@ const ThreadWelcome: FC = () => {
 
 const ThreadSuggestions: FC = () => {
   return (
-    <div className="aui-thread-welcome-suggestions grid w-full @md:grid-cols-2 gap-2 pb-4">
-      <ThreadPrimitive.Suggestions>
-        {() => <ThreadSuggestionItem />}
-      </ThreadPrimitive.Suggestions>
+    <div className="aui-thread-welcome-suggestions px-4 pb-4">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+        Try asking Sage
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        <ThreadPrimitive.Suggestions>
+          {() => <ThreadSuggestionItem />}
+        </ThreadPrimitive.Suggestions>
+      </div>
     </div>
   );
 };
 
 const ThreadSuggestionItem: FC = () => {
   return (
-    <div className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 @md:nth-[n+3]:block nth-[n+3]:hidden animate-in fill-mode-both duration-200">
+    <div className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200">
       <SuggestionPrimitive.Trigger send asChild>
-        <Button
-          variant="ghost"
-          className="aui-thread-welcome-suggestion h-auto w-full @md:flex-col flex-wrap items-start justify-start gap-1 rounded-3xl border bg-background px-4 py-3 text-start text-sm transition-colors hover:bg-muted"
+        <button
+          type="button"
+          className="aui-thread-welcome-suggestion inline-flex items-center text-[11px] font-medium rounded-full px-3 py-1.5 bg-foresight hover:bg-foresight-dark text-white transition shadow-sm"
         >
-          <SuggestionPrimitive.Title className="aui-thread-welcome-suggestion-text-1 font-medium" />
-          <SuggestionPrimitive.Description className="aui-thread-welcome-suggestion-text-2 text-muted-foreground empty:hidden" />
-        </Button>
+          <SuggestionPrimitive.Title className="aui-thread-welcome-suggestion-text-1" />
+          <SuggestionPrimitive.Description className="aui-thread-welcome-suggestion-text-2 ml-1 text-white/70 empty:hidden" />
+        </button>
       </SuggestionPrimitive.Trigger>
     </div>
   );

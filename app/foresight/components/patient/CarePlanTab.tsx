@@ -37,7 +37,7 @@ export function CarePlanTab({ patientId }: { patientId: Id<"patients"> }) {
       <div className="glass p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
+            <h3 className="text-sm font-semibold text-brand-950 tracking-wide uppercase">
               Care plan (v{v.versionNumber})
             </h3>
             <p className="text-xs text-brand-500 mt-0.5">
@@ -99,8 +99,8 @@ function HistoryModal({
         {/* Timeline */}
         <div className="w-[280px] border-r border-brand-100 overflow-y-auto p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-brand-900">Version history</h3>
-            <button onClick={onClose} className="text-brand-500 hover:text-brand-900">
+            <h3 className="text-sm font-semibold text-brand-950">Version history</h3>
+            <button onClick={onClose} className="text-brand-500 hover:text-brand-950">
               ×
             </button>
           </div>
@@ -149,7 +149,7 @@ function HistoryModal({
         {/* Diff body */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-brand-900">
+            <h3 className="text-sm font-semibold text-brand-950">
               v{selected.versionNumber} · {new Date(selected.draftedAt).toLocaleDateString()}
             </h3>
             <p className="text-xs text-brand-500 mt-1">
