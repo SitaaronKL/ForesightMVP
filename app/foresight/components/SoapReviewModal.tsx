@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { Spinner } from "./Spinner";
 
 const SECTIONS = [
   { key: "subjective", label: "Subjective" },
@@ -126,8 +127,8 @@ export function SoapReviewModal({
 
         <div className="px-6 py-5 space-y-5">
           {!draft && (
-            <div className="text-sm text-brand-500 italic py-8 text-center">
-              Loading draft…
+            <div className="text-sm text-brand-500 py-8 flex items-center justify-center">
+              <Spinner size={18} label="Loading draft…" />
             </div>
           )}
 

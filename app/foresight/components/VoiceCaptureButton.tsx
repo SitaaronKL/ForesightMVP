@@ -5,10 +5,11 @@ import { useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
-import { Square, Loader2 } from "lucide-react";
+import { Square } from "lucide-react";
 import { MicIcon, type MicIconHandle } from "./MicIcon";
 import { PhoneCallIcon, type PhoneCallIconHandle } from "./PhoneCallIcon";
 import { useAgentRail } from "./AgentRailContext";
+import { Spinner } from "./Spinner";
 
 export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> }) {
   const [recording, setRecording] = useState(false);
@@ -155,8 +156,8 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
         )}
 
         {processing && (
-          <div className="inline-flex items-center gap-2 rounded-[100px] bg-brand-100 text-brand-700 px-5 py-2 text-sm">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing…
+          <div className="inline-flex items-center rounded-[100px] bg-brand-100 text-brand-700 px-5 py-2 text-sm">
+            <Spinner size={14} label="Transcribing…" />
           </div>
         )}
       </div>
