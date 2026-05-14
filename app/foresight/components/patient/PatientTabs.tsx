@@ -14,6 +14,7 @@ export type PatientTabKey =
   | "carePlan"
   | "encounters"
   | "serviceElements"
+  | "activity"
   | "messages";
 
 const TABS: { key: PatientTabKey; label: string }[] = [
@@ -21,6 +22,7 @@ const TABS: { key: PatientTabKey; label: string }[] = [
   { key: "carePlan", label: "Care Plan" },
   { key: "encounters", label: "Encounters" },
   { key: "serviceElements", label: "Service Elements" },
+  { key: "activity", label: "Activity" },
   { key: "messages", label: "Messages" },
 ];
 

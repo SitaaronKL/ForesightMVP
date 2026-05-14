@@ -89,6 +89,13 @@ export function useSageSuggestions() {
   return useContext(SageSuggestionsContext);
 }
 
+const SageSendContext = createContext<((text: string) => Promise<void>) | null>(
+  null,
+);
+export function useSageSend() {
+  return useContext(SageSendContext);
+}
+
 export function SageProvider({
   contextPatientId,
   children,
@@ -252,11 +259,22 @@ export function SageProvider({
     [suggestions],
   );
 
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      await onNew({ content: [{ type: "text", text: trimmed }] });
+    },
+    [onNew],
+  );
+
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <SageThreadIdContext.Provider value={threadId}>
         <SageSuggestionsContext.Provider value={suggestionPrompts}>
-          {children}
+          <SageSendContext.Provider value={sendMessage}>
+            {children}
+          </SageSendContext.Provider>
         </SageSuggestionsContext.Provider>
       </SageThreadIdContext.Provider>
     </AssistantRuntimeProvider>

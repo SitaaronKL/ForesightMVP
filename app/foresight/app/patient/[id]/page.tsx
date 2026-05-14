@@ -13,9 +13,13 @@ import { OverviewTab } from "../../../components/patient/OverviewTab";
 import { CarePlanTab } from "../../../components/patient/CarePlanTab";
 import { EncountersTab } from "../../../components/patient/EncountersTab";
 import { ServiceElementsTab } from "../../../components/patient/ServiceElementsTab";
+import { ActivityTab } from "../../../components/patient/ActivityTab";
 import { MessagesTab } from "../../../components/patient/MessagesTab";
 import { VoiceCaptureButton } from "../../../components/VoiceCaptureButton";
 import { PatientTabs, type PatientTabKey } from "../../../components/patient/PatientTabs";
+import { QuickActionsRow } from "../../../components/patient/QuickActionsRow";
+import { HospitalEventBanner } from "../../../components/patient/HospitalEventBanner";
+import { SagePatientSuggestions } from "../../../components/patient/SagePatientSuggestions";
 
 export default function PatientPage({
   params,
@@ -80,6 +84,24 @@ export default function PatientPage({
         </div>
       </div>
 
+      {/* Hospital discharge banner — appears only if discharge in last 14 days */}
+      <HospitalEventBanner
+        patientId={patientId}
+        onCompleteTOC={() => setTab("encounters")}
+      />
+
+      {/* Quick actions strip — sticks under the header on scroll */}
+      <QuickActionsRow
+        patientId={patientId}
+        patientName={`${patient.firstName} ${patient.lastName}`}
+      />
+
+      {/* Sage's proactive context-aware draft suggestions for this patient */}
+      <SagePatientSuggestions
+        patientId={patientId}
+        patientName={`${patient.firstName} ${patient.lastName}`}
+      />
+
       {/* Big-pill segmented control with draggable mini-pill indicator */}
       <PatientTabs value={tab} onChange={setTab} />
 
@@ -88,6 +110,7 @@ export default function PatientPage({
         {tab === "carePlan" && <CarePlanTab patientId={patientId} />}
         {tab === "encounters" && <EncountersTab patientId={patientId} />}
         {tab === "serviceElements" && <ServiceElementsTab patientId={patientId} />}
+        {tab === "activity" && <ActivityTab patientId={patientId} />}
         {tab === "messages" && <MessagesTab patientId={patientId} />}
       </div>
     </div>
