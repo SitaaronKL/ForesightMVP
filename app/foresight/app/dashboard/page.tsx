@@ -20,17 +20,17 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Top bento row: stats + queue on the left, briefing on the right */}
+    <div className="space-y-4">
+      {/* Top bento row: stats square (left) + briefing square (right) */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-        <StatsQueueBento kpis={kpis} queue={queue} />
-        <BriefingBento
-          morning={morningBriefing}
-          eod={eodBriefing}
-        />
+        <StatsBento kpis={kpis} queue={queue} />
+        <BriefingBento morning={morningBriefing} eod={eodBriefing} />
       </section>
 
-      {/* Reached today — full-width below the bento row */}
+      {/* Priority queue — full-width wide rectangle below the bento row */}
+      <PriorityQueuePanel queue={queue} />
+
+      {/* Reached today — full-width below, only when there's at least one */}
       {(reached?.length ?? 0) > 0 && (
         <section className="rounded-2xl border border-brand-100 bg-white p-5">
           <div className="flex items-center justify-between mb-3 gap-3">
@@ -55,7 +55,7 @@ export default function DashboardPage() {
 
 /* ────────────────────────────────────────────────────────────────────── */
 
-function StatsQueueBento({
+function StatsBento({
   kpis,
   queue,
 }: {
@@ -64,7 +64,7 @@ function StatsQueueBento({
 }) {
   return (
     <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
-      <header className="px-5 py-4 border-b border-brand-100">
+      <header className="px-6 pt-5 pb-4 border-b border-brand-100">
         <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
           Today&apos;s Queue
         </h2>
@@ -73,8 +73,8 @@ function StatsQueueBento({
         </p>
       </header>
 
-      {/* Stats strip */}
-      <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-3 border-b border-brand-100">
+      {/* 2 × 3 stats grid — fills the square evenly */}
+      <div className="flex-1 grid grid-cols-2 grid-rows-3 gap-x-6 gap-y-4 p-6">
         <Kpi
           label="Panel size"
           value={kpis?.panelSize ?? "—"}
@@ -105,7 +105,7 @@ function StatsQueueBento({
           hint="Average documentation time per patient this month, across all encounters."
         />
         <Kpi
-          label="APCM"
+          label="APCM coverage"
           value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
           tone={
             kpis
@@ -119,29 +119,32 @@ function StatsQueueBento({
           hint="Share of APCM patients with all required service elements met for the current month."
         />
       </div>
-
-      {/* Priority queue */}
-      <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto">
-        <div className="flex items-center justify-between mb-3 gap-3">
-          <h3 className="text-[10px] font-semibold text-brand-700 tracking-wider uppercase">
-            Priority queue
-          </h3>
-          <span className="text-[10px] text-brand-500 flex-shrink-0 uppercase tracking-wider">
-            {queue?.length ?? 0} flagged
-          </span>
-        </div>
-        <div className="grid gap-2">
-          {queue?.map((p) => (
-            <PatientPill key={p._id} patient={p} billingIconOnly />
-          ))}
-          {queue?.length === 0 && (
-            <div className="text-xs text-brand-500 py-4 text-center">
-              No urgent patients today. Nice work.
-            </div>
-          )}
-        </div>
-      </div>
     </div>
+  );
+}
+
+function PriorityQueuePanel({ queue }: { queue: any[] | undefined }) {
+  return (
+    <section className="rounded-2xl border border-brand-100 bg-white p-5">
+      <div className="flex items-center justify-between mb-3 gap-3">
+        <h2 className="text-xs font-semibold text-brand-700 tracking-wider uppercase">
+          Priority queue
+        </h2>
+        <span className="text-xs text-brand-500 flex-shrink-0 uppercase tracking-wider">
+          {queue?.length ?? 0} flagged
+        </span>
+      </div>
+      <div className="grid gap-2">
+        {queue?.map((p) => (
+          <PatientPill key={p._id} patient={p} billingIconOnly />
+        ))}
+        {queue?.length === 0 && (
+          <div className="text-xs text-brand-500 py-4 text-center">
+            No urgent patients today. Nice work.
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -360,17 +363,12 @@ function Kpi({
     bad: "text-red-warning",
   }[tone];
   return (
-    <div className="flex flex-col">
-      <span className="text-[9px] text-brand-500 uppercase tracking-wider">
+    <div className="flex flex-col justify-center">
+      <span className="text-[10px] text-brand-500 uppercase tracking-wider flex items-center gap-1">
         {label}
-        {hint && (
-          <>
-            {" "}
-            <HelpHint>{hint}</HelpHint>
-          </>
-        )}
+        {hint && <HelpHint>{hint}</HelpHint>}
       </span>
-      <span className={`mt-0.5 text-lg font-semibold ${toneClass}`}>
+      <span className={`mt-1 text-2xl font-semibold leading-none ${toneClass}`}>
         {value}
       </span>
     </div>
