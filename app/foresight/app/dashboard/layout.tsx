@@ -47,7 +47,7 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
       <Sidebar user={me} />
       <main
         className={`min-h-screen pl-[13.5rem] py-6 transition-[padding] duration-300 ease-out ${
-          railOpen ? "pr-6 lg:pr-[404px] xl:pr-[444px]" : "pr-6"
+          railOpen ? "pr-6 lg:pr-[440px] xl:pr-[480px]" : "pr-6"
         }`}
       >
         <div className="max-w-[960px] mx-auto">
