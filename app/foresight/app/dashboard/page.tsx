@@ -72,10 +72,10 @@ function StatsBento({
           backgroundPosition: "center",
         }}
       >
-        <h2 className="text-2xl font-semibold tracking-tight text-white drop-shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
           Today&apos;s Queue
         </h2>
-        <p className="mt-0.5 text-xs text-white/85">
+        <p className="mt-0.5 text-xs text-brand-700">
           {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
         </p>
       </header>
@@ -258,20 +258,20 @@ function BriefingBento({
       >
         <div className="flex items-center gap-2">
           {active === "morning" ? (
-            <Sun className="w-3.5 h-3.5 text-white" />
+            <Sun className="w-3.5 h-3.5 text-brand-950" />
           ) : (
-            <Moon className="w-3.5 h-3.5 text-white" />
+            <Moon className="w-3.5 h-3.5 text-brand-950" />
           )}
-          <h2 className="text-xs font-semibold tracking-wide uppercase text-white">
+          <h2 className="text-xs font-semibold tracking-wide uppercase text-brand-950">
             {title}
           </h2>
         </div>
         <div className="flex items-center gap-2">
           {current?.date && (
-            <span className="text-[11px] text-white/80">{current.date}</span>
+            <span className="text-[11px] text-brand-800">{current.date}</span>
           )}
           {/* Sun / Moon toggle. Only shown when both exist OR the inactive one can be generated. */}
-          <div className="flex items-center gap-0.5 bg-white/15 backdrop-blur-sm rounded-full p-0.5">
+          <div className="flex items-center gap-0.5 bg-white/60 backdrop-blur-sm rounded-full p-0.5">
             <button
               type="button"
               onClick={() =>
@@ -282,8 +282,8 @@ function BriefingBento({
               title={hasMorning ? "Show morning briefing" : "Generate morning briefing"}
               className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
                 active === "morning"
-                  ? "bg-white text-foresight"
-                  : "text-white/80 hover:bg-white/10"
+                  ? "bg-white text-brand-950 shadow-sm"
+                  : "text-brand-700 hover:bg-white/40"
               }`}
             >
               <Sun className="w-3 h-3" />
@@ -296,8 +296,8 @@ function BriefingBento({
               title={hasEod ? "Show end-of-day wrap" : "Generate end-of-day wrap"}
               className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
                 active === "eod"
-                  ? "bg-white text-foresight"
-                  : "text-white/80 hover:bg-white/10"
+                  ? "bg-white text-brand-950 shadow-sm"
+                  : "text-brand-700 hover:bg-white/40"
               }`}
             >
               <Moon className="w-3 h-3" />
