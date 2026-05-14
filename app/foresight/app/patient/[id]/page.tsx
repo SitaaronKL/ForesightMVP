@@ -4,9 +4,8 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { use } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { RiskBadge, TierBadge, BillingBadge } from "../../../components/RiskBadge";
+import { BackToPanelButton } from "../../../components/BackToPanelButton";
 import { OverviewTab } from "../../../components/patient/OverviewTab";
 import { CarePlanTab } from "../../../components/patient/CarePlanTab";
 import { EncountersTab } from "../../../components/patient/EncountersTab";
@@ -38,14 +37,9 @@ export default function PatientPage({
 
   return (
     <div className="space-y-5">
-      {/* Back to dashboard */}
+      {/* Back to panel */}
       <div>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-900 transition"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to panel
-        </Link>
+        <BackToPanelButton />
       </div>
 
       {/* Patient header */}

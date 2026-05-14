@@ -7,8 +7,10 @@ import { Thread } from "@/components/assistant-ui/thread";
 import { ThreadList } from "@/components/assistant-ui/thread-list";
 import { SageProvider, useSageThreadId } from "./SageRuntime";
 import { SageActionTray } from "./SageActionTray";
-import { ChevronLeft, ChevronRight, History } from "lucide-react";
-import { AmbulanceIcon } from "./AmbulanceIcon";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AmbulanceIcon, type AmbulanceIconHandle } from "./AmbulanceIcon";
+import { HistoryIcon, type HistoryIconHandle } from "./HistoryIcon";
+import { useRef } from "react";
 import { useAgentRail } from "./AgentRailContext";
 
 export function AgentRail({
@@ -88,30 +90,38 @@ function SageInner({
 }) {
   const threadId = useSageThreadId();
   const [showHistory, setShowHistory] = useState(false);
+  const ambulanceRef = useRef<AmbulanceIconHandle>(null);
+  const historyRef = useRef<HistoryIconHandle>(null);
 
   return (
     <>
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/30 flex items-center justify-between gap-2 flex-shrink-0">
-        <div className="flex items-center gap-2 min-w-0 text-brand-900">
-          <AmbulanceIcon size={18} className="flex-shrink-0" />
+        <div
+          className="flex items-center gap-2 min-w-0 text-brand-900 cursor-default"
+          onMouseEnter={() => ambulanceRef.current?.startAnimation()}
+          onMouseLeave={() => ambulanceRef.current?.stopAnimation()}
+        >
+          <AmbulanceIcon ref={ambulanceRef} size={18} className="flex-shrink-0" />
           <span className="font-semibold text-sm tracking-wide">Sage</span>
         </div>
         <button
           onClick={() => setShowHistory((v) => !v)}
-          className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-900 rounded-md px-2 py-1 hover:bg-white/40"
+          onMouseEnter={() => historyRef.current?.startAnimation()}
+          onMouseLeave={() => historyRef.current?.stopAnimation()}
+          className="flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 bg-foresight hover:bg-foresight-dark text-white transition shadow-sm"
           aria-label="Toggle conversation history"
           title="Toggle history"
         >
-          <History className="w-3.5 h-3.5" />
+          <HistoryIcon ref={historyRef} size={14} className="flex items-center" />
           History
         </button>
       </div>
 
       <div className="flex flex-1 min-h-0">
-        {/* Thread list panel */}
+        {/* Thread list panel — dark divider to clearly split off from the chat surface */}
         {showHistory && (
-          <div className="w-[160px] border-r border-white/30 bg-white/30 overflow-y-auto p-2 flex-shrink-0">
+          <div className="w-[160px] border-r-2 border-brand-950 bg-white/30 overflow-y-auto p-2 flex-shrink-0">
             <ThreadList />
           </div>
         )}

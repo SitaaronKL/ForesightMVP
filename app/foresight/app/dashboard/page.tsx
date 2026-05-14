@@ -132,9 +132,14 @@ function Kpi({
   }[tone];
   return (
     <div className="flex flex-col">
-      <span className="flex items-center gap-1 text-[10px] text-brand-500 uppercase tracking-wider">
+      <span className="text-[10px] text-brand-500 uppercase tracking-wider">
         {label}
-        {hint && <HelpHint>{hint}</HelpHint>}
+        {hint && (
+          <>
+            {" "}
+            <HelpHint>{hint}</HelpHint>
+          </>
+        )}
       </span>
       <span className={`mt-0.5 text-xl font-semibold ${toneClass}`}>{value}</span>
     </div>
