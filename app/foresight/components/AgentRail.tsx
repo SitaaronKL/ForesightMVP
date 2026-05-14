@@ -5,6 +5,7 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
+import ReactMarkdown from "react-markdown";
 
 export function AgentRail({
   user,
@@ -236,8 +237,27 @@ function MessageBubble({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex">
-        <div className="max-w-[90%] rounded-2xl bg-white/10 px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap">
-          {message.content}
+        <div className="max-w-[90%] rounded-2xl bg-white/10 px-3 py-2 text-sm leading-relaxed">
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="my-1 first:mt-0 last:mb-0">{children}</p>,
+              ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 my-1">{children}</ol>,
+              ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1">{children}</ul>,
+              li: ({ children }) => <li className="leading-snug">{children}</li>,
+              strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+              em: ({ children }) => <em className="italic text-white/90">{children}</em>,
+              code: ({ children }) => (
+                <code className="font-mono text-[11px] bg-black/30 px-1 py-0.5 rounded">{children}</code>
+              ),
+              a: ({ href, children }) => (
+                <a href={href} className="text-teal-300 underline" target="_blank" rel="noreferrer">
+                  {children}
+                </a>
+              ),
+            }}
+          >
+            {message.content}
+          </ReactMarkdown>
         </div>
       </div>
       {message.actionCards?.map((card: any, i: number) => (
