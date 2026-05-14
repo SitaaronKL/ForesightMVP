@@ -183,6 +183,16 @@ function ToolFallbackContent({
   );
 }
 
+function formatJsonish(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) return input;
+  try {
+    return JSON.stringify(JSON.parse(trimmed), null, 2);
+  } catch {
+    return input;
+  }
+}
+
 function ToolFallbackArgs({
   argsText,
   className,
@@ -198,8 +208,11 @@ function ToolFallbackArgs({
       className={cn("aui-tool-fallback-args px-4", className)}
       {...props}
     >
-      <pre className="aui-tool-fallback-args-value whitespace-pre-wrap">
-        {argsText}
+      <p className="aui-tool-fallback-args-header text-xs font-semibold text-muted-foreground mb-1">
+        Arguments
+      </p>
+      <pre className="aui-tool-fallback-args-value whitespace-pre-wrap font-mono text-xs leading-relaxed rounded-md bg-muted/40 px-3 py-2 overflow-x-auto">
+        {formatJsonish(argsText)}
       </pre>
     </div>
   );
@@ -214,6 +227,11 @@ function ToolFallbackResult({
 }) {
   if (result === undefined) return null;
 
+  const isString = typeof result === "string";
+  const formatted = isString
+    ? formatJsonish(result as string)
+    : JSON.stringify(result, null, 2);
+
   return (
     <div
       data-slot="tool-fallback-result"
@@ -223,9 +241,11 @@ function ToolFallbackResult({
       )}
       {...props}
     >
-      <p className="aui-tool-fallback-result-header font-semibold">Result:</p>
-      <pre className="aui-tool-fallback-result-content whitespace-pre-wrap">
-        {typeof result === "string" ? result : JSON.stringify(result, null, 2)}
+      <p className="aui-tool-fallback-result-header text-xs font-semibold text-muted-foreground mb-1">
+        Result
+      </p>
+      <pre className="aui-tool-fallback-result-content whitespace-pre-wrap font-mono text-xs leading-relaxed rounded-md bg-muted/40 px-3 py-2 overflow-x-auto">
+        {formatted}
       </pre>
     </div>
   );

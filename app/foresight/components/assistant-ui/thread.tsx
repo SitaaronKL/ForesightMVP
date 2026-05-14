@@ -364,15 +364,7 @@ const AssistantMessage: FC = () => {
                 );
               }
               case "group-tool":
-                return (
-                  <ToolGroupRoot>
-                    <ToolGroupTrigger
-                      count={part.indices.length}
-                      active={part.status.type === "running"}
-                    />
-                    <ToolGroupContent>{children}</ToolGroupContent>
-                  </ToolGroupRoot>
-                );
+                return <>{children}</>;
               case "text":
                 return <MarkdownText />;
               case "reasoning":
