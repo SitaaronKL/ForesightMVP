@@ -36,6 +36,8 @@ import {
 import { ArrowUpRightIcon } from "@/components/ArrowUpRightIcon";
 import { AmbulanceIcon, type AmbulanceIconHandle } from "@/components/AmbulanceIcon";
 import { useEffect, useRef } from "react";
+import { useSageSuggestions } from "@/components/SageRuntime";
+import { useThreadRuntime } from "@assistant-ui/react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -153,32 +155,35 @@ const ThreadWelcome: FC = () => {
 };
 
 const ThreadSuggestions: FC = () => {
+  // Pull suggestion prompts from our own context. The assistant-ui
+  // SuggestionPrimitive.Title was rendering empty because the runtime's
+  // ThreadSuggestion shape only carries `prompt` (no `title`), so we bypass
+  // the primitive and render plain buttons that send via the thread runtime.
+  const prompts = useSageSuggestions();
+  const runtime = useThreadRuntime();
+  if (!prompts.length) return null;
   return (
     <div className="aui-thread-welcome-suggestions px-4 pb-4">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
         Try asking Sage
       </p>
       <div className="flex flex-wrap gap-1.5">
-        <ThreadPrimitive.Suggestions>
-          {() => <ThreadSuggestionItem />}
-        </ThreadPrimitive.Suggestions>
+        {prompts.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() =>
+              runtime.append({
+                role: "user",
+                content: [{ type: "text", text: p }],
+              })
+            }
+            className="fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200 inline-flex items-center text-[11px] font-medium rounded-full px-3 py-1.5 bg-foresight hover:bg-foresight-dark text-white transition shadow-sm cursor-pointer"
+          >
+            {p}
+          </button>
+        ))}
       </div>
-    </div>
-  );
-};
-
-const ThreadSuggestionItem: FC = () => {
-  return (
-    <div className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200">
-      <SuggestionPrimitive.Trigger send asChild>
-        <button
-          type="button"
-          className="aui-thread-welcome-suggestion inline-flex items-center text-[11px] font-medium rounded-full px-3 py-1.5 bg-foresight hover:bg-foresight-dark text-white transition shadow-sm"
-        >
-          <SuggestionPrimitive.Title className="aui-thread-welcome-suggestion-text-1" />
-          <SuggestionPrimitive.Description className="aui-thread-welcome-suggestion-text-2 ml-1 text-white/70 empty:hidden" />
-        </button>
-      </SuggestionPrimitive.Trigger>
     </div>
   );
 };

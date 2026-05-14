@@ -18,13 +18,20 @@ export function RiskBadge({ score }: { score: number }) {
 
 export function TierBadge({ tier }: { tier: string }) {
   const label = tier.replace("level_", "L");
-  const styles = {
-    level_3: "bg-brand-900 text-white",
-    level_2: "bg-brand-200 text-brand-950",
-    level_1: "bg-brand-50 text-brand-700",
-  }[tier as keyof typeof styles] ?? "bg-brand-50 text-brand-700";
+  // L1 stable → muted green. L2 moderate → muted amber. L3 highest acuity →
+  // muted red. Low saturation so it harmonises with the risk-score chip
+  // (which carries the louder signal).
+  const styles =
+    {
+      level_3: "bg-red-50 text-red-700 border border-red-200",
+      level_2: "bg-amber-50 text-amber-700 border border-amber-200",
+      level_1: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    }[tier as keyof typeof styles] ??
+    "bg-zinc-50 text-zinc-700 border border-zinc-200";
   return (
-    <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${styles}`}>
+    <span
+      className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${styles}`}
+    >
       {label}
     </span>
   );

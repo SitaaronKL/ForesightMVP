@@ -111,7 +111,8 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
 
   // When the rail is open the patient header is cramped, stack the buttons.
   // When the rail is collapsed there's room, lay them out side-by-side.
-  const orientation: "row" | "col" = railCollapsed ? "row" : "col";
+  const orientation: "row" | "col" = "row";
+  void railCollapsed;
 
   return (
     <>
@@ -120,6 +121,18 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
           orientation === "row" ? "flex-row" : "flex-col"
         }`}
       >
+        {!recording && !processing && (
+          <button
+            onClick={handleCall}
+            onMouseEnter={() => phoneRef.current?.startAnimation()}
+            onMouseLeave={() => phoneRef.current?.stopAnimation()}
+            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm"
+          >
+            <PhoneCallIcon ref={phoneRef} size={16} className="flex items-center" />
+            Call
+          </button>
+        )}
+
         {!recording && !processing && (
           <button
             onClick={startRecording}
@@ -145,18 +158,6 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
           <div className="inline-flex items-center gap-2 rounded-[100px] bg-brand-100 text-brand-700 px-5 py-2 text-sm">
             <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing…
           </div>
-        )}
-
-        {!recording && !processing && (
-          <button
-            onClick={handleCall}
-            onMouseEnter={() => phoneRef.current?.startAnimation()}
-            onMouseLeave={() => phoneRef.current?.stopAnimation()}
-            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 px-5 py-2 text-sm font-medium hover:bg-white transition shadow-sm"
-          >
-            <PhoneCallIcon ref={phoneRef} size={16} className="flex items-center" />
-            Call
-          </button>
         )}
       </div>
 

@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { use, useState } from "react";
+import { Mars, Venus, CircleUser } from "lucide-react";
 import { RiskBadge, TierBadge, BillingBadge } from "../../../components/RiskBadge";
 import { BackToPanelButton } from "../../../components/BackToPanelButton";
 import { OverviewTab } from "../../../components/patient/OverviewTab";
@@ -53,7 +54,7 @@ export default function PatientPage({
             <div className="mt-2 flex items-center gap-2 flex-wrap text-xs text-brand-600">
               <span>{age} years old</span>
               <span>·</span>
-              <span>{patient.gender}</span>
+              <GenderLabel value={patient.gender} />
               <span>·</span>
               <span>{patient.city}, {patient.state}</span>
               <span>·</span>
@@ -87,5 +88,19 @@ export default function PatientPage({
         {tab === "messages" && <MessagesTab patientId={patientId} />}
       </div>
     </div>
+  );
+}
+
+function GenderLabel({ value }: { value: string | undefined | null }) {
+  const v = (value ?? "").trim().toLowerCase();
+  const isMale = v === "m" || v === "male";
+  const isFemale = v === "f" || v === "female";
+  const Icon = isMale ? Mars : isFemale ? Venus : CircleUser;
+  const label = isMale ? "Male" : isFemale ? "Female" : value ?? "Unknown";
+  return (
+    <span className="inline-flex items-center gap-1">
+      <Icon className="w-3.5 h-3.5" aria-hidden />
+      {label}
+    </span>
   );
 }

@@ -84,6 +84,11 @@ export function useSageThreadId() {
   return useContext(SageThreadIdContext);
 }
 
+const SageSuggestionsContext = createContext<readonly string[]>([]);
+export function useSageSuggestions() {
+  return useContext(SageSuggestionsContext);
+}
+
 export function SageProvider({
   contextPatientId,
   children,
@@ -242,10 +247,17 @@ export function SageProvider({
     },
   });
 
+  const suggestionPrompts = useMemo(
+    () => suggestions.map((s) => s.prompt),
+    [suggestions],
+  );
+
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <SageThreadIdContext.Provider value={threadId}>
-        {children}
+        <SageSuggestionsContext.Provider value={suggestionPrompts}>
+          {children}
+        </SageSuggestionsContext.Provider>
       </SageThreadIdContext.Provider>
     </AssistantRuntimeProvider>
   );

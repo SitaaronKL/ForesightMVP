@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { RiskBadge, TierBadge, BillingBadge } from "./RiskBadge";
+import { RiskBadge, TierBadge } from "./RiskBadge";
 import { HelpHint } from "./HelpHint";
 
 const TIER_LABEL: Record<string, string> = {
@@ -30,7 +30,6 @@ export function PatientPill({ patient: p }: { patient: any }) {
       <div className="flex items-center gap-2 min-w-0">
         <RiskBadge score={p.riskScore} />
         <TierBadge tier={p.tier} />
-        <BillingBadge program={p.billingProgram} />
         <span className="font-medium text-brand-950 truncate">
           {p.firstName} {p.lastName}
         </span>
