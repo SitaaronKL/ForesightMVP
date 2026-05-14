@@ -30,13 +30,24 @@ export function LiquidGlass({
     let startTimer: number | null = null;
 
     async function start() {
-      const [{ default: html2canvas }, mod] = await Promise.all([
+      const [h2c, mod] = await Promise.all([
         import("html2canvas"),
         import("./liquid-glass/liquid-glass.js"),
       ]);
       if (cancelled || !mountRef.current) return;
 
-      (window as any).html2canvas = html2canvas;
+      const html2canvas = (h2c as any).default ?? h2c;
+
+      // Wrap html2canvas to surface failures so the lib doesn't fail silently.
+      (window as any).html2canvas = (...args: any[]) => {
+        const promise = html2canvas(...args);
+        if (promise && typeof promise.catch === "function") {
+          promise.catch((err: any) =>
+            console.error("[LiquidGlass] html2canvas failed:", err),
+          );
+        }
+        return promise;
+      };
 
       const instance = new (mod as any).Container({
         borderRadius,
@@ -51,11 +62,19 @@ export function LiquidGlass({
       el.style.width = "100%";
       el.style.boxSizing = "border-box";
       el.style.isolation = "isolate";
+      // Always-visible glassy backdrop so the bento reads even if WebGL
+      // hasn't kicked in yet (snapshot pending, html2canvas error, etc.).
+      el.style.background = "rgba(255, 255, 255, 0.55)";
+      el.style.backdropFilter = "blur(20px) saturate(160%)";
+      (el.style as any).webkitBackdropFilter = "blur(20px) saturate(160%)";
+      el.style.border = "1px solid rgba(255, 255, 255, 0.6)";
+      el.style.boxShadow =
+        "0 8px 32px rgba(11, 59, 92, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset";
 
       const canvas: HTMLCanvasElement | null = instance.canvas;
       if (canvas) {
         canvas.style.zIndex = "0";
-        canvas.style.boxShadow = "0 8px 24px rgba(11, 59, 92, 0.12)";
+        canvas.style.boxShadow = "none";
       }
 
       mountRef.current.appendChild(el);

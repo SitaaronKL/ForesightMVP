@@ -7,7 +7,8 @@ import { Thread } from "@/components/assistant-ui/thread";
 import { ThreadList } from "@/components/assistant-ui/thread-list";
 import { SageProvider, useSageThreadId } from "./SageRuntime";
 import { SageActionTray } from "./SageActionTray";
-import { ChevronLeft, ChevronRight, Sparkles, History } from "lucide-react";
+import { ChevronLeft, ChevronRight, History } from "lucide-react";
+import { AmbulanceIcon } from "./AmbulanceIcon";
 
 export function AgentRail({
   user,
@@ -82,8 +83,8 @@ function SageInner({
     <>
       {/* Header */}
       <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-2 flex-shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
+        <div className="flex items-center gap-2 min-w-0 text-primary">
+          <AmbulanceIcon size={18} className="flex-shrink-0" />
           <span className="font-semibold text-sm tracking-wide text-foreground">
             Sage
           </span>

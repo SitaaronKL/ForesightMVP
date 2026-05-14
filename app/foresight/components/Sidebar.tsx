@@ -2,12 +2,19 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { LogoutIcon, type LogoutIconHandle } from "./LogoutIcon";
 import { SettingsIcon, type SettingsIconHandle } from "./SettingsIcon";
 
+const NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/panel", label: "Full panel" },
+];
+
 export function Sidebar({ user }: { user: any }) {
   const { signOut } = useAuthActions();
+  const pathname = usePathname();
   const settingsRef = useRef<SettingsIconHandle>(null);
   const logoutRef = useRef<LogoutIconHandle>(null);
 
@@ -24,6 +31,27 @@ export function Sidebar({ user }: { user: any }) {
           Foresight
         </Link>
       </div>
+
+      <nav className="px-3 flex flex-col gap-1">
+        {NAV_ITEMS.map((item) => {
+          const active =
+            pathname === item.href ||
+            (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`px-3 py-2 rounded-md text-sm transition ${
+                active
+                  ? "bg-brand-900 text-white"
+                  : "text-brand-700 hover:bg-brand-50"
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       <div className="flex-1" />
 
