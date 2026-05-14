@@ -147,7 +147,7 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
           <DropdownMenuContent
             align="start"
             sideOffset={8}
-            className="min-w-[300px] rounded-3xl border-brand-100 shadow-xl p-2 bg-white/95 backdrop-blur-xl flex flex-col gap-1.5"
+            className="min-w-[300px] bg-transparent border-0 shadow-none p-0 flex flex-col gap-1.5"
           >
             <DropdownMenuItem
               onSelect={() => startRecording()}
