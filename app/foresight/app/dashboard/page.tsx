@@ -13,7 +13,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* KPI bento (WebGL liquid glass) */}
-      <LiquidGlass borderRadius={20} tintOpacity={0.35}>
+      <LiquidGlass borderRadius={20} tintOpacity={0.08}>
         <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/30 px-5 py-4">
           <KpiCell label="Panel size" value={kpis?.panelSize ?? "—"} />
           <KpiCell label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />

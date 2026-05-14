@@ -9,7 +9,6 @@ import { SageProvider, useSageThreadId } from "./SageRuntime";
 import { SageActionTray } from "./SageActionTray";
 import { ChevronLeft, ChevronRight, History } from "lucide-react";
 import { AmbulanceIcon } from "./AmbulanceIcon";
-import LiquidGlass from "liquid-glass-react";
 
 export function AgentRail({
   user,
@@ -35,20 +34,9 @@ export function AgentRail({
         aria-label="Open Sage"
         title="Open Sage"
       >
-        <LiquidGlass
-          displacementScale={40}
-          blurAmount={0.05}
-          saturation={130}
-          aberrationIntensity={2}
-          elasticity={0.2}
-          cornerRadius={9999}
-          padding="0"
-          mode="standard"
-        >
-          <div className="h-16 w-7 flex items-center justify-center text-brand-900">
-            <ChevronLeft className="w-4 h-4" />
-          </div>
-        </LiquidGlass>
+        <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.12)] flex items-center justify-center text-brand-900 hover:text-brand-700 hover:bg-white/85 transition">
+          <ChevronLeft className="w-4 h-4" />
+        </div>
       </button>
     );
   }
@@ -56,27 +44,18 @@ export function AgentRail({
   return (
     <>
       <aside className="w-[380px] xl:w-[420px] flex-shrink-0 sticky top-0 self-start h-screen hidden lg:flex relative">
-        {/* Collapse tab nub clinging to the left edge of the sidebar */}
+        {/* Collapse tab nub: glued to the OUTSIDE of the sidebar's left edge,
+            so it visibly attaches to the sidebar instead of overlapping the
+            translucent surface and bleeding into dashboard content behind. */}
         <button
           onClick={() => setCollapsed(true)}
           aria-label="Hide Sage"
           title="Hide Sage"
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20"
+          className="absolute right-full top-1/2 -translate-y-1/2 z-20"
         >
-          <LiquidGlass
-            displacementScale={40}
-            blurAmount={0.05}
-            saturation={130}
-            aberrationIntensity={2}
-            elasticity={0.2}
-            cornerRadius={9999}
-            padding="0"
-            mode="standard"
-          >
-            <div className="h-16 w-7 flex items-center justify-center text-brand-900">
-              <ChevronRight className="w-4 h-4" />
-            </div>
-          </LiquidGlass>
+          <div className="h-16 w-7 rounded-l-full bg-white/70 backdrop-blur-xl border border-r-0 border-white/60 shadow-[-4px_0_16px_rgba(11,59,92,0.08)] flex items-center justify-center text-brand-900 hover:text-brand-700 hover:bg-white/85 transition">
+            <ChevronRight className="w-4 h-4" />
+          </div>
         </button>
 
         {/* Translucent liquid-glass sidebar surface, full height, flush right edge */}

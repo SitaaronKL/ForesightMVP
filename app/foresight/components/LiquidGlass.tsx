@@ -12,20 +12,8 @@ function makeFallbackSnapshot(): HTMLCanvasElement {
   canvas.height = h;
   const ctx = canvas.getContext("2d");
   if (!ctx) return canvas;
-  ctx.fillStyle = "#f8fbfd";
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, w, h);
-  const grads: Array<[number, number, number, [number, number, number, number]]> = [
-    [0, 0, Math.max(w, h) * 0.7, [60, 111, 157, 0.18]],
-    [w, 0, Math.max(w, h) * 0.7, [47, 193, 173, 0.14]],
-    [w * 0.5, h, Math.max(w, h) * 0.8, [11, 59, 92, 0.1]],
-  ];
-  for (const [cx, cy, r, [cr, cg, cb, ca]] of grads) {
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${ca})`);
-    g.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
-  }
   return canvas;
 }
 
@@ -89,14 +77,9 @@ export function LiquidGlass({
       el.style.width = "100%";
       el.style.boxSizing = "border-box";
       el.style.isolation = "isolate";
-      // Always-visible glassy backdrop so the bento reads even if WebGL
-      // hasn't kicked in yet (snapshot pending, html2canvas error, etc.).
-      el.style.background = "rgba(255, 255, 255, 0.55)";
-      el.style.backdropFilter = "blur(20px) saturate(160%)";
-      (el.style as any).webkitBackdropFilter = "blur(20px) saturate(160%)";
-      el.style.border = "1px solid rgba(255, 255, 255, 0.6)";
-      el.style.boxShadow =
-        "0 8px 32px rgba(11, 59, 92, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset";
+      el.style.background = "transparent";
+      el.style.border = "1px solid rgba(255, 255, 255, 0.5)";
+      el.style.boxShadow = "0 8px 32px rgba(11, 59, 92, 0.08)";
 
       const canvas: HTMLCanvasElement | null = instance.canvas;
       if (canvas) {
