@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { PatientPill } from "../../components/PatientPill";
+import { HelpHint } from "../../components/HelpHint";
 
 export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
@@ -25,18 +26,28 @@ export default function DashboardPage() {
       <section className="glass overflow-hidden">
         {/* Stats strip */}
         <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-5 gap-4 border-b border-brand-100/70">
-          <Kpi label="Panel size" value={kpis?.panelSize ?? "—"} />
-          <Kpi label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
+          <Kpi
+            label="Panel size"
+            value={kpis?.panelSize ?? "—"}
+            hint="Total active patients enrolled in your panel right now."
+          />
+          <Kpi
+            label="Reached this month"
+            value={kpis?.reachedThisMonth ?? "—"}
+            hint="Patients you've had at least one billable contact with this calendar month."
+          />
           <Kpi
             label="Reach rate"
             value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
             tone={
               kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"
             }
+            hint="Share of your panel reached this month. Green ≥ 80%, amber 70–79%, red below 70%."
           />
           <Kpi
             label="Avg doc / patient"
             value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
+            hint="Average documentation time per patient this month, across all encounters."
           />
           <Kpi
             label="APCM coverage"
@@ -50,6 +61,7 @@ export default function DashboardPage() {
                     : "bad"
                 : "neutral"
             }
+            hint="Share of APCM patients with all required service elements met for the current month."
           />
         </div>
 
@@ -105,10 +117,12 @@ function Kpi({
   label,
   value,
   tone = "neutral",
+  hint,
 }: {
   label: string;
   value: any;
   tone?: "neutral" | "ok" | "warn" | "bad";
+  hint?: string;
 }) {
   const toneClass = {
     neutral: "text-brand-900",
@@ -118,8 +132,9 @@ function Kpi({
   }[tone];
   return (
     <div className="flex flex-col">
-      <span className="text-[10px] text-brand-500 uppercase tracking-wider">
+      <span className="flex items-center gap-1 text-[10px] text-brand-500 uppercase tracking-wider">
         {label}
+        {hint && <HelpHint>{hint}</HelpHint>}
       </span>
       <span className={`mt-0.5 text-xl font-semibold ${toneClass}`}>{value}</span>
     </div>
