@@ -141,9 +141,9 @@ const ThreadScrollToBottom: FC = () => {
 
 const ThreadWelcome: FC = () => {
   return (
-    <div className="aui-thread-welcome-root my-auto flex grow flex-col">
-      <div className="aui-thread-welcome-center flex w-full grow flex-col items-center justify-center">
-        <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
+    <div className="aui-thread-welcome-root mt-auto flex flex-col">
+      <div className="aui-thread-welcome-center flex w-full flex-col items-center justify-center">
+        <div className="aui-thread-welcome-message flex w-full flex-col justify-center px-4">
           <h1 className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both font-semibold text-2xl duration-200">
             Hello there!
           </h1>
@@ -175,7 +175,7 @@ const ThreadSuggestions: FC = () => {
   }
 
   return (
-    <div className="aui-thread-welcome-suggestions px-4 pt-16 pb-1">
+    <div className="aui-thread-welcome-suggestions px-4 pt-6 pb-0">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
         Try asking Sage
       </p>

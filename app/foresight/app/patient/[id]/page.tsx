@@ -53,38 +53,39 @@ export default function PatientPage({
       </div>
 
       {/* Patient header */}
-      <div className="glass p-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-semibold text-brand-950">
-              {patient.firstName} {patient.lastName}
-            </h1>
-            <div className="mt-2 flex items-center gap-2 flex-wrap text-xs text-brand-600">
-              <span>{age} years old</span>
-              <span>·</span>
-              <GenderLabel value={patient.gender} />
-              <span>·</span>
-              <span>{patient.city}, {patient.state}</span>
-              <span>·</span>
-              <RiskTierBadge score={patient.riskScore} tier={patient.tier} />
-              <BillingBadge program={patient.billingProgram} />
-              {patient.dualEligible && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
-                  Dual eligible
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-brand-500 mt-2">
-              Conditions: {patient.chronicConditions.join(", ")}
-            </p>
+      <div className="glass p-5 @container">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold text-brand-950">
+            {patient.firstName} {patient.lastName}
+          </h1>
+          <div className="mt-2 flex items-center gap-2 flex-wrap text-xs text-brand-600">
+            <span>{age} years old</span>
+            <span>·</span>
+            <GenderLabel value={patient.gender} />
+            <span>·</span>
+            <span>{patient.city}, {patient.state}</span>
+            <span>·</span>
+            <RiskTierBadge score={patient.riskScore} tier={patient.tier} />
+            <BillingBadge program={patient.billingProgram} />
+            {patient.dualEligible && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                Dual eligible
+              </span>
+            )}
           </div>
-          <div className="@container flex items-center gap-2 flex-nowrap justify-end flex-1 min-w-[200px]">
-            <VoiceCaptureButton patientId={patientId} />
-            <QuickActionsRow
-              patientId={patientId}
-              patientName={`${patient.firstName} ${patient.lastName}`}
-            />
-          </div>
+          <p className="text-xs text-brand-500 mt-2">
+            Conditions: {patient.chronicConditions.join(", ")}
+          </p>
+        </div>
+        {/* Action row — full-width below patient info, left-aligned. The
+            patient card itself is the @container, so labels collapse only
+            once the whole header narrows past the threshold. */}
+        <div className="mt-4 flex items-center gap-2 flex-nowrap min-w-0 overflow-hidden">
+          <VoiceCaptureButton patientId={patientId} />
+          <QuickActionsRow
+            patientId={patientId}
+            patientName={`${patient.firstName} ${patient.lastName}`}
+          />
         </div>
       </div>
 
