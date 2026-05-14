@@ -4,6 +4,7 @@ import { useQuery, usePaginatedQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import Link from "next/link";
 import { RiskBadge, TierBadge, BillingBadge } from "../../components/RiskBadge";
+import { LiquidGlass } from "../../components/LiquidGlass";
 import { useState } from "react";
 
 export default function DashboardPage() {
@@ -23,33 +24,35 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* KPI strip */}
-      <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <Kpi label="Panel size" value={kpis?.panelSize ?? "—"} />
-        <Kpi label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
-        <Kpi
-          label="Reach rate"
-          value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
-          tone={kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"}
-        />
-        <Kpi
-          label="Avg doc / patient"
-          value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
-        />
-        <Kpi
-          label="APCM coverage"
-          value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
-          tone={
-            kpis
-              ? kpis.serviceElementCoverage >= 0.7
-                ? "ok"
-                : kpis.serviceElementCoverage >= 0.5
-                  ? "warn"
-                  : "bad"
-              : "neutral"
-          }
-        />
-      </section>
+      {/* KPI bento (WebGL liquid glass) */}
+      <LiquidGlass borderRadius={20} tintOpacity={0.35}>
+        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/30 px-5 py-4">
+          <KpiCell label="Panel size" value={kpis?.panelSize ?? "—"} />
+          <KpiCell label="Reached this month" value={kpis?.reachedThisMonth ?? "—"} />
+          <KpiCell
+            label="Reach rate"
+            value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
+            tone={kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"}
+          />
+          <KpiCell
+            label="Avg doc / patient"
+            value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
+          />
+          <KpiCell
+            label="APCM coverage"
+            value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
+            tone={
+              kpis
+                ? kpis.serviceElementCoverage >= 0.7
+                  ? "ok"
+                  : kpis.serviceElementCoverage >= 0.5
+                    ? "warn"
+                    : "bad"
+                : "neutral"
+            }
+          />
+        </div>
+      </LiquidGlass>
 
       {/* Briefing */}
       {briefing?.content && (
@@ -172,7 +175,7 @@ function PatientPill({ patient: p }: { patient: any }) {
   );
 }
 
-function Kpi({
+function KpiCell({
   label,
   value,
   tone = "neutral",
@@ -188,9 +191,13 @@ function Kpi({
     bad: "text-red-warning",
   }[tone];
   return (
-    <div className="glass p-4">
-      <div className="text-xs text-brand-500 uppercase tracking-wider">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold ${toneClass}`}>{value}</div>
+    <div className="px-4 py-1 first:pl-1 last:pr-1">
+      <div className="text-[10px] text-brand-500 uppercase tracking-wider leading-tight">
+        {label}
+      </div>
+      <div className={`mt-1 text-xl font-semibold leading-tight ${toneClass}`}>
+        {value}
+      </div>
     </div>
   );
 }
