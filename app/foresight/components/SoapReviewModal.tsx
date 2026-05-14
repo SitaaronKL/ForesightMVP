@@ -4,6 +4,11 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export function SoapReviewModal({
   soapNoteId,
@@ -30,7 +35,6 @@ export function SoapReviewModal({
 
   const sign = useMutation(api.mutations.soapNotes.sign);
 
-  // Seed inputs from the real draft when it arrives
   useEffect(() => {
     if (!draft || loaded) return;
     setSubjective(draft.subjective ?? "");
@@ -64,35 +68,32 @@ export function SoapReviewModal({
   const confidence = draft?.aiConfidenceScore;
 
   return (
-    <div className="fixed inset-0 z-40 bg-brand-950/40 backdrop-blur-sm flex items-center justify-center p-6">
-      <div className="glass max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h2 className="text-lg font-semibold text-brand-900">Review SOAP draft</h2>
-            <p className="text-xs text-brand-500 mt-0.5">
-              {draft?.draftSource === "ai_from_transcript" ? "Drafted from call transcript" : "Drafted from notes"}
-              {typeof confidence === "number" && (
-                <>
-                  {" "}· Confidence{" "}
-                  <span
-                    className={`font-mono ${
-                      confidence >= 85
-                        ? "text-green-700"
-                        : confidence >= 70
-                          ? "text-amber-700"
-                          : "text-red-warning"
-                    }`}
-                  >
-                    {Math.round(confidence)}%
-                  </span>
-                </>
-              )}
-            </p>
-          </div>
-          <button onClick={onClose} className="text-brand-500 text-2xl leading-none hover:text-brand-900">
-            ×
-          </button>
-        </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto glass border-white/60">
+        <DialogHeader>
+          <DialogTitle className="text-brand-900">Review SOAP draft</DialogTitle>
+          <DialogDescription className="text-brand-500">
+            {draft?.draftSource === "ai_from_transcript"
+              ? "Drafted from call transcript"
+              : "Drafted from notes"}
+            {typeof confidence === "number" && (
+              <>
+                {" · Confidence "}
+                <span
+                  className={`font-mono ${
+                    confidence >= 85
+                      ? "text-green-700"
+                      : confidence >= 70
+                        ? "text-amber-700"
+                        : "text-red-warning"
+                  }`}
+                >
+                  {Math.round(confidence)}%
+                </span>
+              </>
+            )}
+          </DialogDescription>
+        </DialogHeader>
 
         {!draft && (
           <div className="text-sm text-brand-500 italic py-8 text-center">
@@ -103,13 +104,18 @@ export function SoapReviewModal({
         {draft && (
           <>
             {transcript && (
-              <div className="mb-4 mt-3 border border-brand-100 rounded-lg overflow-hidden">
+              <div className="border border-brand-100 rounded-lg overflow-hidden">
                 <button
+                  type="button"
                   onClick={() => setShowTranscript((v) => !v)}
                   className="w-full px-3 py-2 bg-brand-50/60 text-left text-xs font-medium text-brand-700 flex items-center justify-between hover:bg-brand-50"
                 >
                   <span>Call transcript ({Math.round(transcript.audioDurationSeconds)}s)</span>
-                  <span>{showTranscript ? "−" : "+"}</span>
+                  {showTranscript ? (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  )}
                 </button>
                 {showTranscript && (
                   <div className="px-3 py-2 text-xs text-brand-700 bg-white/50 max-h-32 overflow-y-auto whitespace-pre-wrap">
@@ -128,69 +134,62 @@ export function SoapReviewModal({
                   ["Plan", plan, setPlan],
                 ] as const
               ).map(([label, value, setter]) => (
-                <label key={label} className="block">
-                  <span className="text-[10px] uppercase tracking-wider text-brand-500 font-semibold">
+                <div key={label}>
+                  <Label className="text-[10px] uppercase tracking-wider text-brand-500 font-semibold">
                     {label}
-                  </span>
+                  </Label>
                   <textarea
                     value={value}
                     onChange={(e) => (setter as any)(e.target.value)}
                     rows={3}
-                    className="mt-1 w-full px-3 py-2 rounded-lg bg-white/70 border border-brand-100 text-sm focus:outline-none focus:ring-1 focus:ring-brand-400"
+                    className="mt-1 w-full px-3 py-2 rounded-lg bg-white/70 border border-brand-100 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                   />
-                </label>
+                </div>
               ))}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-brand-100">
-                <label className="block">
-                  <span className="text-[10px] uppercase tracking-wider text-brand-500 font-semibold">
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-brand-500 font-semibold">
                     Duration (minutes)
-                  </span>
-                  <input
+                  </Label>
+                  <Input
                     type="number"
                     value={Math.round(duration / 60)}
                     onChange={(e) => setDuration(Number(e.target.value) * 60)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg bg-white/70 border border-brand-100 text-sm"
+                    className="mt-1 bg-white/70"
                   />
-                </label>
-                <label className="block">
-                  <span className="text-[10px] uppercase tracking-wider text-brand-500 font-semibold">
+                </div>
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-brand-500 font-semibold">
                     Time log activity
-                  </span>
-                  <input
+                  </Label>
+                  <Input
                     type="text"
                     value={activity}
                     onChange={(e) => setActivity(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg bg-white/70 border border-brand-100 text-sm"
+                    className="mt-1 bg-white/70"
                   />
-                </label>
+                </div>
               </div>
             </div>
 
             {error && (
-              <div className="mt-4 text-xs text-red-warning bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              <div className="text-xs text-red-warning bg-red-50 border border-red-200 rounded-md px-3 py-2">
                 {error}
               </div>
             )}
 
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-sm"
-              >
+            <DialogFooter>
+              <Button variant="ghost" onClick={onClose}>
                 Discard
-              </button>
-              <button
-                onClick={handleSign}
-                disabled={signing}
-                className="px-4 py-2 rounded-lg bg-brand-900 hover:bg-brand-800 text-white text-sm disabled:opacity-50"
-              >
+              </Button>
+              <Button onClick={handleSign} disabled={signing}>
                 {signing ? "Signing…" : "Sign and save"}
-              </button>
-            </div>
+              </Button>
+            </DialogFooter>
           </>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -74,34 +74,18 @@ export default function DashboardPage() {
       )}
 
       {/* Today's queue */}
-      <section className="glass p-5">
-        <div className="flex items-center justify-between mb-3">
+      <section className="glass p-5 overflow-hidden">
+        <div className="flex items-center justify-between mb-3 gap-3">
           <h2 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
             Today's queue
           </h2>
-          <span className="text-xs text-brand-500">
+          <span className="text-xs text-brand-500 flex-shrink-0">
             {queue?.length ?? 0} patients flagged
           </span>
         </div>
         <div className="grid gap-2">
           {queue?.map((p) => (
-            <Link
-              key={p._id}
-              href={`/patient/${p._id}`}
-              className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/60 hover:bg-white/90 transition border border-brand-100"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <RiskBadge score={p.riskScore} />
-                <TierBadge tier={p.tier} />
-                <BillingBadge program={p.billingProgram} />
-                <span className="font-medium text-brand-900 truncate">
-                  {p.firstName} {p.lastName}
-                </span>
-              </div>
-              <span className="text-xs text-brand-600 truncate max-w-[40%]">
-                {p.urgencyReason}
-              </span>
-            </Link>
+            <PatientPill key={p._id} patient={p} />
           ))}
           {queue?.length === 0 && (
             <div className="text-xs text-brand-500 py-4 text-center">
@@ -112,23 +96,23 @@ export default function DashboardPage() {
       </section>
 
       {/* Full panel */}
-      <section className="glass p-5">
-        <div className="flex items-center justify-between mb-3">
+      <section className="glass p-5 overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between mb-3 gap-2">
           <h2 className="text-sm font-semibold text-brand-900 tracking-wide uppercase">
             Full panel
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               type="text"
               placeholder="Search name…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="text-xs px-3 py-1.5 rounded-md bg-white/60 border border-brand-100 w-40"
+              className="text-xs px-3 py-1.5 rounded-full bg-white/60 border border-brand-100 w-40"
             />
             <select
               value={tierFilter ?? ""}
               onChange={(e) => setTierFilter(e.target.value || undefined)}
-              className="text-xs px-3 py-1.5 rounded-md bg-white/60 border border-brand-100"
+              className="text-xs px-3 py-1.5 rounded-full bg-white/60 border border-brand-100"
             >
               <option value="">All tiers</option>
               <option value="level_3">Level 3</option>
@@ -137,7 +121,7 @@ export default function DashboardPage() {
             </select>
             <button
               onClick={() => setOverdueOnly((v) => !v)}
-              className={`text-xs px-3 py-1.5 rounded-md border transition ${
+              className={`text-xs px-3 py-1.5 rounded-full border transition ${
                 overdueOnly
                   ? "bg-brand-900 text-white border-brand-900"
                   : "bg-white/60 text-brand-700 border-brand-100"
@@ -147,35 +131,16 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
-        <div className="grid gap-1.5">
+        <div className="grid gap-2">
           {panel.results?.map((p: any) => (
-            <Link
-              key={p._id}
-              href={`/patient/${p._id}`}
-              className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-white/80 transition"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <RiskBadge score={p.riskScore} />
-                <TierBadge tier={p.tier} />
-                <BillingBadge program={p.billingProgram} />
-                <span className="font-medium text-brand-900 truncate">
-                  {p.firstName} {p.lastName}
-                </span>
-                <span className="text-xs text-brand-500 hidden md:inline truncate">
-                  {p.chronicConditions.slice(0, 2).join(", ")}
-                </span>
-              </div>
-              <span className="text-xs text-brand-600 truncate max-w-[35%]">
-                {p.urgencyReason}
-              </span>
-            </Link>
+            <PatientPill key={p._id} patient={p} />
           ))}
         </div>
         {panel.status === "CanLoadMore" && (
           <div className="mt-3 text-center">
             <button
               onClick={() => panel.loadMore(25)}
-              className="text-xs px-4 py-1.5 rounded-md bg-brand-50 hover:bg-brand-100 text-brand-700"
+              className="text-xs px-4 py-1.5 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-700"
             >
               Load more
             </button>
@@ -183,6 +148,27 @@ export default function DashboardPage() {
         )}
       </section>
     </div>
+  );
+}
+
+function PatientPill({ patient: p }: { patient: any }) {
+  return (
+    <Link
+      href={`/patient/${p._id}`}
+      className="flex items-center justify-between gap-3 pl-2 pr-4 py-2 rounded-full bg-white/60 hover:bg-white/90 transition border border-brand-100 min-w-0"
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <RiskBadge score={p.riskScore} />
+        <TierBadge tier={p.tier} />
+        <BillingBadge program={p.billingProgram} />
+        <span className="font-medium text-brand-900 truncate">
+          {p.firstName} {p.lastName}
+        </span>
+      </div>
+      <span className="text-xs text-brand-600 truncate flex-shrink min-w-0 max-w-[45%] text-right">
+        {p.urgencyReason}
+      </span>
+    </Link>
   );
 }
 

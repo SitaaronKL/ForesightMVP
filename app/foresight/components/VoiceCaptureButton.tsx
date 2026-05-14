@@ -5,6 +5,8 @@ import { useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
+import { Button } from "@/components/ui/button";
+import { Mic, Square, Loader2 } from "lucide-react";
 
 export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> }) {
   const [recording, setRecording] = useState(false);
@@ -105,24 +107,22 @@ export function VoiceCaptureButton({ patientId }: { patientId: Id<"patients"> })
   return (
     <>
       {!recording && !processing && (
-        <button
-          onClick={startRecording}
-          className="px-4 py-2 rounded-lg bg-brand-900 text-white text-sm font-medium hover:bg-brand-800 flex items-center gap-2"
-        >
-          <span className="w-2 h-2 rounded-full bg-red-warning" /> Record call
-        </button>
+        <Button onClick={startRecording} className="gap-2">
+          <Mic className="w-4 h-4" /> Record call
+        </Button>
       )}
       {recording && (
-        <button
+        <Button
           onClick={stopAndProcess}
-          className="px-4 py-2 rounded-lg bg-red-warning text-white text-sm font-medium hover:bg-red-700 flex items-center gap-2"
+          variant="destructive"
+          className="gap-2"
         >
-          <span className="w-2 h-2 rounded-full bg-white pulse-dot" /> Stop ({elapsed}s)
-        </button>
+          <Square className="w-3 h-3 fill-current" /> Stop ({elapsed}s)
+        </Button>
       )}
       {processing && (
-        <div className="px-4 py-2 rounded-lg bg-brand-100 text-brand-700 text-sm flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-teal-500 pulse-dot" /> Transcribing + drafting…
+        <div className="px-4 py-2 rounded-md bg-brand-100 text-brand-700 text-sm flex items-center gap-2">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing + drafting…
         </div>
       )}
       {soapNoteId && (

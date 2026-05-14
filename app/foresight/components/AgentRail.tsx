@@ -5,7 +5,19 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
+import { PlusIcon, type PlusIconHandle } from "./PlusIcon";
 import ReactMarkdown from "react-markdown";
+import {
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ArrowUp,
+  X,
+  Wrench,
+  Trash2,
+  MessageSquarePlus,
+} from "lucide-react";
 
 type View = "list" | "thread";
 
@@ -120,18 +132,27 @@ export function AgentRail({
   if (collapsed) {
     return (
       <button
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full glass-dark flex items-center justify-center text-white shadow-glow"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 h-16 w-7 rounded-l-full glass-dark flex items-center justify-center text-white/90 hover:text-white shadow-glow"
         onClick={() => setCollapsed(false)}
         aria-label="Open Sage"
+        title="Open Sage"
       >
-        ✦
+        <ChevronLeft className="w-4 h-4" />
       </button>
     );
   }
 
   return (
     <>
-      <aside className="w-[340px] xl:w-[380px] flex-shrink-0 sticky top-0 self-start h-screen p-4 hidden lg:flex">
+      <aside className="w-[340px] xl:w-[380px] flex-shrink-0 sticky top-0 self-start h-screen p-4 hidden lg:flex relative">
+        <button
+          onClick={() => setCollapsed(true)}
+          aria-label="Hide Sage"
+          title="Hide Sage"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-16 w-7 rounded-full glass-dark flex items-center justify-center text-white/90 hover:text-white"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
         <div className="glass-dark flex flex-col w-full h-full overflow-hidden">
           <Header
             view={view}
@@ -140,11 +161,8 @@ export function AgentRail({
                 ? threads?.find((t) => t._id === threadId)?.title ?? "Thread"
                 : null
             }
-            pending={pending}
-            contextPatientId={contextPatientId}
             onBackToList={backToList}
             onNewThread={startNewThread}
-            onCollapse={() => setCollapsed(true)}
           />
 
           {view === "list" && (
@@ -205,42 +223,31 @@ export function AgentRail({
 function Header({
   view,
   threadTitle,
-  pending,
-  contextPatientId,
   onBackToList,
   onNewThread,
-  onCollapse,
 }: {
   view: View;
   threadTitle: string | null;
-  pending: boolean;
-  contextPatientId?: Id<"patients">;
   onBackToList: () => void;
   onNewThread: () => void;
-  onCollapse: () => void;
 }) {
   return (
     <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-2">
       <div className="flex items-center gap-2 min-w-0">
-        <span
-          className={`w-2 h-2 rounded-full flex-shrink-0 ${pending ? "bg-teal-300 pulse-dot" : "bg-green-ok"}`}
-        />
         {view === "list" ? (
           <>
+            <Sparkles className="w-4 h-4 text-teal-300 flex-shrink-0" />
             <span className="font-semibold text-sm tracking-wide">Sage</span>
-            <span className="text-[10px] text-white/60">
-              {contextPatientId ? "patient context" : "panel context"}
-            </span>
           </>
         ) : (
           <>
             <button
               onClick={onBackToList}
-              className="text-white/60 hover:text-white text-xs leading-none flex-shrink-0"
+              className="text-white/60 hover:text-white flex-shrink-0"
               aria-label="Back to threads"
               title="Back to threads"
             >
-              ‹
+              <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="font-medium text-xs text-white/90 truncate">
               {threadTitle}
@@ -249,22 +256,36 @@ function Header({
         )}
       </div>
       <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          onClick={onNewThread}
-          className="text-[10px] px-2 py-1 rounded bg-teal-500 hover:bg-teal-700 text-white"
-          title="New chat"
-        >
-          + New
-        </button>
-        <button
-          onClick={onCollapse}
-          className="text-white/60 hover:text-white text-lg leading-none ml-1"
-          aria-label="Collapse Sage"
-        >
-          ›
-        </button>
+        <NewThreadButton onClick={onNewThread} variant="compact" />
       </div>
     </div>
+  );
+}
+
+function NewThreadButton({
+  onClick,
+  variant,
+}: {
+  onClick: () => void;
+  variant: "compact" | "prominent";
+}) {
+  const iconRef = useRef<PlusIconHandle>(null);
+  const sizeClass =
+    variant === "compact"
+      ? "text-[11px] px-2 py-1 gap-1"
+      : "text-sm px-4 py-2 gap-1.5";
+  const iconSize = variant === "compact" ? 12 : 14;
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => iconRef.current?.startAnimation()}
+      onMouseLeave={() => iconRef.current?.stopAnimation()}
+      className={`inline-flex items-center rounded-full bg-teal-500 hover:bg-teal-700 text-white ${sizeClass}`}
+      title="New chat"
+    >
+      New
+      <PlusIcon ref={iconRef} size={iconSize} className="flex items-center" />
+    </button>
   );
 }
 
@@ -283,13 +304,13 @@ function ThreadList({
     <div className="flex-1 overflow-y-auto">
       {threads.length === 0 ? (
         <div className="p-6 text-center">
-          <p className="text-xs text-white/60 italic mb-4">No conversations yet.</p>
-          <button
-            onClick={onNewThread}
-            className="text-xs px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-700 text-white"
-          >
-            Start a chat
-          </button>
+          <p className="text-xs text-white/70 leading-relaxed mb-5">
+            You can ask Sage different questions and different things about your
+            patients and help you plan out stuff for the day.
+          </p>
+          <div className="flex justify-center">
+            <NewThreadButton onClick={onNewThread} variant="prominent" />
+          </div>
         </div>
       ) : (
         <ul className="py-2">
@@ -312,7 +333,7 @@ function ThreadList({
                   aria-label="Delete thread"
                   title="Delete"
                 >
-                  ✕
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </li>
@@ -369,9 +390,10 @@ function Composer({
         <button
           onClick={onSend}
           disabled={pending || !input.trim()}
-          className="px-3 rounded-lg bg-teal-500 hover:bg-teal-700 text-white text-sm disabled:opacity-30"
+          className="px-3 rounded-lg bg-teal-500 hover:bg-teal-700 text-white disabled:opacity-30 flex items-center justify-center"
+          aria-label="Send"
         >
-          ↑
+          <ArrowUp className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -417,11 +439,11 @@ function MessageBubble({
   }
   if (message.role === "tool") {
     return (
-      <div className="text-[11px] text-white/55 font-mono pl-1">
-        <span className="text-teal-300">▸</span>{" "}
+      <div className="text-[11px] text-white/55 font-mono pl-1 flex items-center gap-1.5">
+        <Wrench className="w-3 h-3 text-teal-300" />
         <span className="text-white/80">{message.toolName ?? "tool"}</span>
         {message.toolArgs && (
-          <span className="text-white/40 ml-1">
+          <span className="text-white/40">
             ({truncateJson(message.toolArgs)})
           </span>
         )}
@@ -578,9 +600,10 @@ function ActionCard({
             </button>
             <button
               onClick={() => dismiss({ messageId, cardIndex })}
-              className="text-[10px] px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white/80"
+              className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white/80"
+              aria-label="Dismiss"
             >
-              ✕
+              <X className="w-3 h-3" />
             </button>
           </div>
         )}

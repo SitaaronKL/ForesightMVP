@@ -3,8 +3,9 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { use, useState } from "react";
+import { use } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { RiskBadge, TierBadge, BillingBadge } from "../../../components/RiskBadge";
 import { OverviewTab } from "../../../components/patient/OverviewTab";
 import { CarePlanTab } from "../../../components/patient/CarePlanTab";
@@ -12,16 +13,7 @@ import { EncountersTab } from "../../../components/patient/EncountersTab";
 import { ServiceElementsTab } from "../../../components/patient/ServiceElementsTab";
 import { MessagesTab } from "../../../components/patient/MessagesTab";
 import { VoiceCaptureButton } from "../../../components/VoiceCaptureButton";
-
-const TABS = [
-  { key: "overview", label: "Overview" },
-  { key: "carePlan", label: "Care Plan" },
-  { key: "encounters", label: "Encounters" },
-  { key: "serviceElements", label: "Service Elements" },
-  { key: "messages", label: "Messages" },
-] as const;
-
-type TabKey = (typeof TABS)[number]["key"];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PatientPage({
   params,
@@ -30,7 +22,6 @@ export default function PatientPage({
 }) {
   const { id } = use(params);
   const patientId = id as Id<"patients">;
-  const [tab, setTab] = useState<TabKey>("overview");
 
   const overview = useQuery(api.queries.patients.overview, { patientId });
 
@@ -51,16 +42,16 @@ export default function PatientPage({
       <div>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1 text-xs text-brand-600 hover:text-brand-900 transition"
+          className="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-900 transition"
         >
-          <span aria-hidden>←</span> Back to panel
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to panel
         </Link>
       </div>
 
       {/* Patient header */}
       <div className="glass p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-semibold text-brand-900">
               {patient.firstName} {patient.lastName}
             </h1>
@@ -84,36 +75,47 @@ export default function PatientPage({
               Conditions: {patient.chronicConditions.join(", ")}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <VoiceCaptureButton patientId={patientId} />
           </div>
         </div>
       </div>
 
-      {/* Tab strip */}
-      <div className="flex gap-1 border-b border-brand-100">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              tab === t.key
-                ? "border-brand-900 text-brand-900"
-                : "border-transparent text-brand-500 hover:text-brand-700"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="bg-white/60 border border-brand-100 p-1 h-auto">
+          <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-brand-900 data-[state=active]:text-white">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="carePlan" className="text-xs data-[state=active]:bg-brand-900 data-[state=active]:text-white">
+            Care Plan
+          </TabsTrigger>
+          <TabsTrigger value="encounters" className="text-xs data-[state=active]:bg-brand-900 data-[state=active]:text-white">
+            Encounters
+          </TabsTrigger>
+          <TabsTrigger value="serviceElements" className="text-xs data-[state=active]:bg-brand-900 data-[state=active]:text-white">
+            Service Elements
+          </TabsTrigger>
+          <TabsTrigger value="messages" className="text-xs data-[state=active]:bg-brand-900 data-[state=active]:text-white">
+            Messages
+          </TabsTrigger>
+        </TabsList>
 
-      <div>
-        {tab === "overview" && <OverviewTab patientId={patientId} />}
-        {tab === "carePlan" && <CarePlanTab patientId={patientId} />}
-        {tab === "encounters" && <EncountersTab patientId={patientId} />}
-        {tab === "serviceElements" && <ServiceElementsTab patientId={patientId} />}
-        {tab === "messages" && <MessagesTab patientId={patientId} />}
-      </div>
+        <TabsContent value="overview" className="mt-4">
+          <OverviewTab patientId={patientId} />
+        </TabsContent>
+        <TabsContent value="carePlan" className="mt-4">
+          <CarePlanTab patientId={patientId} />
+        </TabsContent>
+        <TabsContent value="encounters" className="mt-4">
+          <EncountersTab patientId={patientId} />
+        </TabsContent>
+        <TabsContent value="serviceElements" className="mt-4">
+          <ServiceElementsTab patientId={patientId} />
+        </TabsContent>
+        <TabsContent value="messages" className="mt-4">
+          <MessagesTab patientId={patientId} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
