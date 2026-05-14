@@ -64,11 +64,18 @@ function StatsBento({
 }) {
   return (
     <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
-      <header className="px-6 pt-5 pb-4 border-b border-brand-100">
-        <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
+      <header
+        className="px-6 pt-5 pb-4"
+        style={{
+          backgroundImage: "url(/image-mesh-gradient.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <h2 className="text-2xl font-semibold tracking-tight text-white drop-shadow-sm">
           Today&apos;s Queue
         </h2>
-        <p className="mt-0.5 text-xs text-brand-600">
+        <p className="mt-0.5 text-xs text-white/85">
           {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
         </p>
       </header>
@@ -187,10 +194,6 @@ function BriefingBento({
 
   const current = active === "morning" ? morning : eod;
   const title = active === "morning" ? "Morning briefing" : "End-of-day wrap";
-  const accent =
-    active === "morning"
-      ? "from-foresight to-foresight-light"
-      : "from-foresight-dark to-foresight";
 
   // Loading state
   if (morning === undefined || eod === undefined) {
@@ -244,9 +247,14 @@ function BriefingBento({
 
   return (
     <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
-      {/* Header with gradient + sun/moon toggle */}
+      {/* Header with mesh-gradient background + sun/moon toggle */}
       <div
-        className={`bg-gradient-to-r ${accent} px-5 py-3 flex items-center justify-between`}
+        className="px-5 py-3 flex items-center justify-between"
+        style={{
+          backgroundImage: "url(/image-mesh-gradient.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
         <div className="flex items-center gap-2">
           {active === "morning" ? (
