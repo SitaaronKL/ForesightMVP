@@ -2,7 +2,8 @@
 
 import { useQuery, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
 import { PatientPill } from "../../components/PatientPill";
 import { HelpHint } from "../../components/HelpHint";
 import { Spinner } from "../../components/Spinner";
@@ -11,12 +12,161 @@ export default function DashboardPage() {
   const kpis = useQuery(api.queries.panels.kpis, {});
   const queue = useQuery(api.queries.panels.todaysQueue, { limit: 8 });
   const reached = useQuery(api.queries.panels.reachedToday, { limit: 12 });
-  const morningBriefing = useQuery(api.queries.agent.todaysBriefing, { type: "morning" });
-  const eodBriefing = useQuery(api.queries.agent.todaysBriefing, { type: "end_of_day" });
+  const morningBriefing = useQuery(api.queries.agent.todaysBriefing, {
+    type: "morning",
+  });
+  const eodBriefing = useQuery(api.queries.agent.todaysBriefing, {
+    type: "end_of_day",
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Top bento row: stats + queue on the left, briefing on the right */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <StatsQueueBento kpis={kpis} queue={queue} />
+        <BriefingBento
+          morning={morningBriefing}
+          eod={eodBriefing}
+        />
+      </section>
+
+      {/* Reached today — full-width below the bento row */}
+      {(reached?.length ?? 0) > 0 && (
+        <section className="rounded-2xl border border-brand-100 bg-white p-5">
+          <div className="flex items-center justify-between mb-3 gap-3">
+            <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
+              Reached today
+            </h2>
+            <span className="text-xs text-brand-500 flex-shrink-0">
+              {reached?.length ?? 0}{" "}
+              {(reached?.length ?? 0) === 1 ? "patient" : "patients"}
+            </span>
+          </div>
+          <div className="grid gap-2">
+            {reached?.map((p) => (
+              <PatientPill key={p._id} patient={p} billingIconOnly />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────── */
+
+function StatsQueueBento({
+  kpis,
+  queue,
+}: {
+  kpis: any;
+  queue: any[] | undefined;
+}) {
+  return (
+    <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
+      <header className="px-5 py-4 border-b border-brand-100">
+        <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
+          Today&apos;s Queue
+        </h2>
+        <p className="mt-0.5 text-xs text-brand-600">
+          {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
+        </p>
+      </header>
+
+      {/* Stats strip */}
+      <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-3 border-b border-brand-100">
+        <Kpi
+          label="Panel size"
+          value={kpis?.panelSize ?? "—"}
+          hint="Total active patients enrolled in your panel right now."
+        />
+        <Kpi
+          label="Reached"
+          value={kpis?.reachedThisMonth ?? "—"}
+          hint="Patients you've had at least one billable contact with this calendar month."
+        />
+        <Kpi
+          label="Reach rate"
+          value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
+          tone={
+            kpis
+              ? kpis.reachRate >= 0.8
+                ? "ok"
+                : kpis.reachRate >= 0.7
+                  ? "warn"
+                  : "bad"
+              : "neutral"
+          }
+          hint="Share of your panel reached this month. Green ≥ 80%, amber 70–79%, red below 70%."
+        />
+        <Kpi
+          label="Avg doc"
+          value={kpis ? `${kpis.avgDocMinutes.toFixed(1)}m` : "—"}
+          hint="Average documentation time per patient this month, across all encounters."
+        />
+        <Kpi
+          label="APCM"
+          value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
+          tone={
+            kpis
+              ? kpis.serviceElementCoverage >= 0.7
+                ? "ok"
+                : kpis.serviceElementCoverage >= 0.5
+                  ? "warn"
+                  : "bad"
+              : "neutral"
+          }
+          hint="Share of APCM patients with all required service elements met for the current month."
+        />
+      </div>
+
+      {/* Priority queue */}
+      <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto">
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <h3 className="text-[10px] font-semibold text-brand-700 tracking-wider uppercase">
+            Priority queue
+          </h3>
+          <span className="text-[10px] text-brand-500 flex-shrink-0 uppercase tracking-wider">
+            {queue?.length ?? 0} flagged
+          </span>
+        </div>
+        <div className="grid gap-2">
+          {queue?.map((p) => (
+            <PatientPill key={p._id} patient={p} billingIconOnly />
+          ))}
+          {queue?.length === 0 && (
+            <div className="text-xs text-brand-500 py-4 text-center">
+              No urgent patients today. Nice work.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────── */
+
+function BriefingBento({
+  morning,
+  eod,
+}: {
+  morning: any;
+  eod: any;
+}) {
+  const hasMorning = !!morning?.content;
+  const hasEod = !!eod?.content;
+  const [active, setActive] = useState<"morning" | "eod">("morning");
   const triggerMorning = useAction(api.admin.triggerMorningBriefing);
   const triggerEod = useAction(api.admin.triggerEndOfDay);
   const [generating, setGenerating] = useState<null | "morning" | "eod">(null);
   const [genError, setGenError] = useState<string | null>(null);
+
+  // Default to whichever briefing exists; prefer morning when both do.
+  useEffect(() => {
+    if (active === "morning" && !hasMorning && hasEod) setActive("eod");
+    if (active === "eod" && !hasEod && hasMorning) setActive("morning");
+  }, [active, hasMorning, hasEod]);
 
   async function generate(kind: "morning" | "eod") {
     setGenError(null);
@@ -24,6 +174,7 @@ export default function DashboardPage() {
     try {
       if (kind === "morning") await triggerMorning({});
       else await triggerEod({});
+      setActive(kind);
     } catch (err: any) {
       setGenError(err?.message ?? "Failed to generate briefing.");
     } finally {
@@ -31,214 +182,165 @@ export default function DashboardPage() {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Briefings at the top — what the nurse sees first when they land. */}
-      {(morningBriefing?.content || eodBriefing?.content) && (
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {morningBriefing?.content && (
-            <BriefingCard
-              title="Morning briefing"
-              accent="from-foresight to-foresight-light"
-              date={morningBriefing.date}
-              content={morningBriefing.content as any}
-            />
-          )}
-          {eodBriefing?.content && (
-            <BriefingCard
-              title="End-of-day wrap"
-              accent="from-foresight-dark to-foresight"
-              date={eodBriefing.date}
-              content={eodBriefing.content as any}
-            />
-          )}
-        </section>
-      )}
+  const current = active === "morning" ? morning : eod;
+  const title = active === "morning" ? "Morning briefing" : "End-of-day wrap";
+  const accent =
+    active === "morning"
+      ? "from-foresight to-foresight-light"
+      : "from-foresight-dark to-foresight";
 
-      {/* No briefing yet — give the nurse a way to generate one inline. */}
-      {!morningBriefing?.content && !eodBriefing?.content && (
-        <section className="rounded-2xl border border-brand-100 bg-white p-5">
-          <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase mb-1">
+  // Loading state
+  if (morning === undefined || eod === undefined) {
+    return (
+      <div className="rounded-2xl border border-brand-100 bg-white p-5 flex items-center justify-center">
+        <Spinner size={14} label="Loading briefings…" />
+      </div>
+    );
+  }
+
+  // No briefing yet — show the generate affordance
+  if (!hasMorning && !hasEod) {
+    return (
+      <div className="rounded-2xl border border-brand-100 bg-white p-5 flex flex-col">
+        <header className="mb-2">
+          <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
             Briefings
           </h2>
-          {morningBriefing === undefined || eodBriefing === undefined ? (
-            <Spinner size={14} label="Loading today’s briefings…" />
-          ) : (
-            <>
-              <p className="text-sm text-brand-600 leading-relaxed">
-                No briefing generated yet today. Generate one for yourself:
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  onClick={() => generate("morning")}
-                  disabled={generating !== null}
-                  className="text-xs px-3 py-1.5 rounded-full bg-foresight hover:bg-foresight-dark text-white transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
-                >
-                  {generating === "morning" && <Spinner size={12} />}
-                  {generating === "morning"
-                    ? "Generating…"
-                    : "Generate morning briefing"}
-                </button>
-                <button
-                  onClick={() => generate("eod")}
-                  disabled={generating !== null}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white border border-brand-100 text-brand-700 hover:text-foresight hover:bg-foresight/5 transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
-                >
-                  {generating === "eod" && <Spinner size={12} />}
-                  {generating === "eod"
-                    ? "Generating…"
-                    : "Generate end-of-day wrap"}
-                </button>
-              </div>
-              {genError && (
-                <p className="mt-3 text-xs text-red-warning">{genError}</p>
-              )}
-            </>
-          )}
-        </section>
-      )}
-
-      {/* Page title */}
-      <header>
-        <h1 className="text-4xl font-semibold tracking-tight text-brand-950">
-          Today&apos;s Queue
-        </h1>
-        <p className="mt-1 text-sm text-brand-600">
-          {queue ? `${queue.length} patients flagged for today.` : "Loading panel…"}
-        </p>
-      </header>
-
-      {/* Combined stats + queue panel */}
-      <section className="glass overflow-hidden">
-        {/* Stats strip */}
-        <div className="px-5 py-4 flex flex-wrap items-start gap-x-10 gap-y-3 border-b border-brand-100/70">
-          <Kpi
-            label="Panel size"
-            value={kpis?.panelSize ?? "—"}
-            hint="Total active patients enrolled in your panel right now."
-          />
-          <Kpi
-            label="Reached this month"
-            value={kpis?.reachedThisMonth ?? "—"}
-            hint="Patients you've had at least one billable contact with this calendar month."
-          />
-          <Kpi
-            label="Reach rate"
-            value={kpis ? `${Math.round(kpis.reachRate * 100)}%` : "—"}
-            tone={
-              kpis ? (kpis.reachRate >= 0.8 ? "ok" : kpis.reachRate >= 0.7 ? "warn" : "bad") : "neutral"
-            }
-            hint="Share of your panel reached this month. Green ≥ 80%, amber 70–79%, red below 70%."
-          />
-          <Kpi
-            label="Avg doc / patient"
-            value={kpis ? `${kpis.avgDocMinutes.toFixed(1)} min` : "—"}
-            hint="Average documentation time per patient this month, across all encounters."
-          />
-          <Kpi
-            label="APCM coverage"
-            value={kpis ? `${Math.round(kpis.serviceElementCoverage * 100)}%` : "—"}
-            tone={
-              kpis
-                ? kpis.serviceElementCoverage >= 0.7
-                  ? "ok"
-                  : kpis.serviceElementCoverage >= 0.5
-                    ? "warn"
-                    : "bad"
-                : "neutral"
-            }
-            hint="Share of APCM patients with all required service elements met for the current month."
-          />
+          <p className="text-sm text-brand-600 mt-1 leading-relaxed">
+            No briefing yet today. Generate one to see your day at a glance.
+          </p>
+        </header>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            onClick={() => generate("morning")}
+            disabled={generating !== null}
+            className="text-xs px-3 py-1.5 rounded-full bg-foresight hover:bg-foresight-dark text-white transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
+          >
+            <Sun className="w-3.5 h-3.5" />
+            {generating === "morning"
+              ? "Generating…"
+              : "Generate morning briefing"}
+          </button>
+          <button
+            onClick={() => generate("eod")}
+            disabled={generating !== null}
+            className="text-xs px-3 py-1.5 rounded-full bg-white border border-brand-100 text-brand-700 hover:text-foresight hover:bg-foresight/5 transition shadow-sm disabled:opacity-50 inline-flex items-center gap-2"
+          >
+            <Moon className="w-3.5 h-3.5" />
+            {generating === "eod"
+              ? "Generating…"
+              : "Generate end-of-day wrap"}
+          </button>
         </div>
-
-        {/* Priority queue */}
-        <div className="px-5 py-4">
-          <div className="flex items-center justify-between mb-3 gap-3">
-            <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
-              Priority queue
-            </h2>
-            <span className="text-xs text-brand-500 flex-shrink-0">
-              {queue?.length ?? 0} patients flagged
-            </span>
-          </div>
-          <div className="grid gap-2">
-            {queue?.map((p) => (
-              <PatientPill key={p._id} patient={p} billingIconOnly />
-            ))}
-            {queue?.length === 0 && (
-              <div className="text-xs text-brand-500 py-4 text-center">
-                No urgent patients today. Nice work.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Reached today — only shown when there's at least one. */}
-        {(reached?.length ?? 0) > 0 && (
-          <div className="px-5 py-4 border-t border-brand-100/70">
-            <div className="flex items-center justify-between mb-3 gap-3">
-              <h2 className="text-xs font-semibold text-brand-700 tracking-wide uppercase">
-                Reached today
-              </h2>
-              <span className="text-xs text-brand-500 flex-shrink-0">
-                {reached?.length ?? 0}{" "}
-                {(reached?.length ?? 0) === 1 ? "patient" : "patients"}
-              </span>
-            </div>
-            <div className="grid gap-2">
-              {reached?.map((p) => (
-                <PatientPill key={p._id} patient={p} billingIconOnly />
-              ))}
-            </div>
-          </div>
+        {genError && (
+          <p className="mt-3 text-xs text-red-warning">{genError}</p>
         )}
-      </section>
+      </div>
+    );
+  }
 
-    </div>
-  );
-}
-
-function BriefingCard({
-  title,
-  date,
-  content,
-  accent,
-}: {
-  title: string;
-  date?: string;
-  content: { headline?: string; headsUp?: string[] };
-  accent: string;
-}) {
   return (
-    <div className="glass overflow-hidden">
+    <div className="rounded-2xl border border-brand-100 bg-white overflow-hidden flex flex-col">
+      {/* Header with gradient + sun/moon toggle */}
       <div
         className={`bg-gradient-to-r ${accent} px-5 py-3 flex items-center justify-between`}
       >
-        <h2 className="text-xs font-semibold tracking-wide uppercase text-white">
-          {title}
-        </h2>
-        {date && <span className="text-[11px] text-white/80">{date}</span>}
+        <div className="flex items-center gap-2">
+          {active === "morning" ? (
+            <Sun className="w-3.5 h-3.5 text-white" />
+          ) : (
+            <Moon className="w-3.5 h-3.5 text-white" />
+          )}
+          <h2 className="text-xs font-semibold tracking-wide uppercase text-white">
+            {title}
+          </h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {current?.date && (
+            <span className="text-[11px] text-white/80">{current.date}</span>
+          )}
+          {/* Sun / Moon toggle. Only shown when both exist OR the inactive one can be generated. */}
+          <div className="flex items-center gap-0.5 bg-white/15 backdrop-blur-sm rounded-full p-0.5">
+            <button
+              type="button"
+              onClick={() =>
+                hasMorning ? setActive("morning") : generate("morning")
+              }
+              disabled={generating !== null}
+              aria-label="Morning briefing"
+              title={hasMorning ? "Show morning briefing" : "Generate morning briefing"}
+              className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
+                active === "morning"
+                  ? "bg-white text-foresight"
+                  : "text-white/80 hover:bg-white/10"
+              }`}
+            >
+              <Sun className="w-3 h-3" />
+            </button>
+            <button
+              type="button"
+              onClick={() => (hasEod ? setActive("eod") : generate("eod"))}
+              disabled={generating !== null}
+              aria-label="End-of-day wrap"
+              title={hasEod ? "Show end-of-day wrap" : "Generate end-of-day wrap"}
+              className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
+                active === "eod"
+                  ? "bg-white text-foresight"
+                  : "text-white/80 hover:bg-white/10"
+              }`}
+            >
+              <Moon className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="px-5 py-4">
-        {content.headline && (
-          <p className="text-brand-950 leading-relaxed text-sm">
-            {content.headline}
-          </p>
+
+      <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto">
+        {generating === active ? (
+          <Spinner size={14} label="Generating…" />
+        ) : current?.content ? (
+          <>
+            {current.content.headline && (
+              <p className="text-brand-950 leading-relaxed text-sm">
+                {current.content.headline}
+              </p>
+            )}
+            {(current.content.headsUp?.length ?? 0) > 0 && (
+              <ul className="mt-3 text-xs text-brand-700 space-y-1.5">
+                {current.content.headsUp.slice(0, 4).map((h: string, i: number) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-foresight">•</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        ) : (
+          // The active type doesn't have a briefing yet — offer to generate.
+          <div className="text-sm text-brand-600 leading-relaxed">
+            No {active === "morning" ? "morning briefing" : "end-of-day wrap"}{" "}
+            yet today.{" "}
+            <button
+              type="button"
+              onClick={() => generate(active)}
+              disabled={generating !== null}
+              className="underline text-foresight hover:text-foresight-dark"
+            >
+              Generate it now
+            </button>
+            .
+          </div>
         )}
-        {(content.headsUp?.length ?? 0) > 0 && (
-          <ul className="mt-3 text-xs text-brand-700 space-y-1.5">
-            {content.headsUp!.slice(0, 4).map((h, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="text-foresight">•</span>
-                <span>{h}</span>
-              </li>
-            ))}
-          </ul>
+        {genError && (
+          <p className="mt-3 text-xs text-red-warning">{genError}</p>
         )}
       </div>
     </div>
   );
 }
+
+/* ────────────────────────────────────────────────────────────────────── */
 
 function Kpi({
   label,
@@ -259,7 +361,7 @@ function Kpi({
   }[tone];
   return (
     <div className="flex flex-col">
-      <span className="text-[10px] text-brand-500 uppercase tracking-wider">
+      <span className="text-[9px] text-brand-500 uppercase tracking-wider">
         {label}
         {hint && (
           <>
@@ -268,7 +370,9 @@ function Kpi({
           </>
         )}
       </span>
-      <span className={`mt-0.5 text-xl font-semibold ${toneClass}`}>{value}</span>
+      <span className={`mt-0.5 text-lg font-semibold ${toneClass}`}>
+        {value}
+      </span>
     </div>
   );
 }
