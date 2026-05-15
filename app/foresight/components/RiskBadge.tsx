@@ -118,6 +118,17 @@ export const BillingBadge = forwardRef<
     },
   }));
 
+  function handleEnter() {
+    checkRef.current?.startAnimation();
+    plusRef.current?.startAnimation();
+    minusRef.current?.startAnimation();
+  }
+  function handleLeave() {
+    checkRef.current?.stopAnimation();
+    plusRef.current?.stopAnimation();
+    minusRef.current?.stopAnimation();
+  }
+
   // Map program → which animated icon to render at this slot.
   const Icon =
     key === "ccm" ? (
@@ -133,6 +144,8 @@ export const BillingBadge = forwardRef<
       className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 uppercase tracking-wider"
       aria-label={full}
       title={full}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
     >
       {Icon}
       {!iconOnly && <span>{program}</span>}

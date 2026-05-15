@@ -47,7 +47,7 @@ export default function DashboardPage() {
           </div>
           <div className="grid gap-2">
             {reached?.map((p) => (
-              <PatientPill key={p._id} patient={p} billingIconOnly />
+              <PatientPill key={p._id} patient={p} />
             ))}
           </div>
         </section>
@@ -179,7 +179,7 @@ function PriorityQueuePanel({ queue }: { queue: any[] | undefined }) {
       </header>
       <div className="p-5 grid gap-2">
         {queue?.map((p) => (
-          <PatientPill key={p._id} patient={p} billingIconOnly />
+          <PatientPill key={p._id} patient={p} />
         ))}
         {queue?.length === 0 && (
           <div className="text-xs text-brand-500 py-4 text-center">

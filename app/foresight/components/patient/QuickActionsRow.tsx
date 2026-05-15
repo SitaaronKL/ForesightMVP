@@ -5,7 +5,6 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useState } from "react";
 import {
-  MessageSquarePlus,
   PencilLine,
   CheckCircle2,
   CalendarClock,
@@ -24,44 +23,20 @@ import {
 } from "@/components/ui/dialog";
 import { HelpHint } from "../HelpHint";
 import { GlassTooltip } from "../GlassTooltip";
+import {
+  MessageCirclePlusIcon,
+  type MessageCirclePlusIconHandle,
+} from "../MessageCirclePlusIcon";
+import { useRef } from "react";
 
 type ActionKey = "message" | "note" | "element" | "retry";
 
-const ACTIONS: {
+type ActionDef = {
   key: ActionKey;
   label: string;
-  Icon: typeof MessageSquarePlus;
+  renderIcon: () => React.ReactNode;
   tooltip: string;
-}[] = [
-  {
-    key: "message",
-    label: "Send message",
-    Icon: MessageSquarePlus,
-    tooltip:
-      "Draft a portal message to this patient. Counts toward Enhanced Communication (service element #9).",
-  },
-  {
-    key: "note",
-    label: "Quick note",
-    Icon: PencilLine,
-    tooltip:
-      "Log a short off-call touch like a refill or chart review. Defaults to a 5-minute outbound phone encounter so it appears in the activity feed.",
-  },
-  {
-    key: "element",
-    label: "Mark element",
-    Icon: CheckCircle2,
-    tooltip:
-      "Manually attest delivery of an APCM service element when the system can't infer it from activity (e.g., 24/7 access acknowledgment).",
-  },
-  {
-    key: "retry",
-    label: "Schedule retry",
-    Icon: CalendarClock,
-    tooltip:
-      "Queue an outreach attempt for an unreached patient. Pick method and time. Sage uses historical best-window data when available.",
-  },
-];
+};
 
 /**
  * Inline quick-action pills. Designed to sit in the patient header next to

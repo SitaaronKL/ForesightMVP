@@ -64,11 +64,24 @@ export const RiskTierBadge = forwardRef<
     },
   }));
 
+  function handleEnter() {
+    smileRef.current?.startAnimation();
+    annoyedRef.current?.startAnimation();
+    angryRef.current?.startAnimation();
+  }
+  function handleLeave() {
+    smileRef.current?.stopAnimation();
+    annoyedRef.current?.stopAnimation();
+    angryRef.current?.stopAnimation();
+  }
+
   return (
     <span
       className={`inline-flex items-center gap-1 ${meta.toneText}`}
       aria-label={label}
       title={label}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
     >
       {tier === "level_1" && (
         <SmileIcon ref={smileRef} size={size} className="flex items-center" />

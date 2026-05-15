@@ -1,6 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { RiskTierBadge } from "./RiskTierBadge";
-import { BillingBadge } from "./RiskBadge";
+import { useRef } from "react";
+import {
+  RiskTierBadge,
+  type RiskTierBadgeHandle,
+} from "./RiskTierBadge";
+import { BillingBadge, type BillingBadgeHandle } from "./RiskBadge";
 import { HelpHint } from "./HelpHint";
 
 const TIER_LABEL: Record<string, string> = {
@@ -20,8 +26,8 @@ export function PatientPill({
   billingIconOnly = false,
 }: {
   patient: any;
-  /** When true, the billing program is rendered as an icon-only chip
-   * (used on the dashboard's Today's Queue to keep rows compact). */
+  /** Kept for backwards compatibility; the program text is now always
+   * rendered when this is false. */
   billingIconOnly?: boolean;
 }) {
   const conditions: string[] = Array.isArray(p.chronicConditions)
@@ -31,14 +37,33 @@ export function PatientPill({
   const programKey = String(p.billingProgram ?? "").toUpperCase();
   const programLabel = PROGRAM_LABEL[programKey] ?? p.billingProgram;
 
+  const tierRef = useRef<RiskTierBadgeHandle>(null);
+  const billingRef = useRef<BillingBadgeHandle>(null);
+
+  function handleEnter() {
+    tierRef.current?.startAnimation();
+    billingRef.current?.startAnimation();
+  }
+  function handleLeave() {
+    tierRef.current?.stopAnimation();
+    billingRef.current?.stopAnimation();
+  }
+
   return (
     <Link
       href={`/patient/${p._id}`}
-      className="flex items-center justify-between gap-3 pl-2 pr-4 py-2 rounded-full bg-white/60 hover:bg-white/90 transition border border-brand-100 min-w-0"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      className="flex items-center justify-between gap-3 pl-3 pr-4 py-2 rounded-full bg-white/60 hover:bg-white/90 transition border border-brand-100 min-w-0"
     >
-      <div className="flex items-center gap-2 min-w-0">
-        <RiskTierBadge score={p.riskScore} tier={p.tier} />
-        <BillingBadge program={p.billingProgram} iconOnly={billingIconOnly} />
+      <div className="flex items-center gap-3 min-w-0">
+        <RiskTierBadge ref={tierRef} score={p.riskScore} tier={p.tier} size={20} />
+        <BillingBadge
+          ref={billingRef}
+          program={p.billingProgram}
+          iconOnly={billingIconOnly}
+          size={18}
+        />
         <span className="font-medium text-brand-950 truncate">
           {p.firstName} {p.lastName}
         </span>

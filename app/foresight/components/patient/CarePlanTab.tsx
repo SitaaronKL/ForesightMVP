@@ -4,8 +4,12 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pencil, Plus, Trash2, X, Check, Sparkles } from "lucide-react";
+import { Plus, Trash2, X, Check, Sparkles } from "lucide-react";
 import { HistoryIcon, type HistoryIconHandle } from "../HistoryIcon";
+import {
+  FilePenLineIcon,
+  type FilePenLineIconHandle,
+} from "../FilePenLineIcon";
 import { HelpHint } from "../HelpHint";
 
 const SECTIONS = [
@@ -42,6 +46,7 @@ export function CarePlanTab({ patientId }: { patientId: Id<"patients"> }) {
   const [draft, setDraft] = useState<CarePlanContent | null>(null);
   const [saving, setSaving] = useState(false);
   const historyRef = useRef<HistoryIconHandle>(null);
+  const editRef = useRef<FilePenLineIconHandle>(null);
 
   const current = data?.currentVersion;
 
@@ -135,10 +140,16 @@ export function CarePlanTab({ patientId }: { patientId: Id<"patients"> }) {
                 <>
                   <button
                     onClick={() => setEditing(true)}
+                    onMouseEnter={() => editRef.current?.startAnimation()}
+                    onMouseLeave={() => editRef.current?.stopAnimation()}
                     className="flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 bg-foresight hover:bg-foresight-dark text-white transition shadow-sm"
                     title="Edit any section. Saving creates a new version."
                   >
-                    <Pencil className="w-3.5 h-3.5" />
+                    <FilePenLineIcon
+                      ref={editRef}
+                      size={14}
+                      className="flex items-center"
+                    />
                     Edit
                   </button>
                   <button
