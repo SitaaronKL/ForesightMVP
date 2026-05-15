@@ -138,4 +138,4 @@ export const BillingBadge = forwardRef<
       {!iconOnly && <span>{program}</span>}
     </span>
   );
-}
+});
