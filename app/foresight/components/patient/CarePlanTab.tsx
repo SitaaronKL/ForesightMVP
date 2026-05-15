@@ -4,7 +4,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, X, Check, Sparkles } from "lucide-react";
+import { Trash2, X, Check, Sparkles } from "lucide-react";
+import { PlusIcon, type PlusIconHandle } from "../PlusIcon";
 import { HistoryIcon, type HistoryIconHandle } from "../HistoryIcon";
 import {
   FilePenLineIcon,
@@ -246,6 +247,7 @@ function Section({
   editing: boolean;
   onChange: (items: string[]) => void;
 }) {
+  const addRef = useRef<PlusIconHandle>(null);
   return (
     <div>
       <SectionHeader label={label} hint={hint} />
@@ -276,9 +278,11 @@ function Section({
           <button
             type="button"
             onClick={() => onChange([...items, ""])}
+            onMouseEnter={() => addRef.current?.startAnimation()}
+            onMouseLeave={() => addRef.current?.stopAnimation()}
             className="inline-flex items-center gap-1 text-[11px] text-foresight hover:text-foresight-dark mt-1"
           >
-            <Plus className="w-3 h-3" /> Add item
+            <PlusIcon ref={addRef} size={12} className="flex items-center" /> Add item
           </button>
         </div>
       ) : (
