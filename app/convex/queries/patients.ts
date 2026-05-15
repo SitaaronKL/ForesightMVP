@@ -2,6 +2,42 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { requirePatientAccess } from "../lib/auth";
 
+const ENCOUNTER_TYPE_LABEL: Record<string, string> = {
+  phone_call: "Phone call",
+  sms: "SMS",
+  portal_message: "Portal message",
+  video: "Video visit",
+  in_person: "In-person visit",
+  email: "Email",
+  inbound_call: "Inbound call",
+};
+
+const TOPIC_TAG_LABEL: Record<string, string> = {
+  refill: "Refill",
+  lab_followup: "Lab follow-up",
+  transitions_of_care: "Transitions of care",
+  symptom_check: "Symptom check",
+  chart_review: "Chart review",
+  social: "Social",
+  other: "Other",
+};
+
+function formatEncounterType(t: string | undefined | null): string {
+  if (!t) return "Encounter";
+  return ENCOUNTER_TYPE_LABEL[t] ?? titleCase(t);
+}
+
+function formatTopicTags(tags: string[] | undefined | null): string {
+  if (!tags || tags.length === 0) return "";
+  return tags.map((t) => TOPIC_TAG_LABEL[t] ?? titleCase(t)).join(", ");
+}
+
+function titleCase(s: string): string {
+  return s
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export const get = query({
   args: { patientId: v.id("patients") },
   handler: async (ctx, { patientId }) => {
@@ -235,7 +271,7 @@ export const serviceElementsWithEvidence = query({
                 kind: "encounter",
                 refId: first._id,
                 label: "Initiating visit on record",
-                sublabel: `${first.type.replace("_", " ")} on ${new Date(first.startedAt).toLocaleDateString()}`,
+                sublabel: `${formatEncounterType(first.type)} on ${new Date(first.startedAt).toLocaleDateString()}`,
                 timestamp: first.startedAt,
                 route: `?encounter=${first._id}`,
               },
@@ -282,9 +318,9 @@ export const serviceElementsWithEvidence = query({
           return monthEncounters.slice(0, 3).map((e) => ({
             kind: "encounter" as const,
             refId: e._id,
-            label: `${e.type.replace("_", " ")} · ${Math.round((e.durationSeconds ?? 0) / 60)} min`,
+            label: `${formatEncounterType(e.type)} · ${Math.round((e.durationSeconds ?? 0) / 60)} min`,
             sublabel: `${new Date(e.startedAt).toLocaleDateString()}${
-              e.topicTags.length ? " · " + e.topicTags.join(", ") : ""
+              e.topicTags.length ? " · " + formatTopicTags(e.topicTags) : ""
             }`,
             timestamp: e.startedAt,
             route: `?encounter=${e._id}`,
@@ -466,9 +502,9 @@ export const activityFeed = query({
         kind: "encounter",
         refId: e._id,
         timestamp: e.startedAt,
-        title: `${e.type.replace("_", " ")} · ${Math.round((e.durationSeconds ?? 0) / 60)} min`,
+        title: `${formatEncounterType(e.type)} · ${Math.round((e.durationSeconds ?? 0) / 60)} min`,
         body: e.jotNotes || undefined,
-        meta: e.topicTags.join(", "),
+        meta: formatTopicTags(e.topicTags),
         status: e.status,
       });
     }
