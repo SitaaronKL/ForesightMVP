@@ -5,8 +5,6 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useState } from "react";
 import {
-  PencilLine,
-  CheckCircle2,
   CalendarClock,
   Phone,
   MessageCircle,
@@ -27,15 +25,24 @@ import {
   MessageCirclePlusIcon,
   type MessageCirclePlusIconHandle,
 } from "../MessageCirclePlusIcon";
+import {
+  FileCheck2Icon,
+  type FileCheck2IconHandle,
+} from "../FileCheck2Icon";
+import { PenToolIcon, type PenToolIconHandle } from "../PenToolIcon";
 import { useRef } from "react";
 
 type ActionKey = "message" | "note" | "element" | "retry";
 
-type ActionDef = {
-  key: ActionKey;
-  label: string;
-  renderIcon: () => React.ReactNode;
-  tooltip: string;
+const TOOLTIPS: Record<ActionKey, string> = {
+  message:
+    "Draft a portal message to this patient. Counts toward Enhanced Communication (service element #9).",
+  note:
+    "Log a short off-call touch like a refill or chart review. Defaults to a 5-minute outbound phone encounter so it appears in the activity feed.",
+  element:
+    "Manually attest delivery of an APCM service element when the system can't infer it from activity (e.g., 24/7 access acknowledgment).",
+  retry:
+    "Queue an outreach attempt for an unreached patient. Pick method and time. Sage uses historical best-window data when available.",
 };
 
 /**
@@ -51,26 +58,80 @@ export function QuickActionsRow({
   patientName: string;
 }) {
   const [open, setOpen] = useState<ActionKey | null>(null);
+  const messageIconRef = useRef<MessageCirclePlusIconHandle>(null);
+  const elementIconRef = useRef<FileCheck2IconHandle>(null);
+  const noteIconRef = useRef<PenToolIconHandle>(null);
+
+  const pillCls =
+    "inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0 px-3 @[700px]:px-5 py-2";
+  const labelCls = "hidden @[700px]:inline whitespace-nowrap";
 
   return (
     <>
       {/* Labels collapse to icons via the closest @container ancestor in
           the patient header — they always render, never wrap, and pick up
           text again the moment there's room. */}
-      {ACTIONS.map((a) => (
-        <GlassTooltip key={a.key} width={260} content={a.tooltip}>
-          <button
-            onClick={() => setOpen(a.key)}
-            aria-label={a.label}
-            className="inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0 px-3 @[700px]:px-5 py-2"
-          >
-            <a.Icon className="w-4 h-4 text-foresight" />
-            <span className="hidden @[700px]:inline whitespace-nowrap">
-              {a.label}
-            </span>
-          </button>
-        </GlassTooltip>
-      ))}
+      <GlassTooltip width={260} content={TOOLTIPS.message}>
+        <button
+          onClick={() => setOpen("message")}
+          onMouseEnter={() => messageIconRef.current?.startAnimation()}
+          onMouseLeave={() => messageIconRef.current?.stopAnimation()}
+          aria-label="Send message"
+          className={pillCls}
+        >
+          <MessageCirclePlusIcon
+            ref={messageIconRef}
+            size={16}
+            className="flex items-center text-foresight"
+          />
+          <span className={labelCls}>Send message</span>
+        </button>
+      </GlassTooltip>
+
+      <GlassTooltip width={260} content={TOOLTIPS.note}>
+        <button
+          onClick={() => setOpen("note")}
+          onMouseEnter={() => noteIconRef.current?.startAnimation()}
+          onMouseLeave={() => noteIconRef.current?.stopAnimation()}
+          aria-label="Quick note"
+          className={pillCls}
+        >
+          <PenToolIcon
+            ref={noteIconRef}
+            size={16}
+            className="flex items-center text-foresight"
+          />
+          <span className={labelCls}>Quick note</span>
+        </button>
+      </GlassTooltip>
+
+      <GlassTooltip width={260} content={TOOLTIPS.element}>
+        <button
+          onClick={() => setOpen("element")}
+          onMouseEnter={() => elementIconRef.current?.startAnimation()}
+          onMouseLeave={() => elementIconRef.current?.stopAnimation()}
+          aria-label="Mark element"
+          className={pillCls}
+        >
+          <FileCheck2Icon
+            ref={elementIconRef}
+            size={16}
+            className="flex items-center text-foresight"
+          />
+          <span className={labelCls}>Mark element</span>
+        </button>
+      </GlassTooltip>
+
+      <GlassTooltip width={260} content={TOOLTIPS.retry}>
+        <button
+          onClick={() => setOpen("retry")}
+          aria-label="Schedule retry"
+          className={pillCls}
+        >
+          <CalendarClock className="w-4 h-4 text-foresight" />
+          <span className={labelCls}>Schedule retry</span>
+        </button>
+      </GlassTooltip>
 
       <SendMessageDialog
         open={open === "message"}
@@ -483,7 +544,7 @@ function ScheduleRetryDialog({
     [
       { value: "call", label: "Phone call", Icon: Phone },
       { value: "sms", label: "SMS", Icon: MessageCircle },
-      { value: "portal", label: "Portal", Icon: MessageSquarePlus },
+      { value: "portal", label: "Portal", Icon: MessageCircle },
       { value: "email", label: "Email", Icon: Mail },
     ];
 
