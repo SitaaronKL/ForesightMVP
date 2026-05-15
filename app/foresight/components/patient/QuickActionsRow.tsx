@@ -30,6 +30,10 @@ import {
   type FileCheck2IconHandle,
 } from "../FileCheck2Icon";
 import { PenToolIcon, type PenToolIconHandle } from "../PenToolIcon";
+import {
+  CalendarCogIcon,
+  type CalendarCogIconHandle,
+} from "../CalendarCogIcon";
 import { useRef } from "react";
 
 type ActionKey = "message" | "note" | "element" | "retry";
@@ -61,6 +65,7 @@ export function QuickActionsRow({
   const messageIconRef = useRef<MessageCirclePlusIconHandle>(null);
   const elementIconRef = useRef<FileCheck2IconHandle>(null);
   const noteIconRef = useRef<PenToolIconHandle>(null);
+  const retryIconRef = useRef<CalendarCogIconHandle>(null);
 
   const pillCls =
     "inline-flex items-center gap-2 rounded-[100px] bg-white/70 backdrop-blur-md border border-brand-200 text-brand-950 text-sm font-medium hover:bg-white transition shadow-sm flex-shrink-0 px-3 @[700px]:px-5 py-2";
@@ -125,10 +130,16 @@ export function QuickActionsRow({
       <GlassTooltip width={260} content={TOOLTIPS.retry}>
         <button
           onClick={() => setOpen("retry")}
+          onMouseEnter={() => retryIconRef.current?.startAnimation()}
+          onMouseLeave={() => retryIconRef.current?.stopAnimation()}
           aria-label="Schedule retry"
           className={pillCls}
         >
-          <CalendarClock className="w-4 h-4 text-foresight" />
+          <CalendarCogIcon
+            ref={retryIconRef}
+            size={16}
+            className="flex items-center text-foresight"
+          />
           <span className={labelCls}>Schedule retry</span>
         </button>
       </GlassTooltip>
