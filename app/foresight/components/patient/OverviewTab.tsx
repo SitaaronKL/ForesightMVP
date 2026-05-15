@@ -61,7 +61,7 @@ export function OverviewTab({ patientId }: { patientId: Id<"patients"> }) {
                 role="button"
                 tabIndex={0}
                 aria-label={`Open encounter from ${fmt(e.startedAt)}`}
-                className="flex items-center justify-between text-sm py-1.5 px-1 -mx-1 rounded border-b border-brand-50 last:border-0 cursor-pointer hover:bg-foresight/5 transition-colors"
+                className="flex items-center justify-between text-sm py-2 px-3 -mx-3 rounded-full cursor-pointer hover:bg-foresight/5 transition-colors"
               >
                 <div>
                   <div className="font-medium text-brand-950">{fmt(e.startedAt)}</div>

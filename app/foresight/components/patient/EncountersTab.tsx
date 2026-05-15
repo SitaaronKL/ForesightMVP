@@ -22,66 +22,51 @@ export function EncountersTab({ patientId }: { patientId: Id<"patients"> }) {
   return (
     <>
       <div className="glass p-5">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-[11px] uppercase tracking-wider text-brand-500 border-b border-brand-100">
-              <th className="py-2 font-semibold">Date</th>
-              <th className="py-2 font-semibold">Type</th>
-              <th className="py-2 font-semibold">Duration</th>
-              <th className="py-2 font-semibold">Status</th>
-              <th className="py-2 font-semibold">Topics</th>
-            </tr>
-          </thead>
-          <tbody>
-            {encounters.map((e) => (
-              <tr
+        <h3 className="text-xs font-semibold text-brand-600 uppercase tracking-wider mb-3">
+          All encounters
+        </h3>
+        <ul className="space-y-1">
+          {encounters.map((e) => {
+            const typeLabel = e.type
+              .replace("_", " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+            const minutes = Math.round(e.durationSeconds / 60);
+            const statusLabel =
+              e.status.charAt(0).toUpperCase() + e.status.slice(1);
+            return (
+              <li
                 key={e._id}
                 onClick={() => setOpenId(e._id)}
-                className="border-b border-brand-50 last:border-0 cursor-pointer hover:bg-foresight/5 transition-colors"
-                tabIndex={0}
-                role="button"
-                aria-label={`Open encounter from ${new Date(e.startedAt).toLocaleDateString()}`}
                 onKeyDown={(ev) => {
                   if (ev.key === "Enter" || ev.key === " ") {
                     ev.preventDefault();
                     setOpenId(e._id);
                   }
                 }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open encounter from ${new Date(e.startedAt).toLocaleDateString()}`}
+                className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-foresight/5 transition-colors"
               >
-                <td className="py-2 text-brand-950">
-                  {new Date(e.startedAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </td>
-                <td className="py-2 text-brand-700 capitalize">
-                  {e.type.replace("_", " ")}
-                </td>
-                <td className="py-2 text-brand-700">
-                  {Math.round(e.durationSeconds / 60)} min
-                </td>
-                <td className="py-2">
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded uppercase ${
-                      e.status === "completed"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-amber-50 text-amber-700"
-                    }`}
-                  >
-                    {e.status}
-                  </span>
-                </td>
-                <td
-                  className="py-2"
-                  onClick={(ev) => ev.stopPropagation()}
-                >
+                <div className="min-w-0">
+                  <div className="font-medium text-brand-950">
+                    {new Date(e.startedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </div>
+                  <div className="text-xs text-brand-500">
+                    {typeLabel} · {minutes} Min · {statusLabel}
+                  </div>
+                </div>
+                <span onClick={(ev) => ev.stopPropagation()} className="flex-shrink-0">
                   <TopicChipList topics={e.topicTags} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       <EncounterDetailModal

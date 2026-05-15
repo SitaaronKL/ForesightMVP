@@ -34,14 +34,22 @@ export function EncounterDetailModal({
     >
       <DialogContent
         showCloseButton
-        className="max-w-3xl max-h-[88vh] overflow-y-auto p-0 border-0 bg-white shadow-2xl rounded-2xl"
+        className="max-w-3xl max-h-[88vh] p-0 border-0 bg-white shadow-2xl rounded-2xl overflow-hidden"
       >
-        <div className="bg-foresight px-6 py-5 rounded-t-2xl">
+        <div className="max-h-[88vh] overflow-y-auto">
+        <div
+          className="px-6 py-5"
+          style={{
+            backgroundImage: "url(/image-mesh-gradient.png)",
+            backgroundSize: "200% 200%",
+            backgroundPosition: "0% 100%",
+          }}
+        >
           <DialogHeader>
-            <DialogTitle className="text-white text-lg">
+            <DialogTitle className="text-brand-950 text-xl">
               Encounter details
             </DialogTitle>
-            <DialogDescription className="text-white/80 text-xs">
+            <DialogDescription className="text-brand-950/75 text-xs">
               {detail?.encounter
                 ? `${formatType(detail.encounter.type)} · ${fmtDate(detail.encounter.startedAt)}`
                 : "Loading encounter…"}
@@ -141,6 +149,7 @@ export function EncounterDetailModal({
               This encounter could not be loaded.
             </div>
           )}
+        </div>
         </div>
       </DialogContent>
     </Dialog>
