@@ -33,7 +33,7 @@ export function EncounterDetailModal({
       }}
     >
       <DialogContent
-        showCloseButton
+        showCloseButton={false}
         className="max-w-3xl max-h-[88vh] p-0 border-0 bg-white shadow-2xl rounded-2xl overflow-hidden"
       >
         <div className="max-h-[88vh] overflow-y-auto">

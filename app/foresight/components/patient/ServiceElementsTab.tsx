@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 import { EncounterDetailModal } from "./EncounterDetailModal";
 import { HelpHint } from "../HelpHint";
 
@@ -127,37 +127,29 @@ export function ServiceElementsTab({
           </header>
 
           {/* Element list */}
-          <div className="divide-y divide-brand-50">
+          <div className="p-2 space-y-0.5">
             {els.map((el) => {
               const isOpen = expanded.has(el._id);
               const evCount = el.inferredEvidence?.length ?? 0;
-              const statusStyle =
-                el.status === "delivered"
-                  ? "bg-green-ok text-white"
-                  : el.status === "available"
-                    ? "bg-amber-warning text-white"
-                    : "bg-brand-100 text-brand-500";
-              const statusLabel =
-                el.status === "delivered"
-                  ? "Delivered"
-                  : el.status === "available"
-                    ? "Available"
-                    : "Not yet";
               const statusText =
                 el.status === "delivered"
                   ? "text-green-700"
                   : el.status === "available"
                     ? "text-amber-700"
                     : "text-brand-400";
+              const statusLabel =
+                el.status === "delivered"
+                  ? "Delivered"
+                  : el.status === "available"
+                    ? "Available"
+                    : "Pending";
               return (
                 <div key={el._id}>
                   <button
                     onClick={() => toggle(el._id)}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-brand-50/60 transition text-left"
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-foresight/5 transition-colors text-left"
                   >
-                    <span
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0 ${statusStyle}`}
-                    >
+                    <span className="w-8 h-8 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center text-xs font-semibold text-foresight flex-shrink-0">
                       {el.elementId}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -177,8 +169,14 @@ export function ServiceElementsTab({
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] uppercase tracking-wider font-semibold ${statusText}`}
+                      className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold ${statusText}`}
                     >
+                      {el.status === "delivered" && (
+                        <Check className="w-3 h-3" strokeWidth={2.5} />
+                      )}
+                      {el.status === "available" && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                      )}
                       {statusLabel}
                     </span>
                     <ChevronDown
@@ -189,7 +187,7 @@ export function ServiceElementsTab({
                   </button>
 
                   {isOpen && (
-                    <div className="px-5 pb-4 pt-1 bg-brand-50/40">
+                    <div className="pl-12 pr-3 pb-2 pt-1">
                       {evCount === 0 ? (
                         <p className="text-xs text-brand-500 italic py-2">
                           No evidence on file for the current month. Document an
@@ -198,7 +196,7 @@ export function ServiceElementsTab({
                           row.
                         </p>
                       ) : (
-                        <div className="space-y-1.5">
+                        <div className="space-y-0.5">
                           {el.inferredEvidence.map((ev, i) => (
                             <EvidenceItem
                               key={`${el._id}-${i}`}
@@ -236,15 +234,6 @@ const KIND_LABEL: Record<EvidenceKind, string> = {
   practice: "Practice",
 };
 
-const KIND_COLOR: Record<EvidenceKind, string> = {
-  encounter: "bg-foresight/10 text-foresight",
-  care_plan_version: "bg-teal-100 text-teal-700",
-  hospital_event: "bg-amber-100 text-amber-700",
-  portal_message: "bg-violet-100 text-violet-700",
-  consent: "bg-green-100 text-green-700",
-  practice: "bg-brand-100 text-brand-700",
-};
-
 function EvidenceItem({
   evidence,
   onOpenEncounter,
@@ -260,11 +249,41 @@ function EvidenceItem({
       })
     : null;
 
-  const inner = (
-    <>
-      <span
-        className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${KIND_COLOR[evidence.kind]}`}
+  if (clickable) {
+    return (
+      <button
+        onClick={() => onOpenEncounter(evidence.refId)}
+        className="group w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:shadow-sm text-left"
+        style={{
+          backgroundImage: "url(/image-mesh-gradient.png)",
+          backgroundSize: "200% 200%",
+          backgroundPosition: "0% 50%",
+        }}
       >
+        <span className="text-[10px] uppercase tracking-wider font-semibold text-brand-950 flex-shrink-0 w-20">
+          {KIND_LABEL[evidence.kind]}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm text-brand-950 truncate font-medium">
+            {evidence.label}
+          </div>
+          {evidence.sublabel && (
+            <div className="text-[11px] text-brand-950/70 truncate mt-0.5">
+              {evidence.sublabel}
+            </div>
+          )}
+        </div>
+        {dateLabel && (
+          <span className="text-[11px] text-brand-950/80 flex-shrink-0">
+            {dateLabel}
+          </span>
+        )}
+      </button>
+    );
+  }
+  return (
+    <div className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-foresight/5">
+      <span className="text-[10px] uppercase tracking-wider font-semibold text-foresight flex-shrink-0 w-20">
         {KIND_LABEL[evidence.kind]}
       </span>
       <div className="min-w-0 flex-1">
@@ -280,22 +299,6 @@ function EvidenceItem({
           {dateLabel}
         </span>
       )}
-    </>
-  );
-
-  if (clickable) {
-    return (
-      <button
-        onClick={() => onOpenEncounter(evidence.refId)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-brand-100 hover:border-foresight/50 hover:shadow-sm transition text-left"
-      >
-        {inner}
-      </button>
-    );
-  }
-  return (
-    <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-brand-100">
-      {inner}
     </div>
   );
 }
