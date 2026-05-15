@@ -65,18 +65,19 @@ export function TierBadge({ tier }: { tier: string }) {
   );
 }
 
-import type { ComponentType } from "react";
-import { AlarmClockCheckIcon } from "./AlarmClockCheckIcon";
-import { AlarmClockMinusIcon } from "./AlarmClockMinusIcon";
-import { AlarmClockPlusIcon } from "./AlarmClockPlusIcon";
-
-type BillingIconCmp = ComponentType<{ size?: number; className?: string }>;
-
-const PROGRAM_ICON: Record<string, BillingIconCmp | undefined> = {
-  ccm: AlarmClockCheckIcon as BillingIconCmp,
-  pcm: AlarmClockPlusIcon as BillingIconCmp,
-  apcm: AlarmClockMinusIcon as BillingIconCmp,
-};
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import {
+  AlarmClockCheckIcon,
+  type AlarmClockCheckIconHandle,
+} from "./AlarmClockCheckIcon";
+import {
+  AlarmClockMinusIcon,
+  type AlarmClockMinusIconHandle,
+} from "./AlarmClockMinusIcon";
+import {
+  AlarmClockPlusIcon,
+  type AlarmClockPlusIconHandle,
+} from "./AlarmClockPlusIcon";
 
 const PROGRAM_FULL: Record<string, string> = {
   ccm: "Chronic Care Management",
@@ -84,36 +85,57 @@ const PROGRAM_FULL: Record<string, string> = {
   apcm: "Advanced Primary Care Management",
 };
 
-export function BillingBadge({
-  program,
-  iconOnly = false,
-}: {
-  program: string;
-  iconOnly?: boolean;
-}) {
+export type BillingBadgeHandle = {
+  startAnimation: () => void;
+  stopAnimation: () => void;
+};
+
+/**
+ * Program chip: animated alarm-clock icon + uppercase program text, no
+ * background pill. Forwards an imperative animation handle so a parent row
+ * can trigger the icon's hover animation when the user hovers the row.
+ */
+export const BillingBadge = forwardRef<
+  BillingBadgeHandle,
+  { program: string; size?: number; iconOnly?: boolean }
+>(function BillingBadge({ program, size = 18, iconOnly = false }, ref) {
+  const checkRef = useRef<AlarmClockCheckIconHandle>(null);
+  const plusRef = useRef<AlarmClockPlusIconHandle>(null);
+  const minusRef = useRef<AlarmClockMinusIconHandle>(null);
   const key = String(program ?? "").toLowerCase();
-  const Icon: BillingIconCmp | undefined = PROGRAM_ICON[key];
   const full = PROGRAM_FULL[key] ?? program;
 
-  if (iconOnly && Icon) {
-    return (
-      <span
-        className="inline-flex items-center justify-center w-5 h-5 text-teal-700"
-        aria-label={full}
-        title={full}
-      >
-        <Icon size={12} className="flex items-center" />
-      </span>
-    );
-  }
+  useImperativeHandle(ref, () => ({
+    startAnimation: () => {
+      checkRef.current?.startAnimation();
+      plusRef.current?.startAnimation();
+      minusRef.current?.startAnimation();
+    },
+    stopAnimation: () => {
+      checkRef.current?.stopAnimation();
+      plusRef.current?.stopAnimation();
+      minusRef.current?.stopAnimation();
+    },
+  }));
+
+  // Map program → which animated icon to render at this slot.
+  const Icon =
+    key === "ccm" ? (
+      <AlarmClockCheckIcon ref={checkRef} size={size} className="flex items-center" />
+    ) : key === "pcm" ? (
+      <AlarmClockPlusIcon ref={plusRef} size={size} className="flex items-center" />
+    ) : key === "apcm" ? (
+      <AlarmClockMinusIcon ref={minusRef} size={size} className="flex items-center" />
+    ) : null;
 
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 text-teal-700 uppercase tracking-wider"
+      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 uppercase tracking-wider"
+      aria-label={full}
       title={full}
     >
-      {Icon && <Icon size={11} className="flex items-center" />}
-      {program}
+      {Icon}
+      {!iconOnly && <span>{program}</span>}
     </span>
   );
 }

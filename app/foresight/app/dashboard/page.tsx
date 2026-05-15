@@ -85,10 +85,10 @@ function StatsBento({
         />
         <div className="min-w-0">
           <h2 className="text-2xl font-semibold tracking-tight text-brand-950">
-            Today&apos;s Queue
+            Home
           </h2>
           <p className="mt-0.5 text-xs text-brand-950">
-            {queue ? `${queue.length} patients flagged for today.` : "Loading…"}
+            Panel at a glance for this month.
           </p>
         </div>
       </header>

@@ -1,50 +1,87 @@
 "use client";
 
-import { SmileIcon } from "./SmileIcon";
-import { AnnoyedIcon } from "./AnnoyedIcon";
-import { AngryIcon } from "./AngryIcon";
-import type { ComponentType } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { SmileIcon, type SmileIconHandle } from "./SmileIcon";
+import { AnnoyedIcon, type AnnoyedIconHandle } from "./AnnoyedIcon";
+import { AngryIcon, type AngryIconHandle } from "./AngryIcon";
 
-type IconCmp = ComponentType<{ size?: number; className?: string }>;
+export type RiskTierBadgeHandle = {
+  startAnimation: () => void;
+  stopAnimation: () => void;
+};
+
+type Tier = "level_1" | "level_2" | "level_3" | string;
 
 const TIER_META: Record<
   string,
-  { styles: string; ariaLabel: string; Icon: IconCmp }
+  { ariaLabel: string; toneText: string }
 > = {
   level_1: {
-    styles: "bg-emerald-50 text-emerald-700 border-emerald-200",
     ariaLabel: "Level 1 (stable)",
-    Icon: SmileIcon as IconCmp,
+    toneText: "text-emerald-700",
   },
   level_2: {
-    styles: "bg-amber-50 text-amber-700 border-amber-200",
     ariaLabel: "Level 2 (moderate acuity)",
-    Icon: AnnoyedIcon as IconCmp,
+    toneText: "text-amber-700",
   },
   level_3: {
-    styles: "bg-red-50 text-red-700 border-red-200",
     ariaLabel: "Level 3 (highest acuity)",
-    Icon: AngryIcon as IconCmp,
+    toneText: "text-red-700",
   },
 };
 
 const FALLBACK = {
-  styles: "bg-zinc-50 text-zinc-700 border-zinc-200",
   ariaLabel: "Risk score",
-  Icon: SmileIcon as IconCmp,
+  toneText: "text-zinc-700",
 };
 
-export function RiskTierBadge({ score, tier }: { score: number; tier: string }) {
-  const { styles, ariaLabel, Icon } = TIER_META[tier] ?? FALLBACK;
-  const label = `${ariaLabel} · risk ${Math.round(score)}`;
+/**
+ * Inline risk + tier chip — no pill background. Face icon picked by tier
+ * (smile / annoyed / angry) and rendered larger so it carries the row.
+ * Forwards an imperative ref so a parent row can trigger the icon's hover
+ * animation when the user hovers anywhere on the row.
+ */
+export const RiskTierBadge = forwardRef<
+  RiskTierBadgeHandle,
+  { score: number; tier: Tier; size?: number }
+>(function RiskTierBadge({ score, tier, size = 20 }, ref) {
+  const smileRef = useRef<SmileIconHandle>(null);
+  const annoyedRef = useRef<AnnoyedIconHandle>(null);
+  const angryRef = useRef<AngryIconHandle>(null);
+  const meta = TIER_META[tier] ?? FALLBACK;
+  const label = `${meta.ariaLabel} · risk ${Math.round(score)}`;
+
+  useImperativeHandle(ref, () => ({
+    startAnimation: () => {
+      smileRef.current?.startAnimation();
+      annoyedRef.current?.startAnimation();
+      angryRef.current?.startAnimation();
+    },
+    stopAnimation: () => {
+      smileRef.current?.stopAnimation();
+      annoyedRef.current?.stopAnimation();
+      angryRef.current?.stopAnimation();
+    },
+  }));
+
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${styles}`}
+      className={`inline-flex items-center gap-1 ${meta.toneText}`}
       aria-label={label}
       title={label}
     >
-      <Icon size={12} className="flex items-center" />
-      {Math.round(score)}
+      {tier === "level_1" && (
+        <SmileIcon ref={smileRef} size={size} className="flex items-center" />
+      )}
+      {tier === "level_2" && (
+        <AnnoyedIcon ref={annoyedRef} size={size} className="flex items-center" />
+      )}
+      {tier === "level_3" && (
+        <AngryIcon ref={angryRef} size={size} className="flex items-center" />
+      )}
+      <span className="text-sm font-semibold tabular-nums">
+        {Math.round(score)}
+      </span>
     </span>
   );
-}
+});

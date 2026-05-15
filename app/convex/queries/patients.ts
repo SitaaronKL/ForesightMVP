@@ -38,6 +38,58 @@ function titleCase(s: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+const SECTION_LABEL: Record<string, string> = {
+  problemList: "problem list",
+  problem_list: "problem list",
+  medications: "medications",
+  treatmentGoals: "treatment goals",
+  treatment_goals: "treatment goals",
+  interventions: "interventions",
+  selfMgmtPlan: "self-management plan",
+  self_management_plan: "self-management plan",
+};
+
+/**
+ * Rewrite a raw care plan diffSummary into something readable.
+ * Accepts patterns like:
+ *   "problemList: -1; medications: +2"   → "1 fewer problem, 2 more medications"
+ *   "problemList: +3"                     → "3 added to problem list"
+ *   "Initial care plan"                   → returned unchanged
+ *   "Furosemide titration after CHF..."   → returned unchanged
+ *
+ * Falls back to the input untouched when no key:value tokens are found.
+ */
+function humanizeDiffSummary(raw: string | undefined | null): string | undefined {
+  if (!raw) return undefined;
+  const s = raw.trim();
+  if (!s) return undefined;
+  // If it doesn't look like "section: change" tokens, leave it.
+  if (!/:\s*[+\-]?\d/.test(s)) return s;
+
+  const parts = s.split(/;\s*/).filter(Boolean);
+  const rendered: string[] = [];
+  for (const part of parts) {
+    const m = part.match(/^\s*([A-Za-z_]+)\s*:\s*([+\-]?\d+)\s*$/);
+    if (!m) {
+      rendered.push(part);
+      continue;
+    }
+    const section = SECTION_LABEL[m[1]] ?? titleCase(m[1]).toLowerCase();
+    const n = parseInt(m[2], 10);
+    if (Number.isNaN(n) || n === 0) {
+      rendered.push(`No change to ${section}`);
+    } else if (n > 0) {
+      rendered.push(`${n} added to ${section}`);
+    } else {
+      const abs = Math.abs(n);
+      rendered.push(`${abs} removed from ${section}`);
+    }
+  }
+  // Capitalize the first letter of the joined sentence.
+  const joined = rendered.join(", ");
+  return joined.charAt(0).toUpperCase() + joined.slice(1);
+}
+
 export const get = query({
   args: { patientId: v.id("patients") },
   handler: async (ctx, { patientId }) => {
@@ -513,7 +565,7 @@ export const activityFeed = query({
         kind: "hospital_event",
         refId: h._id,
         timestamp: h.eventDate,
-        title: `${h.eventType[0].toUpperCase() + h.eventType.slice(1)} · ${h.facility}`,
+        title: `${titleCase(h.eventType)} · ${h.facility}`,
         body: h.reason ?? undefined,
       });
     }
@@ -532,7 +584,7 @@ export const activityFeed = query({
         refId: v._id,
         timestamp: v.draftedAt,
         title: `Care plan v${v.versionNumber}`,
-        body: v.diffSummary,
+        body: humanizeDiffSummary(v.diffSummary),
         status: v.reviewStatus,
       });
     }

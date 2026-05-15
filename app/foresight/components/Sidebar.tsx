@@ -8,6 +8,7 @@ import { LogoutIcon, type LogoutIconHandle } from "./LogoutIcon";
 import { SettingsIcon, type SettingsIconHandle } from "./SettingsIcon";
 import { LayoutGridIcon, type LayoutGridIconHandle } from "./LayoutGridIcon";
 import { UsersIcon, type UsersIconHandle } from "./UsersIcon";
+import { MessageSquare } from "lucide-react";
 
 export function Sidebar({ user }: { user: any }) {
   const { signOut } = useAuthActions();
@@ -70,11 +71,7 @@ export function Sidebar({ user }: { user: any }) {
           />
           Full panel
         </Link>
-      </nav>
 
-      <div className="flex-1" />
-
-      <div className="px-3 pb-4">
         <Link
           href="/admin"
           aria-label="Settings"
@@ -90,7 +87,20 @@ export function Sidebar({ user }: { user: any }) {
           Settings
         </Link>
 
-        <div className="mt-2 flex items-center gap-2 px-3 py-2">
+        <a
+          href="mailto:dhruvlalwani114@gmail.com?subject=ForesightHealth%20feedback"
+          aria-label="Send feedback"
+          className="flex items-center gap-2 px-3 py-2 rounded-full text-sm text-brand-700 hover:bg-brand-50"
+        >
+          <MessageSquare className="w-4 h-4 text-brand-700 flex-shrink-0" />
+          Feedback
+        </a>
+      </nav>
+
+      <div className="flex-1" />
+
+      <div className="px-3 pb-4">
+        <div className="flex items-center gap-2 px-3 py-2">
           <span className="flex-1 text-sm text-brand-950 font-medium truncate">
             {displayName}
           </span>
