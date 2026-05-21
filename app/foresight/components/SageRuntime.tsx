@@ -16,6 +16,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -259,11 +260,18 @@ export function SageProvider({
     [suggestions],
   );
 
+  const sendLock = useRef(false);
   const sendMessage = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed) return;
-      await onNew({ content: [{ type: "text", text: trimmed }] });
+      if (sendLock.current) return;
+      sendLock.current = true;
+      try {
+        await onNew({ content: [{ type: "text", text: trimmed }] });
+      } finally {
+        sendLock.current = false;
+      }
     },
     [onNew],
   );

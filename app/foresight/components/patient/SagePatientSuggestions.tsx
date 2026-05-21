@@ -34,6 +34,7 @@ export function SagePatientSuggestions({
   const sendToSage = useSageSend();
   const rail = useAgentRail();
   const [sending, setSending] = useState<string | null>(null);
+  const lockRef = useRef(false);
 
   if (!overview) return null;
 
@@ -88,12 +89,14 @@ export function SagePatientSuggestions({
   }
 
   async function fire(s: Suggestion) {
-    if (!sendToSage || sending) return;
+    if (!sendToSage || lockRef.current) return;
+    lockRef.current = true;
     setSending(s.key);
     try {
       rail.setCollapsed(false);
       await sendToSage(s.prompt);
     } finally {
+      lockRef.current = false;
       setSending(null);
     }
   }

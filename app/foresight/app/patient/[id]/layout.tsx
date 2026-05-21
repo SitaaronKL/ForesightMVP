@@ -6,6 +6,7 @@ import { useMe } from "../../../components/useMe";
 import { Sidebar } from "../../../components/Sidebar";
 import { AgentRail } from "../../../components/AgentRail";
 import { AgentRailProvider, useAgentRail } from "../../../components/AgentRailContext";
+import { SageProvider } from "../../../components/SageRuntime";
 import { LoginScreen } from "../../../components/LoginScreen";
 import { Spinner } from "../../../components/Spinner";
 import { useParams } from "next/navigation";
@@ -45,15 +46,17 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
   const patientId = params.id as Id<"patients">;
   const { collapsed, width } = useAgentRail();
   return (
-    <div className="min-h-screen">
-      <Sidebar user={me} />
-      <main
-        style={{ paddingRight: collapsed ? 24 : width + 60 }}
-        className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
-      >
-        <div className="max-w-[960px] mx-auto">{children}</div>
-      </main>
-      <AgentRail user={me} contextPatientId={patientId} />
-    </div>
+    <SageProvider contextPatientId={patientId}>
+      <div className="min-h-screen">
+        <Sidebar user={me} />
+        <main
+          style={{ paddingRight: collapsed ? 24 : width + 60 }}
+          className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
+        >
+          <div className="max-w-[960px] mx-auto">{children}</div>
+        </main>
+        <AgentRail user={me} contextPatientId={patientId} />
+      </div>
+    </SageProvider>
   );
 }

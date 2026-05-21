@@ -18,6 +18,7 @@ import {
   AgentRailProvider,
   useAgentRail,
 } from "../../components/AgentRailContext";
+import { SageProvider } from "../../components/SageRuntime";
 import { useMe } from "../../components/useMe";
 import { useState } from "react";
 import {
@@ -56,18 +57,20 @@ function AdminWorkspace() {
   const me = useMe();
   const { collapsed, width } = useAgentRail();
   return (
-    <div className="min-h-screen">
-      <Sidebar user={me} />
-      <main
-        style={{ paddingRight: collapsed ? 24 : width + 60 }}
-        className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
-      >
-        <div className="max-w-5xl mx-auto">
-          <Admin />
-        </div>
-      </main>
-      <AgentRail user={me} />
-    </div>
+    <SageProvider>
+      <div className="min-h-screen">
+        <Sidebar user={me} />
+        <main
+          style={{ paddingRight: collapsed ? 24 : width + 60 }}
+          className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
+        >
+          <div className="max-w-5xl mx-auto">
+            <Admin />
+          </div>
+        </main>
+        <AgentRail user={me} />
+      </div>
+    </SageProvider>
   );
 }
 

@@ -7,6 +7,7 @@ import { useMe } from "../../components/useMe";
 import { Sidebar } from "../../components/Sidebar";
 import { AgentRail } from "../../components/AgentRail";
 import { AgentRailProvider, useAgentRail } from "../../components/AgentRailContext";
+import { SageProvider } from "../../components/SageRuntime";
 import { LoginScreen } from "../../components/LoginScreen";
 import { Spinner } from "../../components/Spinner";
 
@@ -46,18 +47,20 @@ function WorkspaceInner({ children }: { children: ReactNode }) {
   const railOpen = !needsSeed && !collapsed;
 
   return (
-    <div className="min-h-screen">
-      <Sidebar user={me} />
-      <main
-        style={{ paddingRight: railOpen ? width + 60 : 24 }}
-        className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
-      >
-        <div className="max-w-[960px] mx-auto">
-          {needsSeed ? <SeedFirstNotice /> : children}
-        </div>
-      </main>
-      {needsSeed ? null : <AgentRail user={me} />}
-    </div>
+    <SageProvider>
+      <div className="min-h-screen">
+        <Sidebar user={me} />
+        <main
+          style={{ paddingRight: railOpen ? width + 60 : 24 }}
+          className="min-h-screen pl-[13.5rem] py-6 max-lg:!pr-6"
+        >
+          <div className="max-w-[960px] mx-auto">
+            {needsSeed ? <SeedFirstNotice /> : children}
+          </div>
+        </main>
+        {needsSeed ? null : <AgentRail user={me} />}
+      </div>
+    </SageProvider>
   );
 }
 

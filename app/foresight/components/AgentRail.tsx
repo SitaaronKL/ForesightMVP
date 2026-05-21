@@ -5,7 +5,7 @@ import { Id } from "@convex/_generated/dataModel";
 import { SoapReviewModal } from "./SoapReviewModal";
 import { Thread } from "@/components/assistant-ui/thread";
 import { ThreadList } from "@/components/assistant-ui/thread-list";
-import { SageProvider, useSageThreadId } from "./SageRuntime";
+import { useSageThreadId } from "./SageRuntime";
 import { SageActionTray } from "./SageActionTray";
 import { AmbulanceIcon, type AmbulanceIconHandle } from "./AmbulanceIcon";
 import { HistoryIcon, type HistoryIconHandle } from "./HistoryIcon";
@@ -128,9 +128,7 @@ export function AgentRail({
 
         {/* Translucent liquid-glass sidebar surface, full height, flush right edge */}
         <div className="relative flex flex-col w-full h-full overflow-hidden border-l border-white/40 backdrop-blur-2xl backdrop-saturate-150 bg-white/40 shadow-[-8px_0_32px_rgba(11,59,92,0.08)]">
-          <SageProvider contextPatientId={contextPatientId}>
-            <SageInner onOpenSoapReview={openSoapReview} />
-          </SageProvider>
+          <SageInner onOpenSoapReview={openSoapReview} />
         </div>
       </aside>
 
